@@ -1,0 +1,548 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Studio, Al Jubeiha")
+@section('roleStyle', 'seeker')
+@section('bodyAttributes') data-role="seeker" data-page="property"@endsection
+
+@section('content')
+    <!-- ===== Navbar ===== -->
+    <header class="site-header app-nav">
+      <nav class="navbar navbar-expand-lg" aria-label="Main">
+        <div class="container">
+          <a class="brand" href="{{ route('seeker.search') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+
+          <!-- Messages, notifications + user menu (stay visible on phones) -->
+          <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
+            <!-- Messages: icon with unread count -->
+            <a
+              class="icon-btn"
+              href="{{ route('seeker.chat') }}"
+              aria-label="Messages, 2 unread"
+            >
+              <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
+            </a>
+            <div class="dropdown">
+              <button
+                class="icon-btn"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-label="Notifications"
+              >
+                <i class="bi bi-bell"></i><span class="dot"></span>
+              </button>
+              <div
+                class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+                style="width: 320px"
+              >
+                <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+                <div class="py-1">
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.property') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-stars"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >A new home just listed in Al Jubeiha with a 92%
+                        match</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >10 minutes ago</span
+                      >
+                    </span>
+                  </a>
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.bookings') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-check2-circle"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >Abu Ahmad accepted your booking</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >1 hour ago</span
+                      >
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button
+                class="app-user app-user--avatar"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Account menu, Sara Khaled"
+              >
+                <span class="avatar">S</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
+                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                    >Log out</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <button
+              class="navbar-toggler border-0"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#appNav"
+              aria-controls="appNav"
+              aria-expanded="false"
+              aria-label="Menu"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
+
+          <!-- Page links + search, grouped in one capsule -->
+          <div class="collapse navbar-collapse" id="appNav">
+            <div class="nav-group">
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link active" href="{{ route('seeker.search') }}"
+                    ><i class="bi bi-stars"></i><span>Discover</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ route('seeker.bookings') }}"
+                    ><i class="bi bi-calendar-check"></i><span>My bookings</span
+                    ><span class="side-badge">1</span></a
+                  >
+                </li>
+              </ul>
+              <span class="nav-group-divider" aria-hidden="true"></span>
+              <!-- Search: plain GET form, opens the Discover page -->
+              <form
+                class="nav-search"
+                action="{{ route('seeker.search') }}"
+                method="get"
+                role="search"
+              >
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input
+                  type="search"
+                  class="form-control"
+                  name="q"
+                  placeholder="Search by area..."
+                  aria-label="Search homes by neighborhood"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- ===== Content ===== -->
+    <main class="app-page container">
+        <!-- 1. Back to results -->
+        <a href="{{ route('seeker.search') }}" class="back-link"
+          ><i class="bi bi-arrow-left"></i>Back to results</a
+        >
+
+        <!-- 2. Photo gallery -->
+        <div class="gallery mt-2 mb-4" id="propertyGallery" aria-label="Illustrative property photos">
+          <div class="g-main ph ph-1">
+            <i class="bi bi-house-door" aria-hidden="true"></i>
+          </div>
+          <div class="ph ph-5"></div>
+          <div class="ph ph-3"></div>
+          <div class="ph ph-1"></div>
+          <div class="ph ph-4"></div>
+        </div>
+
+        <div class="row g-4 align-items-start">
+          <!-- ===== Home details ===== -->
+          <div class="col-lg-8 d-flex flex-column gap-3">
+            <!-- 3. Title and quick facts -->
+            <div class="prop-head">
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <h1>Studio — Al Jubeiha</h1>
+                <span class="status status--info"
+                  ><i class="bi bi-patch-check-fill"></i>Verified</span
+                >
+              </div>
+              <p
+                class="d-flex align-items-center gap-2 small text-muted mt-2 mb-3"
+              >
+                <i class="bi bi-arrow-repeat ic-ok"></i>The owner confirmed it's
+                available 2 days ago
+              </p>
+              <div class="facts">
+                <span class="fact"
+                  ><i class="bi bi-arrows-angle-expand"></i>45 m²</span
+                >
+                <span class="fact"
+                  ><i class="bi bi-house-door"></i>Studio</span
+                >
+                <span class="fact"><i class="bi bi-lamp"></i>Furnished</span>
+                <span class="fact"><i class="bi bi-layers"></i>Floor 2</span>
+                <span class="fact"
+                  ><i class="bi bi-universal-access"></i>Elevator</span
+                >
+                <span class="fact"
+                  ><i class="bi bi-calendar3"></i>Minimum stay 3 months</span
+                >
+              </div>
+            </div>
+
+            <!-- 4. Monthly cost -->
+            <section class="panel" aria-labelledby="costTitle">
+              <h2 class="h5 mb-1" id="costTitle">True monthly cost</h2>
+              <div class="cost-row">
+                <span>Rent</span><span>220 JOD</span>
+              </div>
+              <div class="cost-row">
+                <span
+                  >Electricity &amp; water
+                  <span class="badge-soft">estimate</span></span
+                ><span>30 JOD</span>
+              </div>
+              <div class="cost-row"><span>Internet</span><span>15 JOD</span></div>
+              <div class="cost-total">
+                <span>Total</span><span>265 JOD</span>
+              </div>
+            </section>
+
+            <!-- 5. About the home and amenities -->
+            <section class="panel" aria-labelledby="aboutTitle">
+              <h2 class="h5 mb-2" id="aboutTitle">About the home</h2>
+              <p class="mb-3">
+                A fully furnished studio on the second floor, with a small
+                kitchen, a study desk, and air conditioning. The building is
+                quiet and has an elevator, a few minutes' walk from the
+                university's north gate.
+              </p>
+              <ul class="amenities list-unstyled mb-0" id="amenitiesList">
+                <li class="amenity"><i class="bi bi-snow"></i>Air conditioning</li>
+                <li class="amenity"><i class="bi bi-wifi"></i>Fast internet</li>
+                <li class="amenity"><i class="bi bi-droplet"></i>Washing machine</li>
+                <li class="amenity"><i class="bi bi-cup-hot"></i>Equipped kitchen</li>
+                <li class="amenity"><i class="bi bi-book"></i>Study desk</li>
+                <li class="amenity">
+                  <i class="bi bi-universal-access"></i>Elevator
+                </li>
+                <li class="amenity is-off">
+                  <i class="bi bi-car-front"></i
+                  ><span
+                    >Parking
+                    <span class="visually-hidden">(not available)</span></span
+                  >
+                </li>
+                <li class="amenity is-off">
+                  <i class="bi bi-door-open"></i
+                  ><span
+                    >Balcony
+                    <span class="visually-hidden">(not available)</span></span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- 6. Location -->
+            <section class="panel" aria-labelledby="locationTitle">
+              <h2 class="h5 mb-3" id="locationTitle">Location</h2>
+              <div
+                class="map-mock mb-2"
+                id="propertyMap"
+                role="img"
+                aria-label="Approximate map of the home's location"
+              >
+                <span
+                  class="map-area"
+                  style="top: 46%; left: 55%; width: 160px; height: 160px"
+                ></span>
+                <span class="map-place" style="top: 30%; left: 22%"
+                  ><i class="bi bi-mortarboard"></i
+                ></span>
+              </div>
+              <div class="privacy-note mb-3">
+                <i class="bi bi-lock"></i>The exact address appears once your booking is
+                confirmed.
+              </div>
+              <h3 class="h6 text-body fw-semibold mb-2">Nearby</h3>
+              <ul class="near-list list-unstyled mb-0">
+                <li>
+                  <span class="icon-tile"
+                    ><i class="bi bi-mortarboard"></i></span
+                  ><span class="flex-grow-1">University of Jordan</span
+                  ><span class="text-muted">8 min</span>
+                </li>
+                <li>
+                  <span class="icon-tile"><i class="bi bi-capsule"></i></span
+                  ><span class="flex-grow-1">Pharmacy</span
+                  ><span class="text-muted">3 min</span>
+                </li>
+                <li>
+                  <span class="icon-tile"><i class="bi bi-bus-front"></i></span
+                  ><span class="flex-grow-1">Bus stop</span
+                  ><span class="text-muted">4 min</span>
+                </li>
+                <li>
+                  <span class="icon-tile"><i class="bi bi-cart"></i></span
+                  ><span class="flex-grow-1">Supermarket</span
+                  ><span class="text-muted">2 min</span>
+                </li>
+              </ul>
+              <div class="ai-invite mt-3">
+                <i class="bi bi-stars"></i>
+                <span class="flex-grow-1"
+                  >Questions about Al Jubeiha? Ask our neighborhood
+                  assistant.</span
+                >
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#aiAssistant"
+                  aria-controls="aiAssistant"
+                  aria-expanded="false"
+                >
+                  Ask now
+                </button>
+              </div>
+            </section>
+
+            <!-- 7. Property owner -->
+            <section
+              class="panel d-flex flex-wrap align-items-center gap-3"
+              aria-label="Property owner"
+            >
+              <span class="avatar avatar-lg">A</span>
+              <div class="flex-grow-1">
+                <div class="small text-muted">Property owner</div>
+                <div class="d-flex align-items-center gap-1 fw-semibold fs-5">
+                  Abu Ahmad<i
+                    class="bi bi-patch-check-fill text-primary-bt fs-6"
+                    title="Verified"
+                  ></i>
+                </div>
+                <div class="small text-muted">
+                  Usually replies within an hour · on Makan since September 2026
+                </div>
+                <a href="tel:+962791234567" class="owner-phone"
+                  ><i class="bi bi-telephone"></i> 079 123 4567</a
+                >
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="tel:+962791234567" class="btn btn-outline-primary"
+                  ><i class="bi bi-telephone me-1"></i>Call owner</a
+                >
+                <a href="{{ route('seeker.chat') }}" class="btn btn-outline-primary"
+                  ><i class="bi bi-chat-dots me-1"></i>Message owner</a
+                >
+              </div>
+            </section>
+
+            <!-- Report this listing -->
+            <div class="text-center">
+              <button
+                type="button"
+                class="btn btn-link btn-sm text-muted"
+                data-bs-toggle="modal"
+                data-bs-target="#reportModal"
+              >
+                <i class="bi bi-flag me-1"></i>Report this listing
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== Booking box ===== -->
+          <div class="col-lg-4">
+            <aside class="panel sticky-box" aria-label="Booking">
+              <div class="mb-3">
+                <b class="fs-3">265 JOD</b>
+                <span class="small text-muted">per month, bills included</span>
+              </div>
+              <form id="bookingForm" method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('seeker.bookings') }}">
+              @csrf
+                <div class="mb-3">
+                  <label for="moveIn" class="form-label">Move-in date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="moveIn"
+                    name="moveIn"
+                    value="2026-11-01"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="duration" class="form-label">Duration</label>
+                  <select class="form-select" id="duration" name="duration">
+                    <option value="6" selected>6 months</option>
+                    <option value="3">3 months</option>
+                    <option value="12">12 months</option>
+                  </select>
+                </div>
+                <div class="book-total">
+                  <span>Monthly rent</span><span id="bookingTotal">265 JOD</span>
+                </div>
+                <button type="submit" class="btn btn-accent btn-lg w-100 mb-3">
+                  Request booking
+                </button>
+              </form>
+              <div class="privacy-note">
+                <i class="bi bi-info-circle flex-shrink-0"></i>You pay the rent
+                directly to the owner. Makan never charges home seekers.
+              </div>
+              <div class="d-flex gap-2 mt-3">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary flex-fill fw-medium"
+                  aria-pressed="true"
+                  id="favBtn"
+                >
+                  <i class="bi bi-heart-fill text-accent me-1"></i>Saved
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary flex-fill fw-medium"
+                  id="shareBtn"
+                >
+                  <i class="bi bi-send me-1"></i>Share
+                </button>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- 8. Neighborhood assistant: closed by default, opens above the corner button -->
+        <div class="collapse ai-dock" id="aiAssistant">
+          <section class="ai-panel is-open" aria-label="Neighborhood assistant">
+            <div class="ai-head">
+              <i class="bi bi-stars fs-5"></i>
+              <div class="lh-sm flex-grow-1">
+                <b>Neighborhood assistant</b
+                ><small>Answers from neighborhood data</small>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-toggle="collapse"
+                data-bs-target="#aiAssistant"
+                aria-controls="aiAssistant"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="chat-body" id="aiMessages">
+              <div class="msg">
+                Hi! I know Al Jubeiha well. What would you like to know?
+              </div>
+            </div>
+            <div class="ai-suggest">
+              <button type="button">Is it quiet at night?</button>
+              <button type="button">Is there a pharmacy nearby?</button>
+              <button type="button">How's public transport?</button>
+            </div>
+            <form class="chat-input" id="aiForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
+              @csrf
+              <input
+                type="text"
+                class="form-control"
+                name="question"
+                aria-label="Your question"
+                placeholder="Ask anything about Al Jubeiha..."
+                autocomplete="off"
+              />
+              <button type="submit" class="btn btn-primary px-3" aria-label="Send">
+                <i class="bi bi-send"></i>
+              </button>
+            </form>
+          </section>
+        </div>
+
+        <!-- Corner button that opens / closes the assistant -->
+        <button
+          type="button"
+          class="btn btn-primary ai-fab"
+          data-bs-toggle="collapse"
+          data-bs-target="#aiAssistant"
+          aria-controls="aiAssistant"
+          aria-expanded="false"
+        >
+          <i class="bi bi-stars me-1"></i>Ask about the area
+        </button>
+
+        <!-- ===== Report this listing ===== -->
+        <div
+          class="modal fade"
+          id="reportModal"
+          tabindex="-1"
+          aria-labelledby="reportTitle"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" id="reportForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
+              @csrf
+              <div class="modal-header">
+                <h2 class="modal-title h5" id="reportTitle">Report this listing</h2>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <p class="small text-muted">
+                  Tell us what's wrong. Our team reviews every report.
+                </p>
+                <fieldset class="d-grid gap-2 mb-3">
+                  <legend class="form-label">Reason</legend>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="reason" id="rNotAvailable" value="not_available" required />
+                    <label class="form-check-label" for="rNotAvailable">The home is no longer available</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="reason" id="rWrongInfo" value="wrong_info" />
+                    <label class="form-check-label" for="rWrongInfo">Wrong price, photos or details</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="reason" id="rScam" value="scam" />
+                    <label class="form-check-label" for="rScam">Looks like a scam</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="reason" id="rOther" value="other" />
+                    <label class="form-check-label" for="rOther">Something else</label>
+                  </div>
+                </fieldset>
+                <label class="form-label" for="reportDetails"
+                  >Details <span class="text-muted fw-normal">(optional)</span></label
+                >
+                <textarea
+                  class="form-control"
+                  id="reportDetails"
+                  name="details"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">Send report</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+@endsection

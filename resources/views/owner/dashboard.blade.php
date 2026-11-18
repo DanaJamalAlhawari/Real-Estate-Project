@@ -1,0 +1,481 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Dashboard")
+@section('roleStyle', 'owner')
+@section('bodyAttributes') data-role="owner" data-page="dashboard"@endsection
+
+@section('content')
+    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
+    <input
+      type="checkbox"
+      class="sidebar-toggle"
+      id="sidebarToggle"
+      aria-label="Collapse the menu"
+    />
+
+    <!-- ===== Topbar ===== -->
+    <header class="app-topbar">
+      <button
+        class="icon-btn d-lg-none"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#appSidebar"
+        aria-label="Menu"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+      <label
+        for="sidebarToggle"
+        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
+        title="Collapse or expand the menu"
+        aria-hidden="true"
+      >
+        <i class="bi bi-list"></i>
+      </label>
+      <a class="brand" href="{{ route('owner.dashboard') }}"
+        ><span class="brand-mark">M</span><span>Makan</span></a
+      >
+      <div class="ms-auto d-flex align-items-center gap-1">
+        <!-- Messages: icon with unread count -->
+        <a
+          class="icon-btn"
+          href="{{ route('owner.chat') }}"
+          aria-label="Messages, 1 unread"
+        >
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+        </a>
+        <div class="dropdown">
+          <button
+            class="icon-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-label="Notifications"
+          >
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+            style="width: 320px"
+          >
+            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="py-1">
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.requests') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-inbox"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block">New booking request from Sara Khaled</span>
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >10 minutes ago</span
+                  >
+                </span>
+              </a>
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.properties') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-shield-check"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block"
+                    >Your Al Jubeiha studio has been verified</span
+                  >
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >1 hour ago</span
+                  >
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button
+            class="app-user app-user--avatar"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Account menu, Abu Ahmad"
+          >
+            <span class="avatar">A</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                >Log out</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link active" href="{{ route('owner.dashboard') }}" aria-current="page" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>Welcome back, Abu Ahmad</h1>
+            <p>Here's how your properties did over the last 30 days.</p>
+          </div>
+          <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add property</span>
+          </a>
+        </div>
+
+        <!-- 2. Availability confirmation alert -->
+        <div class="alert-soft flex-wrap mb-4" id="staleAlert">
+          <i class="bi bi-arrow-repeat"></i>
+          <span class="flex-grow-1"
+            >"3-bedroom apartment — Khalda" needs you to confirm it's still
+            available, or it will be hidden from results tomorrow.</span
+          >
+          <button
+            type="button"
+            class="btn btn-alert"
+            data-action="confirm-available"
+            data-property="3"
+          >
+            Still available
+          </button>
+        </div>
+
+        <!-- 3. Key numbers -->
+        <div class="row g-3 mb-4" id="ownerKpis">
+          <div class="col-sm-6 col-xl-3">
+            <div class="kpi">
+              <span class="kpi-icon"><i class="bi bi-eye"></i></span>
+              <div>
+                <b>1,325</b><span>Views</span> <span class="trend">+12%</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="kpi">
+              <span class="kpi-icon"><i class="bi bi-inbox"></i></span>
+              <div>
+                <b>19</b><span>Booking requests</span>
+                <span class="trend">+4</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="kpi">
+              <span class="kpi-icon"><i class="bi bi-stars"></i></span>
+              <div><b>75%</b><span>Average match</span></div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="kpi">
+              <span class="kpi-icon"><i class="bi bi-house-door"></i></span>
+              <div><b>3 / 4</b><span>Active properties</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Main column -->
+          <div class="col-lg-8 d-flex flex-column gap-4">
+            <!-- 4. Views -->
+            <section class="panel" aria-labelledby="viewsTitle">
+              <div class="panel-head">
+                <h2 id="viewsTitle">Property views · last 14 days</h2>
+                <span class="trend-up">+12%</span>
+              </div>
+              <div
+                class="bar-chart"
+                id="viewsChart"
+                role="img"
+                aria-label="Daily views over the last 14 days, up 12%"
+              >
+                <div class="bar" style="height: 32%"></div>
+                <div class="bar" style="height: 41%"></div>
+                <div class="bar" style="height: 38%"></div>
+                <div class="bar" style="height: 52%"></div>
+                <div class="bar" style="height: 47%"></div>
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar" style="height: 58%"></div>
+                <div class="bar" style="height: 71%"></div>
+                <div class="bar" style="height: 66%"></div>
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar" style="height: 74%"></div>
+                <div class="bar is-hi" style="height: 92%"></div>
+                <div class="bar is-hi" style="height: 88%"></div>
+                <div class="bar is-hi" style="height: 97%"></div>
+              </div>
+              <div class="chart-labels">
+                <span>27 Sep</span><span>3 Oct</span><span>10 Oct</span>
+              </div>
+            </section>
+
+            <!-- 5. New booking requests -->
+            <section class="panel" aria-labelledby="newRequestsTitle">
+              <div class="panel-head">
+                <h2 id="newRequestsTitle">New booking requests</h2>
+                <a href="{{ route('owner.requests') }}">View all</a>
+              </div>
+              <ul class="list-clean" id="newRequests">
+                <li class="list-row flex-wrap">
+                  <span class="avatar avatar-lg">S</span>
+                  <div class="grow flex-main">
+                    <b
+                      >Sara Khaled
+                      <span class="fw-medium small text-muted">· Study</span></b
+                    >
+                    <small>Studio — Al Jubeiha · from 1 Nov · 6 months</small>
+                  </div>
+                  <span class="pill-soft">92% match</span>
+                  <div class="d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      data-action="accept"
+                      data-request="1"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm"
+                      data-action="reject"
+                      data-request="1"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </li>
+                <li class="list-row flex-wrap">
+                  <span class="avatar avatar-lg">M</span>
+                  <div class="grow flex-main">
+                    <b
+                      >Mohammad Al Ali
+                      <span class="fw-medium small text-muted">· Work</span></b
+                    >
+                    <small
+                      >Room in a shared apartment — Al Jubeiha · from 15 Nov · 3
+                      months</small
+                    >
+                  </div>
+                  <span class="pill-soft">81% match</span>
+                  <div class="d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      data-action="accept"
+                      data-request="2"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm"
+                      data-action="reject"
+                      data-request="2"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </li>
+                <li class="list-row flex-wrap">
+                  <span class="avatar avatar-lg">E</span>
+                  <div class="grow flex-main">
+                    <b
+                      >Emily Carter
+                      <span class="fw-medium small text-muted"
+                        >· Tourism</span
+                      ></b
+                    >
+                    <small>Studio — Al Jubeiha · from 20 Oct · 1 month</small>
+                  </div>
+                  <span class="pill-soft">77% match</span>
+                  <div class="d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      data-action="accept"
+                      data-request="3"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm"
+                      data-action="reject"
+                      data-request="3"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </section>
+          </div>
+
+          <!-- Side column -->
+          <div class="col-lg-4 d-flex flex-column gap-4">
+            <!-- 6. Featured listing -->
+            <section class="panel panel-featured">
+              <div class="featured-label">
+                <i class="bi bi-star-fill"></i>Featured listing active
+              </div>
+              <b class="d-block fs-5 mb-1">Studio — Al Jubeiha</b>
+              <p>
+                Shows at the top of results until 30 Oct. It brought in 3× the
+                views this week.
+              </p>
+              <a href="{{ route('owner.account') }}" class="btn btn-light text-primary-bt"
+                >Renew subscription</a
+              >
+            </section>
+
+            <!-- 7. Per-property performance -->
+            <section class="panel" aria-labelledby="perfTitle">
+              <div class="panel-head">
+                <h2 id="perfTitle">Performance by property</h2>
+              </div>
+              <div class="d-flex flex-column gap-3" id="propertyPerformance">
+                <div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="fw-medium">Studio — Al Jubeiha</span
+                    ><span class="text-muted">642 views</span>
+                  </div>
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="Al Jubeiha studio views"
+                    aria-valuenow="100"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div class="progress-bar" style="width: 100%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="fw-medium">Room in a shared apartment — Al Jubeiha</span
+                    ><span class="text-muted">318 views</span>
+                  </div>
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="Room in a shared apartment views"
+                    aria-valuenow="50"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div class="progress-bar" style="width: 50%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="fw-medium">3-bedroom apartment — Khalda</span
+                    ><span class="text-muted">211 views</span>
+                  </div>
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="Khalda 3-bedroom apartment views"
+                    aria-valuenow="33"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div class="progress-bar is-warn" style="width: 33%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="fw-medium">Studio — Sweileh</span
+                    ><span class="text-muted">154 views</span>
+                  </div>
+                  <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="Sweileh studio views"
+                    aria-valuenow="24"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div class="progress-bar" style="width: 24%"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 8. Verification status -->
+            <section class="panel d-flex align-items-center gap-3">
+              <span class="kpi-icon is-success"
+                ><i class="bi bi-patch-check-fill"></i
+              ></span>
+              <div>
+                <b class="d-block">Your account is verified</b>
+                <span class="small text-muted"
+                  >The badge shows on all your properties.</span
+                >
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+@endsection

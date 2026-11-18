@@ -1,0 +1,166 @@
+/* =========================================================
+   Admin pages — styles specific to the admin pages
+   (shared components live in main.css)
+   ========================================================= */
+
+:root {
+  /* Regular chart bars (slightly darker than primary-soft so they stand out) */
+  --admin-bar: #c9d9d7;
+}
+
+/* ---------- Shared across admin pages ---------- */
+/* Red outline button using the system danger color */
+.btn-outline-danger {
+  --bs-btn-color: var(--bt-danger);
+  --bs-btn-border-color: var(--bt-danger);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--bt-danger);
+  --bs-btn-hover-border-color: var(--bt-danger);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--bt-danger);
+  --bs-btn-active-border-color: var(--bt-danger);
+  --bs-btn-focus-shadow-rgb: 180, 35, 24;
+}
+/* Square icon button (edit) */
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bt-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  color: var(--bt-primary);
+}
+.btn-icon:hover,
+.btn-icon:focus-visible {
+  border-color: var(--bt-primary);
+  color: var(--bt-primary);
+  background: var(--bt-primary-soft);
+}
+.panel-table {
+  padding: 0.5rem 1rem;
+}
+
+/* ---------- dashboard.html ---------- */
+.rev-chart {
+  height: 220px;
+  gap: 1rem;
+}
+.rev-chart .bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--bt-muted);
+}
+.rev-chart .bar {
+  flex: none;
+  width: 100%;
+  max-width: 56px;
+  border-radius: 8px 8px 0 0;
+  background: var(--admin-bar);
+}
+.rev-chart .bar.is-hi {
+  background: var(--bt-primary);
+}
+
+/* ---------- verifications.html ---------- */
+.pill-tabs {
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--bt-line);
+}
+.pill-tabs .nav-link {
+  min-height: 36px;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--bt-line);
+  background: var(--bt-surface);
+  color: var(--bt-text);
+  font-size: 0.82rem;
+}
+.pill-tabs .nav-link.active {
+  border-color: var(--bt-primary);
+  background: var(--bt-primary);
+  color: #fff;
+}
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--bt-line);
+  color: inherit;
+  text-decoration: none;
+}
+.queue-item:hover {
+  background: var(--bt-bg);
+  color: inherit;
+}
+.queue-item.is-active {
+  background: var(--bt-primary-soft);
+}
+.queue-item .avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+.queue-item small {
+  display: block;
+  color: var(--bt-muted);
+  font-size: 0.75rem;
+}
+.avatar-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 1.35rem;
+}
+.review-head {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--bt-line);
+}
+.doc-card {
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius);
+  overflow: hidden;
+}
+.doc-card .doc-preview {
+  border: 0;
+  border-radius: 0;
+}
+.check-row {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+/* ---------- users.html ---------- */
+.users-toolbar .search-input {
+  flex: 0 1 300px;
+}
+.users-table {
+  min-width: 680px;
+}
+
+/* ---------- places.html (Areas) ---------- */
+.hoods-table {
+  min-width: 560px;
+}
+
+/* ---------- chat.html ---------- */
+.chat-item .meta .prop {
+  color: var(--bt-primary);
+  font-size: 0.75rem;
+}
+.chat-head small.is-online {
+  color: var(--bt-success);
+}
