@@ -1,0 +1,459 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Profile &amp; priorities")
+@section('roleStyle', 'seeker')
+@section('bodyAttributes') data-role="seeker" data-page="profile"@endsection
+
+@section('content')
+    <!-- ===== Navbar ===== -->
+    <header class="site-header app-nav">
+      <nav class="navbar navbar-expand-lg" aria-label="Main">
+        <div class="container">
+          <a class="brand" href="{{ route('seeker.search') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+
+          <!-- Messages, notifications + user menu (stay visible on phones) -->
+          <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
+            <!-- Messages: icon with unread count -->
+            <a
+              class="icon-btn"
+              href="{{ route('seeker.chat') }}"
+              aria-label="Messages, 2 unread"
+            >
+              <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
+            </a>
+            <div class="dropdown">
+              <button
+                class="icon-btn"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-label="Notifications"
+              >
+                <i class="bi bi-bell"></i><span class="dot"></span>
+              </button>
+              <div
+                class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+                style="width: 320px"
+              >
+                <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+                <div class="py-1">
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.property') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-stars"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >A new home just listed in Al Jubeiha with a 92% match</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >10 minutes ago</span
+                      >
+                    </span>
+                  </a>
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.bookings') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-check2-circle"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >Abu Ahmad accepted your booking</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >1 hour ago</span
+                      >
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button
+                class="app-user app-user--avatar"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Account menu, Sara Khaled"
+              >
+                <span class="avatar">S</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
+                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                    >Log out</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <button
+              class="navbar-toggler border-0"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#appNav"
+              aria-controls="appNav"
+              aria-expanded="false"
+              aria-label="Menu"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
+
+          <!-- Page links + search, grouped in one capsule -->
+          <div class="collapse navbar-collapse" id="appNav">
+            <div class="nav-group">
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ route('seeker.search') }}"
+                    ><i class="bi bi-stars"></i><span>Discover</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ route('seeker.bookings') }}"
+                    ><i class="bi bi-calendar-check"></i><span>My bookings</span
+                    ><span class="side-badge">1</span></a
+                  >
+                </li>
+              </ul>
+              <span class="nav-group-divider" aria-hidden="true"></span>
+              <!-- Search: plain GET form, opens the Discover page -->
+              <form
+                class="nav-search"
+                action="{{ route('seeker.search') }}"
+                method="get"
+                role="search"
+              >
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input
+                  type="search"
+                  class="form-control"
+                  name="q"
+                  placeholder="Search by area..."
+                  aria-label="Search homes by neighborhood"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- ===== Content ===== -->
+    <main class="app-page container">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>Profile &amp; priorities</h1>
+            <p>Any change here updates the match scores on every home.</p>
+          </div>
+        </div>
+
+        <form id="profileForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
+              @csrf
+          <div class="row g-4 align-items-start">
+            <!-- ===== 2. Account card ===== -->
+            <div class="col-lg-4">
+              <aside class="panel" aria-label="My account">
+                <div class="text-center pb-3 border-bottom">
+                  <span class="avatar avatar-xl mb-2">S</span>
+                  <b class="d-block fs-5">Sara Khaled</b>
+                  <div class="small text-muted">sara@example.com</div>
+                  <span class="status status--success mt-2"
+                    >Email verified</span
+                  >
+                </div>
+
+                <!-- Notifications -->
+                <fieldset class="pt-3">
+                  <legend class="fs-6 fw-semibold mb-1">Notifications</legend>
+                  <div class="form-check form-switch switch-row">
+                    <label class="form-check-label" for="alertNewMatch"
+                      >New home with a match above 80%</label
+                    >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="alertNewMatch"
+                      name="alertNewMatch"
+                      checked
+                    />
+                  </div>
+                  <div class="form-check form-switch switch-row">
+                    <label class="form-check-label" for="alertBookings"
+                      >Booking updates</label
+                    >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="alertBookings"
+                      name="alertBookings"
+                      checked
+                    />
+                  </div>
+                  <div class="form-check form-switch switch-row">
+                    <label class="form-check-label" for="alertMessages"
+                      >New messages</label
+                    >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="alertMessages"
+                      name="alertMessages"
+                    />
+                  </div>
+                </fieldset>
+              </aside>
+            </div>
+
+            <!-- ===== Settings ===== -->
+            <div class="col-lg-8 d-flex flex-column gap-3">
+              <!-- 3. Why are you coming? -->
+              <fieldset class="panel">
+                <legend class="h5 mb-3">Why are you coming?</legend>
+                <div class="d-flex flex-wrap gap-2" id="purposeOptions">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pStudy"
+                    value="study"
+                    checked
+                  />
+                  <label class="chip-select" for="pStudy"
+                    ><i class="bi bi-mortarboard"></i>Study</label
+                  >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pWork"
+                    value="work"
+                  />
+                  <label class="chip-select" for="pWork"
+                    ><i class="bi bi-briefcase"></i>Work</label
+                  >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pTourism"
+                    value="tourism"
+                  />
+                  <label class="chip-select" for="pTourism"
+                    ><i class="bi bi-camera"></i>Tourism</label
+                  >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pMedical"
+                    value="medical"
+                  />
+                  <label class="chip-select" for="pMedical"
+                    ><i class="bi bi-hospital"></i>Medical care</label
+                  >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pRelocation"
+                    value="relocation"
+                  />
+                  <label class="chip-select" for="pRelocation"
+                    ><i class="bi bi-truck"></i>Relocation</label
+                  >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="purpose"
+                    id="pOther"
+                    value="other"
+                  />
+                  <label class="chip-select" for="pOther"
+                    ><i class="bi bi-three-dots"></i>Other</label
+                  >
+                </div>
+              </fieldset>
+
+              <!-- 4. Where you want to live -->
+              <section class="panel" aria-labelledby="placeTitle">
+                <h2 class="h5 mb-3" id="placeTitle">Where you want to live</h2>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label" for="city">City</label>
+                    <select class="form-select" id="city" name="city">
+                      <option value="amman" selected>Amman</option>
+                      <option value="irbid">Irbid</option>
+                      <option value="zarqa">Zarqa</option>
+                      <option value="aqaba">Aqaba</option>
+                      <option value="salt">Salt</option>
+                      <option value="madaba">Madaba</option>
+                      <option value="jerash">Jerash</option>
+                      <option value="ajloun">Ajloun</option>
+                      <option value="mafraq">Mafraq</option>
+                      <option value="karak">Karak</option>
+                      <option value="tafilah">Tafilah</option>
+                      <option value="maan">Ma'an</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="area"
+                      >Area <span class="text-muted fw-normal">(optional)</span></label
+                    >
+                    <select class="form-select" id="area" name="area">
+                      <option value="">Any area</option>
+                      <option selected>Al Jubeiha</option>
+                      <option>Abdali</option>
+                      <option>Khalda</option>
+                      <option>Shmeisani</option>
+                      <option>Sweileh</option>
+                      <option>Tla Al Ali</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              
+              <section class="panel" aria-labelledby="prioTitle">
+                <h2 class="h5 mb-3" id="prioTitle">Your priorities</h2>
+
+                <!-- Monthly Budget -->
+                <div class="panel mb-3">
+                  <label class="form-label" for="budget">
+                    Monthly budget (bills included)
+                  </label>
+
+                  <div class="input-group budget-input">
+                    <input
+                      type="number"
+                      class="form-control form-control-lg"
+                      id="budget"
+                      name="budget"
+                      list="budgetOptions"
+                      min="100"
+                      max="2000"
+                      step="10"
+                      value="300"
+                      placeholder="e.g. 300"
+                      aria-describedby="budgetHint"
+                    />
+
+                    <span class="input-group-text">JOD / month</span>
+                  </div>
+
+                  <datalist id="budgetOptions">
+                    <option value="150"></option>
+                    <option value="200"></option>
+                    <option value="250"></option>
+                    <option value="300"></option>
+                    <option value="400"></option>
+                    <option value="500"></option>
+                    <option value="750"></option>
+                    <option value="1000"></option>
+                  </datalist>
+
+                  <small class="form-text text-muted" id="budgetHint">
+                    Type an amount or pick one from the list.
+                  </small>
+                </div>
+
+                <!-- What you need -->
+                <div class="panel" id="priorities">
+                  <!-- Furnished -->
+                  <div class="priority priority--check">
+                    <label for="pr-furnished">
+                      <i class="bi bi-lamp"></i>
+                      <span>
+                        Furnished
+                        <small class="d-block text-muted fw-normal">
+                          I want it furnished
+                        </small>
+                      </span>
+                    </label>
+
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="pr-furnished"
+                      name="furnished"
+                      value="1"
+                    />
+                  </div>
+
+                  <!-- Easy Access -->
+                  <div class="priority priority--check">
+                    <label for="pr-access">
+                      <i class="bi bi-universal-access"></i>
+                      <span>
+                        Easy access
+                        <small class="d-block text-muted fw-normal">
+                          Elevator or ground floor
+                        </small>
+                      </span>
+                    </label>
+
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="pr-access"
+                      name="easy_access"
+                      value="1"
+                    />
+                  </div>
+
+                  <!-- Shared Housing -->
+                  <div class="priority priority--check priority--students">
+                    <label for="pr-sharing">
+                      <i class="bi bi-people"></i>
+                      <span>
+                        Shared housing
+                        <small class="students-only-note d-block fw-normal">
+                          For students only
+                        </small>
+                      </span>
+                    </label>
+
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="pr-sharing"
+                      name="shared_housing"
+                      value="1"
+                    />
+                  </div>
+                </div>
+              </section>
+             
+
+              <!-- 6. Save -->
+              <div
+                class="d-flex flex-wrap align-items-center justify-content-between gap-3"
+              >
+                <span class="d-flex align-items-center gap-2 small text-muted"
+                  ><i class="bi bi-arrow-repeat"></i>We'll recalculate your
+                  match scores after you save.</span
+                >
+                <button type="submit" class="btn btn-primary btn-lg">
+                  Save changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+@endsection

@@ -1,0 +1,104 @@
+[
+  {
+    "id": 1,
+    "title": "Studio — Al Jubeiha",
+    "area": "Al Jubeiha",
+    "category": "studio",
+    "total": 265,
+    "size": 45,
+    "photos": [
+      "studio.jpg",
+      "interior.jpg",
+      "living.jpg"
+    ],
+    "verified": true,
+    "featured": true,
+    "furnished": true,
+    "owner": "Abu Ahmad"
+  },
+  {
+    "id": 2,
+    "title": "2-bedroom apartment — Tla Al Ali",
+    "area": "Tla Al Ali",
+    "category": "apartment",
+    "total": 395,
+    "size": 95,
+    "photos": [
+      "apartment.jpg",
+      "living.jpg",
+      "interior.jpg"
+    ],
+    "verified": true,
+    "featured": false,
+    "furnished": false,
+    "owner": "Al Riyada Real Estate Office"
+  },
+  {
+    "id": 3,
+    "title": "Room in a shared apartment — Al Jubeiha",
+    "area": "Al Jubeiha",
+    "category": "shared-apartment",
+    "total": 170,
+    "size": 18,
+    "photos": [
+      "interior.jpg",
+      "studio.jpg",
+      "apartment.jpg"
+    ],
+    "verified": false,
+    "featured": false,
+    "furnished": true,
+    "owner": "Abu Ahmad"
+  },
+  {
+    "id": 4,
+    "title": "1-bedroom apartment — Shmeisani",
+    "area": "Shmeisani",
+    "category": "apartment",
+    "total": 440,
+    "size": 70,
+    "photos": [
+      "living.jpg",
+      "apartment.jpg",
+      "interior.jpg"
+    ],
+    "verified": true,
+    "featured": true,
+    "furnished": true,
+    "owner": "Umm Yazan"
+  },
+  {
+    "id": 5,
+    "title": "Studio — Sweileh",
+    "area": "Sweileh",
+    "category": "studio",
+    "total": 220,
+    "size": 40,
+    "photos": [
+      "villa.jpg",
+      "studio.jpg",
+      "interior.jpg"
+    ],
+    "verified": true,
+    "featured": false,
+    "furnished": false,
+    "owner": "Abu Ahmad"
+  },
+  {
+    "id": 6,
+    "title": "3-bedroom apartment — Khalda",
+    "area": "Khalda",
+    "category": "apartment",
+    "total": 595,
+    "size": 150,
+    "photos": [
+      "house.jpg",
+      "apartment.jpg",
+      "living.jpg"
+    ],
+    "verified": false,
+    "featured": false,
+    "furnished": false,
+    "owner": "Abu Ahmad"
+  }
+]

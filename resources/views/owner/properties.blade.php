@@ -1,0 +1,359 @@
+@extends('layouts.app')
+
+@section('title', "Makan — My properties")
+@section('roleStyle', 'owner')
+@section('bodyAttributes') data-role="owner" data-page="properties"@endsection
+
+@section('content')
+    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
+    <input
+      type="checkbox"
+      class="sidebar-toggle"
+      id="sidebarToggle"
+      aria-label="Collapse the menu"
+    />
+
+    <!-- ===== Topbar ===== -->
+    <header class="app-topbar">
+      <button
+        class="icon-btn d-lg-none"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#appSidebar"
+        aria-label="Menu"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+      <label
+        for="sidebarToggle"
+        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
+        title="Collapse or expand the menu"
+        aria-hidden="true"
+      >
+        <i class="bi bi-list"></i>
+      </label>
+      <a class="brand" href="{{ route('owner.dashboard') }}"
+        ><span class="brand-mark">M</span><span>Makan</span></a
+      >
+      <div class="ms-auto d-flex align-items-center gap-1">
+        <!-- Messages: icon with unread count -->
+        <a
+          class="icon-btn"
+          href="{{ route('owner.chat') }}"
+          aria-label="Messages, 1 unread"
+        >
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+        </a>
+        <div class="dropdown">
+          <button
+            class="icon-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-label="Notifications"
+          >
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+            style="width: 320px"
+          >
+            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="py-1">
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.requests') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-inbox"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block">New booking request from Sara Khaled</span>
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >10 minutes ago</span
+                  >
+                </span>
+              </a>
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.properties') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-shield-check"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block"
+                    >Your Al Jubeiha studio has been verified</span
+                  >
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >1 hour ago</span
+                  >
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button
+            class="app-user app-user--avatar"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Account menu, Abu Ahmad"
+          >
+            <span class="avatar">A</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                >Log out</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link active" href="{{ route('owner.properties') }}" aria-current="page" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>My properties</h1>
+            <p>4 properties · 3 active</p>
+          </div>
+          <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add property</span>
+          </a>
+        </div>
+
+        <!-- 2. Property list -->
+        <div class="d-flex flex-column gap-3" id="ownerProperties">
+          <!-- Property 1 -->
+          <article class="panel prop-row" data-property="1">
+            <div class="listing-thumb ph ph-1" aria-hidden="true"></div>
+            <div class="flex-main">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <h2 class="prop-row__title">Studio — Al Jubeiha</h2>
+                <span class="status status--success">Active</span>
+                <span class="badge-featured mt-0"
+                  ><i class="bi bi-star-fill"></i>Featured</span
+                >
+              </div>
+              <div class="small text-muted">
+                265 JOD per month, bills included · Furnished
+              </div>
+              <div class="fresh-note">
+                <i class="bi bi-arrow-repeat"></i>Last confirmed available: 2
+                days ago
+              </div>
+            </div>
+            <div class="stat-tiles prop-row__stats">
+              <div class="stat-tile"><b>642</b><span>Views</span></div>
+              <div class="stat-tile"><b>9</b><span>Requests</span></div>
+              <div class="stat-tile"><b>92%</b><span>Match</span></div>
+            </div>
+            <div class="d-flex gap-2">
+              <a
+                href="{{ route('owner.property-form') }}"
+                class="btn btn-ghost btn-square text-primary-bt"
+                aria-label="Edit Studio — Al Jubeiha"
+                ><i class="bi bi-pencil"></i
+              ></a>
+              <button
+                type="button"
+                class="btn btn-ghost btn-square"
+                data-action="hide"
+                aria-label="Hide Studio — Al Jubeiha"
+              >
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- Property 2 -->
+          <article class="panel prop-row" data-property="2">
+            <div class="listing-thumb ph ph-3" aria-hidden="true"></div>
+            <div class="flex-main">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <h2 class="prop-row__title">
+                  Room in a shared apartment — Al Jubeiha
+                </h2>
+                <span class="status status--success">Active</span>
+              </div>
+              <div class="small text-muted">
+                170 JOD per month, bills included · Furnished · Students only
+              </div>
+              <div class="fresh-note">
+                <i class="bi bi-arrow-repeat"></i>Last confirmed available: 4
+                days ago
+              </div>
+            </div>
+            <div class="stat-tiles prop-row__stats">
+              <div class="stat-tile"><b>318</b><span>Views</span></div>
+              <div class="stat-tile"><b>5</b><span>Requests</span></div>
+              <div class="stat-tile"><b>81%</b><span>Match</span></div>
+            </div>
+            <div class="d-flex gap-2">
+              <a
+                href="{{ route('owner.property-form') }}"
+                class="btn btn-ghost btn-square text-primary-bt"
+                aria-label="Edit Room in a shared apartment — Al Jubeiha"
+                ><i class="bi bi-pencil"></i
+              ></a>
+              <button
+                type="button"
+                class="btn btn-ghost btn-square"
+                data-action="hide"
+                aria-label="Hide Room in a shared apartment — Al Jubeiha"
+              >
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- Property 3 (needs confirmation) -->
+          <article class="panel prop-row" data-property="3">
+            <div class="listing-thumb ph ph-5" aria-hidden="true"></div>
+            <div class="flex-main">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <h2 class="prop-row__title">3-bedroom apartment — Khalda</h2>
+                <span class="status status--pending">Needs confirmation</span>
+              </div>
+              <div class="small text-muted">
+                595 JOD per month, bills included · Unfurnished
+              </div>
+              <div class="fresh-note is-warn">
+                <i class="bi bi-arrow-repeat"></i>Not confirmed for 8 days,
+                will be hidden tomorrow
+              </div>
+            </div>
+            <div class="stat-tiles prop-row__stats">
+              <div class="stat-tile"><b>211</b><span>Views</span></div>
+              <div class="stat-tile"><b>3</b><span>Requests</span></div>
+              <div class="stat-tile"><b>58%</b><span>Match</span></div>
+            </div>
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-action="confirm-available"
+              >
+                Still available
+              </button>
+              <a
+                href="{{ route('owner.property-form') }}"
+                class="btn btn-ghost btn-square text-primary-bt"
+                aria-label="Edit 3-bedroom apartment — Khalda"
+                ><i class="bi bi-pencil"></i
+              ></a>
+              <button
+                type="button"
+                class="btn btn-ghost btn-square"
+                data-action="hide"
+                aria-label="Hide 3-bedroom apartment — Khalda"
+              >
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- Property 4 (active) -->
+          <article class="panel prop-row" data-property="4">
+            <div class="listing-thumb ph ph-6" aria-hidden="true"></div>
+            <div class="flex-main">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <h2 class="prop-row__title">Studio — Sweileh</h2>
+                <span class="status status--success">Active</span>
+              </div>
+              <div class="small text-muted">
+                220 JOD per month, bills included · Unfurnished
+              </div>
+              <div class="fresh-note">
+                <i class="bi bi-arrow-repeat"></i>Last confirmed available: 3
+                days ago
+              </div>
+            </div>
+            <div class="stat-tiles prop-row__stats">
+              <div class="stat-tile"><b>154</b><span>Views</span></div>
+              <div class="stat-tile"><b>2</b><span>Requests</span></div>
+              <div class="stat-tile"><b>69%</b><span>Match</span></div>
+            </div>
+            <div class="d-flex gap-2">
+              <a
+                href="{{ route('owner.property-form') }}"
+                class="btn btn-ghost btn-square text-primary-bt"
+                aria-label="Edit Studio — Sweileh"
+                ><i class="bi bi-pencil"></i
+              ></a>
+              <button
+                type="button"
+                class="btn btn-ghost btn-square"
+                data-action="hide"
+                aria-label="Hide Studio — Sweileh"
+              >
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </main>
+    </div>
+@endsection

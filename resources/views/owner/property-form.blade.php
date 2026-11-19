@@ -1,0 +1,685 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Add property")
+@section('roleStyle', 'owner')
+@section('bodyAttributes') data-role="owner" data-page="property-form"@endsection
+
+@section('content')
+    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
+    <input
+      type="checkbox"
+      class="sidebar-toggle"
+      id="sidebarToggle"
+      aria-label="Collapse the menu"
+    />
+
+    <!-- ===== Topbar ===== -->
+    <header class="app-topbar">
+      <button
+        class="icon-btn d-lg-none"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#appSidebar"
+        aria-label="Menu"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+      <label
+        for="sidebarToggle"
+        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
+        title="Collapse or expand the menu"
+        aria-hidden="true"
+      >
+        <i class="bi bi-list"></i>
+      </label>
+      <a class="brand" href="{{ route('owner.dashboard') }}"
+        ><span class="brand-mark">M</span><span>Makan</span></a
+      >
+      <div class="ms-auto d-flex align-items-center gap-1">
+        <!-- Messages: icon with unread count -->
+        <a
+          class="icon-btn"
+          href="{{ route('owner.chat') }}"
+          aria-label="Messages, 1 unread"
+        >
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+        </a>
+        <div class="dropdown">
+          <button
+            class="icon-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-label="Notifications"
+          >
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+            style="width: 320px"
+          >
+            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="py-1">
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.requests') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-inbox"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block">New booking request from Sara Khaled</span>
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >10 minutes ago</span
+                  >
+                </span>
+              </a>
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.properties') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-shield-check"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block"
+                    >Your Al Jubeiha studio has been verified</span
+                  >
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >1 hour ago</span
+                  >
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button
+            class="app-user app-user--avatar"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Account menu, Abu Ahmad"
+          >
+            <span class="avatar">A</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                >Log out</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a
+            class="side-link active"
+            href="{{ route('owner.property-form') }}"
+            aria-current="page"
+            title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>Add property</h1>
+            <p>
+              The more details you fill in, the more accurately your property
+              matches with seekers.
+            </p>
+          </div>
+        </div>
+
+        <div class="row g-4 align-items-start">
+          <!-- ===== Form ===== -->
+          <div class="col-lg-8">
+            <form id="propertyForm" method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('owner.properties') }}">
+              @csrf
+              <!-- 1. Basic details -->
+              <section class="panel form-section" aria-labelledby="secBasics">
+                <h2 id="secBasics">1. Basic details</h2>
+                <p>Property type and specs.</p>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label for="fTitle" class="form-label">Listing title</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="fTitle"
+                      name="title"
+                      value="Studio near the University of Jordan"
+                      required
+                    />
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fCategory" class="form-label">Category</label>
+                    <select class="form-select" id="fCategory" name="category">
+                      <option value="housing" selected>Housing</option>
+                      <option value="farms" disabled>Farms (coming soon)</option>
+                      <option value="offices" disabled>
+                        Offices (coming soon)
+                      </option>
+                      <option value="shops" disabled>Shops (coming soon)</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fType" class="form-label">Category</label>
+                    <select class="form-select" id="fType" name="category">
+                      <option value="studio" selected>Studio</option>
+                      <option value="villa">Villa</option>
+                      <option value="mansion">Mansion</option>
+                      <option value="detached-house">Detached house</option>
+                      <option value="apartment">Apartment</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fSize" class="form-label">Size (m²)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fSize"
+                      name="size"
+                      value="45"
+                      min="1"
+                    />
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fFloor" class="form-label">Floor</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fFloor"
+                      name="floor"
+                      value="2"
+                    />
+                  </div>
+                  <fieldset class="col-12">
+                    <legend class="form-label fs-6">Furnished?</legend>
+                    <div
+                      class="d-flex flex-wrap gap-2"
+                      role="radiogroup"
+                      id="furnishing"
+                    >
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        id="fFurnished"
+                        name="furnished"
+                        value="yes"
+                        checked
+                      />
+                      <label class="chip-select" for="fFurnished"
+                        ><i class="bi bi-lamp"></i>Furnished</label
+                      >
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        id="fUnfurnished"
+                        name="furnished"
+                        value="no"
+                      />
+                      <label class="chip-select" for="fUnfurnished"
+                        ><i class="bi bi-square"></i>Unfurnished</label
+                      >
+                    </div>
+                  </fieldset>
+                </div>
+
+                <!-- Amenities -->
+                <fieldset class="mt-3">
+                  <legend class="visually-hidden">Amenities</legend>
+                  <div class="d-flex flex-wrap gap-2" id="amenities">
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amElevator"
+                      name="amenities"
+                      value="elevator"
+                      checked
+                    />
+                    <label class="chip-select" for="amElevator"
+                      ><i class="bi bi-arrow-down-up"></i>Elevator</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amAc"
+                      name="amenities"
+                      value="ac"
+                      checked
+                    />
+                    <label class="chip-select" for="amAc"
+                      ><i class="bi bi-snow"></i>Air conditioning</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amWifi"
+                      name="amenities"
+                      value="internet"
+                      checked
+                    />
+                    <label class="chip-select" for="amWifi"
+                      ><i class="bi bi-wifi"></i>Internet</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amWasher"
+                      name="amenities"
+                      value="washer"
+                      checked
+                    />
+                    <label class="chip-select" for="amWasher"
+                      ><i class="bi bi-droplet"></i>Washing machine</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amDesk"
+                      name="amenities"
+                      value="desk"
+                      checked
+                    />
+                    <label class="chip-select" for="amDesk"
+                      ><i class="bi bi-book"></i>Study desk</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amParking"
+                      name="amenities"
+                      value="parking"
+                    />
+                    <label class="chip-select" for="amParking"
+                      ><i class="bi bi-car-front"></i>Parking</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="btn-check"
+                      id="amBalcony"
+                      name="amenities"
+                      value="balcony"
+                    />
+                    <label class="chip-select" for="amBalcony"
+                      ><i class="bi bi-door-open"></i>Balcony</label
+                    >
+                  </div>
+                </fieldset>
+              </section>
+
+              <!-- 2. Description + smart assistant -->
+              <section class="panel form-section" aria-labelledby="secDesc">
+                <h2 id="secDesc">2. Description</h2>
+                <p>
+                  Write it yourself, or let the assistant write it from the
+                  details you've filled in.
+                </p>
+                <div class="ai-box flex-wrap mb-3">
+                  <i class="bi bi-magic"></i>
+                  <div class="flex-grow-1">
+                    <b class="d-block">Smart listing writer</b>
+                    <span class="small text-muted"
+                      >Writes a ready Arabic and English description in
+                      seconds.</span
+                    >
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-action="ai-write"
+                    aria-controls="fDescAr fDescEn"
+                  >
+                    <i class="bi bi-stars"></i>
+                    <span>Write it for me</span>
+                  </button>
+                </div>
+
+                <ul class="nav seg-tabs mb-2" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button
+                      class="nav-link active"
+                      data-bs-toggle="tab"
+                      data-bs-target="#desc-ar"
+                      type="button"
+                      role="tab"
+                      aria-controls="desc-ar"
+                      aria-selected="true"
+                    >
+                      Arabic
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button
+                      class="nav-link"
+                      data-bs-toggle="tab"
+                      data-bs-target="#desc-en"
+                      type="button"
+                      role="tab"
+                      aria-controls="desc-en"
+                      aria-selected="false"
+                    >
+                      English
+                    </button>
+                  </li>
+                </ul>
+                <div class="tab-content">
+                  <div
+                    class="tab-pane fade show active"
+                    id="desc-ar"
+                    role="tabpanel"
+                    tabindex="0"
+                  >
+                    <label for="fDescAr" class="visually-hidden"
+                      >Description in Arabic</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="fDescAr"
+                      name="description_ar"
+                      rows="5"
+                      placeholder="Write the description in Arabic"
+                    ></textarea>
+                  </div>
+                  <div
+                    class="tab-pane fade"
+                    id="desc-en"
+                    role="tabpanel"
+                    tabindex="0"
+                  >
+                    <label for="fDescEn" class="visually-hidden"
+                      >Description in English</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="fDescEn"
+                      name="description_en"
+                      rows="5"
+                      placeholder="Description in English..."
+                    ></textarea>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 3. Photos -->
+              <section class="panel form-section" aria-labelledby="secPhotos">
+                <h2 id="secPhotos">3. Photos</h2>
+                <p>Real, recent photos. The first photo is the cover.</p>
+                <label class="dropzone d-block mb-3" for="fPhotos">
+                  <i class="bi bi-cloud-arrow-up"></i>
+                  <span class="d-block fw-semibold text-body"
+                    >Drag photos here, or
+                    <span class="text-primary-bt text-decoration-underline"
+                      >choose from your device</span
+                    ></span
+                  >
+                  <span class="d-block small">JPG or PNG · up to 10 photos</span>
+                </label>
+                <input
+                  type="file"
+                  class="visually-hidden"
+                  id="fPhotos"
+                  name="photos"
+                  accept="image/jpeg,image/png"
+                  multiple
+                />
+                <div class="thumbs" id="photoThumbs">
+                  <div class="t ph ph-1"><span class="cover">Cover</span></div>
+                  <div class="t ph ph-5"></div>
+                  <div class="t ph ph-3"></div>
+                  <div class="t ph ph-2"></div>
+                  <div class="t ph ph-4"></div>
+                </div>
+              </section>
+
+              <!-- 4. Location -->
+              <section class="panel form-section" aria-labelledby="secLocation">
+                <h2 id="secLocation">4. Location</h2>
+                <p>
+                  Drop the pin exactly on the building. Seekers only see the
+                  neighborhood before booking.
+                </p>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label for="fHood" class="form-label">Neighborhood</label>
+                    <select class="form-select" id="fHood" name="neighborhood">
+                      <option value="jubeiha" selected>Al Jubeiha</option>
+                      <option value="sweileh">Sweileh</option>
+                      <option value="tla-al-ali">Tla Al Ali</option>
+                      <option value="khalda">Khalda</option>
+                    </select>
+                  </div>
+                  <div class="col-md-8">
+                    <label for="fStreet" class="form-label"
+                      >Street and building number</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="fStreet"
+                      name="street"
+                      value="Queen Rania St, Building 14"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="map-mock map-picker"
+                  id="locationMap"
+                  role="img"
+                  aria-label="Property location map"
+                >
+                  <i class="bi bi-geo-alt-fill map-drop-pin"></i>
+                </div>
+                <input type="hidden" name="lat" id="fLat" value="" />
+                <input type="hidden" name="lng" id="fLng" value="" />
+              </section>
+
+              <!-- 5. Price and bills -->
+              <section class="panel form-section" aria-labelledby="secPrice">
+                <h2 id="secPrice">5. Price and bills</h2>
+                <p>
+                  If you don't know your average bills, we'll calculate them
+                  from the neighborhood average and mark them as "estimate".
+                </p>
+                <div class="row g-3">
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fRent" class="form-label">Monthly rent</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fRent"
+                      name="rent"
+                      value="220"
+                      min="0"
+                    />
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fBills" class="form-label"
+                      >Avg. electricity &amp; water</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fBills"
+                      name="bills"
+                      placeholder="Empty = estimate"
+                      min="0"
+                    />
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fInternet" class="form-label">Internet</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fInternet"
+                      name="internet"
+                      value="15"
+                      min="0"
+                    />
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                    <label for="fMinStay" class="form-label"
+                      >Minimum stay</label
+                    >
+                    <select class="form-select" id="fMinStay" name="min_stay">
+                      <option value="3" selected>3 months</option>
+                      <option value="1">1 month</option>
+                      <option value="6">6 months</option>
+                    </select>
+                  </div>
+                </div>
+                <div
+                  class="d-flex flex-wrap align-items-center gap-3 mt-3 p-3 bg-body rounded-3"
+                  id="pricePreview"
+                >
+                  <i class="bi bi-receipt fs-5 text-primary-bt"></i>
+                  <span class="flex-grow-1 small"
+                    >Seekers will see:
+                    <b>265 JOD per month, bills included</b></span
+                  >
+                  <span class="small text-muted"
+                    >Suggested price for this neighborhood: 240 – 290 JOD</span
+                  >
+                </div>
+              </section>
+
+              <!-- Save buttons -->
+              <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                <button
+                  type="submit"
+                  class="btn btn-outline-primary btn-lg"
+                  name="action"
+                  value="draft"
+                >
+                  Save as draft
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-accent btn-lg"
+                  name="action"
+                  value="publish"
+                >
+                  Publish listing
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- ===== Side summary ===== -->
+          <aside class="col-lg-4">
+            <div class="sticky-box d-flex flex-column gap-3">
+              <!-- Listing readiness -->
+              <section class="panel" aria-labelledby="readyTitle">
+                <h2 class="fs-6 mb-2" id="readyTitle">Listing readiness</h2>
+                <div
+                  class="progress mb-3"
+                  role="progressbar"
+                  aria-label="Listing readiness"
+                  aria-valuenow="80"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  <div class="progress-bar" style="width: 80%"></div>
+                </div>
+                <ul
+                  class="list-clean d-flex flex-column gap-2 small"
+                  id="readinessList"
+                >
+                  <li class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill ic-ok"></i>Basic details
+                  </li>
+                  <li class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill ic-ok"></i>Description
+                  </li>
+                  <li class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill ic-ok"></i>5 photos (8
+                    recommended)
+                  </li>
+                  <li class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill ic-ok"></i>Location
+                  </li>
+                  <li class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>Average
+                    bills
+                  </li>
+                </ul>
+              </section>
+
+              <!-- After publishing -->
+              <section class="panel" aria-labelledby="afterTitle">
+                <h2 class="fs-6 mb-2" id="afterTitle">After publishing</h2>
+                <div class="d-flex gap-2 small text-muted mb-2">
+                  <i class="bi bi-patch-check text-primary-bt"></i
+                  ><span>An admin reviews the listing within 24 hours.</span>
+                </div>
+                <div class="d-flex gap-2 small text-muted">
+                  <i class="bi bi-arrow-repeat text-primary-bt"></i
+                  ><span
+                    >You need to confirm every week that it's still available,
+                    or it will be hidden from results.</span
+                  >
+                </div>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+@endsection

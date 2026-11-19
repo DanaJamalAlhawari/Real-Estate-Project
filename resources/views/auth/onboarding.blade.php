@@ -1,0 +1,322 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Get to know you")
+
+@section('content')
+    <header class="app-topbar">
+      <a class="brand" href="{{ route('home') }}"
+        ><span class="brand-mark">M</span><span>Makan</span
+      ></a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <a
+          href="{{ route('seeker.search') }}"
+          class="btn btn-sm btn-link text-muted text-decoration-none"
+        >Skip for now</a>
+      </div>
+    </header>
+
+    <main class="container py-4 py-lg-5">
+      <!-- All three steps are shown one after another -->
+      <form class="wizard" id="wizard" method="post" action="{{ route('demo.notice') }}" data-demo-form>
+              @csrf
+              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+        <!-- ===== Step 1: Why are you coming ===== -->
+        <section class="wizard-step" data-step="1">
+          <span class="step-tag">Step 1 of 3</span>
+          <h1 class="h2">Why are you coming?</h1>
+          <p class="text-muted mb-4">
+            Pick one or more, and we'll suggest the right priorities.
+          </p>
+
+          <div class="row row-cols-2 row-cols-md-3 g-2 mb-4">
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pStudy"
+                value="study"
+                checked
+              /><label class="choice-card align-items-center" for="pStudy"
+                ><span class="ci"><i class="bi bi-mortarboard"></i></span
+                ><b>Study</b
+              ></label>
+            </div>
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pWork"
+                value="work"
+              /><label class="choice-card align-items-center" for="pWork"
+                ><span class="ci"><i class="bi bi-briefcase"></i></span
+                ><b>Work</b
+              ></label>
+            </div>
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pTourism"
+                value="tourism"
+              /><label class="choice-card align-items-center" for="pTourism"
+                ><span class="ci"><i class="bi bi-camera"></i></span
+                ><b>Tourism</b
+              ></label>
+            </div>
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pMedical"
+                value="medical"
+              /><label class="choice-card align-items-center" for="pMedical"
+                ><span class="ci"><i class="bi bi-hospital"></i></span
+                ><b>Medical care</b
+              ></label>
+            </div>
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pRelocation"
+                value="relocation"
+              /><label class="choice-card align-items-center" for="pRelocation"
+                ><span class="ci"><i class="bi bi-truck"></i></span
+                ><b>Relocation</b
+              ></label>
+            </div>
+            <div class="col">
+              <input
+                type="checkbox"
+                class="btn-check"
+                name="purpose"
+                id="pOther"
+                value="other"
+              /><label class="choice-card align-items-center" for="pOther"
+                ><span class="ci"><i class="bi bi-three-dots"></i></span
+                ><b>Other</b
+              ></label>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-7">
+              <label class="form-label">How long will you stay?</label>
+              <div class="d-flex flex-wrap gap-2">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="duration"
+                  id="d1"
+                /><label class="chip-select" for="d1">Under a month</label>
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="duration"
+                  id="d3"
+                /><label class="chip-select" for="d3">1 – 3 months</label>
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="duration"
+                  id="d6"
+                  checked
+                /><label class="chip-select" for="d6">3 – 6 months</label>
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="duration"
+                  id="d12"
+                /><label class="chip-select" for="d12">6 months or more</label>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <label
+                class="form-label"
+                for="moveIn"
+              >When do you want to move in?</label>
+              <input
+                type="date"
+                class="form-control"
+                id="moveIn"
+                value="2026-11-01"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Step 2: Where do you want to live ===== -->
+        <section class="wizard-step" data-step="2">
+          <span class="step-tag">Step 2 of 3</span>
+          <h1 class="h2">Where do you want to live?</h1>
+          <p class="text-muted mb-4">
+            Pick a city, then an area if you have one in mind. We'll show homes
+            there first.
+          </p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="city">City</label>
+              <select class="form-select form-select-lg" id="city" name="city" required>
+                <option value="" selected disabled>Choose a city</option>
+                <option value="amman">Amman</option>
+                <option value="irbid">Irbid</option>
+                <option value="zarqa">Zarqa</option>
+                <option value="aqaba">Aqaba</option>
+                <option value="salt">Salt</option>
+                <option value="madaba">Madaba</option>
+                <option value="jerash">Jerash</option>
+                <option value="ajloun">Ajloun</option>
+                <option value="mafraq">Mafraq</option>
+                <option value="karak">Karak</option>
+                <option value="tafilah">Tafilah</option>
+                <option value="maan">Ma'an</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="area"
+                >Area <span class="text-muted fw-normal">(optional)</span></label
+              >
+              <!-- Areas are grouped by city; the backend fills this list -->
+              <select class="form-select form-select-lg" id="area" name="area">
+                <option value="" selected>Any area</option>
+                <optgroup label="Amman">
+                  <option>Abdali</option>
+                  <option>Al Jubeiha</option>
+                  <option>Khalda</option>
+                  <option>Shmeisani</option>
+                  <option>Sweileh</option>
+                  <option>Tla Al Ali</option>
+                </optgroup>
+                <optgroup label="Irbid">
+                  <option>Al Hay Al Janoubi</option>
+                  <option>Al Nuzha</option>
+                </optgroup>
+                <optgroup label="Aqaba">
+                  <option>Al Shallaleh</option>
+                  <option>Area 9</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Step 3: Priorities ===== -->
+        <section class="wizard-step" data-step="3">
+          <span class="step-tag">Step 3 of 3</span>
+          <h1 class="h2">What matters most?</h1>
+          <p class="text-muted mb-4">
+            Set your budget and tick anything you need.
+          </p>
+
+          <!-- Budget: type any amount, or pick one from the list -->
+          <div class="panel mb-3">
+            <label class="form-label" for="budget"
+              >Monthly budget (bills included)</label
+            >
+            <div class="input-group budget-input">
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="budget"
+                name="budget"
+                list="budgetOptions"
+                min="100"
+                max="2000"
+                step="10"
+                value="300"
+                placeholder="e.g. 300"
+                aria-describedby="budgetHint"
+              />
+              <span class="input-group-text">JOD / month</span>
+            </div>
+            <datalist id="budgetOptions">
+              <option value="150"></option>
+              <option value="200"></option>
+              <option value="250"></option>
+              <option value="300"></option>
+              <option value="400"></option>
+              <option value="500"></option>
+              <option value="750"></option>
+              <option value="1000"></option>
+            </datalist>
+            <small class="form-text text-muted" id="budgetHint"
+              >Type an amount or pick one from the list.</small
+            >
+          </div>
+
+          <!-- What you need (yes/no) -->
+          <div class="panel" id="priorities">
+            <div class="priority priority--check">
+              <label for="pr-furnished"
+                ><i class="bi bi-lamp"></i
+                ><span
+                  >Furnished
+                  <small class="d-block text-muted fw-normal"
+                    >I want it furnished</small
+                  ></span
+                ></label
+              >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="pr-furnished"
+                name="furnished"
+                value="1"
+              />
+            </div>
+            <div class="priority priority--check">
+              <label for="pr-access"
+                ><i class="bi bi-universal-access"></i
+                ><span
+                  >Easy access
+                  <small class="d-block text-muted fw-normal"
+                    >Elevator or ground floor</small
+                  ></span
+                ></label
+              >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="pr-access"
+                name="easy_access"
+                value="1"
+              />
+            </div>
+            <!-- Shared housing: only usable when "Study" is picked in step 1
+                 (CSS: .wizard:not(:has(#pStudy:checked)) .priority--students) -->
+            <div class="priority priority--check priority--students">
+              <label for="pr-sharing"
+                ><i class="bi bi-people"></i
+                ><span
+                  >Shared housing
+                  <small class="students-only-note d-block fw-normal"
+                    >For students only</small
+                  ></span
+                ></label
+              >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="pr-sharing"
+                name="shared_housing"
+                value="1"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div class="wizard-nav justify-content-end">
+          <a href="{{ route('seeker.search') }}" class="btn btn-accent btn-lg"
+            ><span>Show my matches</span>
+            <i class="bi bi-arrow-right"></i
+          ></a>
+        </div>
+      </form>
+    </main>
+@endsection

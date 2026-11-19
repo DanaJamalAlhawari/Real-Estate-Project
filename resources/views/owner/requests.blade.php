@@ -1,0 +1,451 @@
+@extends('layouts.app')
+
+@section('title', "Makan — Booking requests")
+@section('roleStyle', 'owner')
+@section('bodyAttributes') data-role="owner" data-page="requests"@endsection
+
+@section('content')
+    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
+    <input
+      type="checkbox"
+      class="sidebar-toggle"
+      id="sidebarToggle"
+      aria-label="Collapse the menu"
+    />
+
+    <!-- ===== Topbar ===== -->
+    <header class="app-topbar">
+      <button
+        class="icon-btn d-lg-none"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#appSidebar"
+        aria-label="Menu"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+      <label
+        for="sidebarToggle"
+        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
+        title="Collapse or expand the menu"
+        aria-hidden="true"
+      >
+        <i class="bi bi-list"></i>
+      </label>
+      <a class="brand" href="{{ route('owner.dashboard') }}"
+        ><span class="brand-mark">M</span><span>Makan</span></a
+      >
+      <div class="ms-auto d-flex align-items-center gap-1">
+        <!-- Messages: icon with unread count -->
+        <a
+          class="icon-btn"
+          href="{{ route('owner.chat') }}"
+          aria-label="Messages, 1 unread"
+        >
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+        </a>
+        <div class="dropdown">
+          <button
+            class="icon-btn"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-label="Notifications"
+          >
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+            style="width: 320px"
+          >
+            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="py-1">
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.requests') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-inbox"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block">New booking request from Sara Khaled</span>
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >10 minutes ago</span
+                  >
+                </span>
+              </a>
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.properties') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-shield-check"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block"
+                    >Your Al Jubeiha studio has been verified</span
+                  >
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >1 hour ago</span
+                  >
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button
+            class="app-user app-user--avatar"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Account menu, Abu Ahmad"
+          >
+            <span class="avatar">A</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item text-danger" href="{{ route('home') }}"
+                >Log out</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link active" href="{{ route('owner.requests') }}" aria-current="page" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>Booking requests</h1>
+            <p>
+              Reply to requests quickly — seekers prefer owners who respond
+              within hours.
+            </p>
+          </div>
+        </div>
+
+          <!-- ===== 2. Booking requests ===== -->
+          <section aria-label="Booking requests">
+            <!-- Filters -->
+            <div
+              class="d-flex flex-wrap gap-2 mb-3"
+              role="radiogroup"
+              aria-label="Filter requests"
+              id="requestFilters"
+            >
+              <input
+                type="radio"
+                class="btn-check"
+                name="status"
+                id="rfAll"
+                value="all"
+                checked
+              />
+              <label class="chip-select py-2" for="rfAll">All</label>
+              <input
+                type="radio"
+                class="btn-check"
+                name="status"
+                id="rfPending"
+                value="pending"
+              />
+              <label class="chip-select py-2" for="rfPending"
+                >Awaiting your reply (3)</label
+              >
+              <input
+                type="radio"
+                class="btn-check"
+                name="status"
+                id="rfAccepted"
+                value="accepted"
+              />
+              <label class="chip-select py-2" for="rfAccepted">Accepted</label>
+              <input
+                type="radio"
+                class="btn-check"
+                name="status"
+                id="rfRejected"
+                value="rejected"
+              />
+              <label class="chip-select py-2" for="rfRejected">Declined</label>
+            </div>
+
+            <!-- Request list -->
+            <div class="d-flex flex-column gap-3" id="requestsList">
+              <!-- Request 1 -->
+              <article
+                class="panel request-row"
+                data-request="1"
+                data-status="pending"
+              >
+                <span class="avatar avatar-lg">S</span>
+                <div class="flex-main">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h2 class="request-row__name">Sara Khaled</h2>
+                    <span class="badge-soft ms-0">Study</span>
+                    <span class="verified-note"
+                      ><i class="bi bi-patch-check-fill"></i>ID verified</span
+                    >
+                  </div>
+                  <div class="small text-muted">
+                    Studio — Al Jubeiha
+                  </div>
+                  <div class="small text-muted">
+                    Move-in 1 Nov · 6 months
+                  </div>
+                </div>
+                <div class="score-ring" style="--value: 92; --size: 54px">
+                  <div class="score-ring__inner">92<small>match</small></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-action="accept"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    data-action="reject"
+                  >
+                    Decline
+                  </button>
+                  <a
+                    href="{{ route('owner.chat') }}"
+                    class="btn btn-ghost btn-square text-primary-bt"
+                    aria-label="Message Sara Khaled"
+                    ><i class="bi bi-chat-dots"></i
+                  ></a>
+                </div>
+              </article>
+
+              <!-- Request 2 -->
+              <article
+                class="panel request-row"
+                data-request="2"
+                data-status="pending"
+              >
+                <span class="avatar avatar-lg">M</span>
+                <div class="flex-main">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h2 class="request-row__name">Mohammad Al Ali</h2>
+                    <span class="badge-soft ms-0">Work</span>
+                    <span class="verified-note"
+                      ><i class="bi bi-patch-check-fill"></i>ID verified</span
+                    >
+                  </div>
+                  <div class="small text-muted">
+                    Room in a shared apartment — Al Jubeiha
+                  </div>
+                  <div class="small text-muted">
+                    Move-in 15 Nov · 3 months
+                  </div>
+                </div>
+                <div class="score-ring" style="--value: 81; --size: 54px">
+                  <div class="score-ring__inner">81<small>match</small></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-action="accept"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    data-action="reject"
+                  >
+                    Decline
+                  </button>
+                  <a
+                    href="{{ route('owner.chat') }}"
+                    class="btn btn-ghost btn-square text-primary-bt"
+                    aria-label="Message Mohammad Al Ali"
+                    ><i class="bi bi-chat-dots"></i
+                  ></a>
+                </div>
+              </article>
+
+              <!-- Request 3 -->
+              <article
+                class="panel request-row"
+                data-request="3"
+                data-status="pending"
+              >
+                <span class="avatar avatar-lg">E</span>
+                <div class="flex-main">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h2 class="request-row__name">Emily Carter</h2>
+                    <span class="badge-soft ms-0">Tourism</span>
+                  </div>
+                  <div class="small text-muted">
+                    Studio — Al Jubeiha
+                  </div>
+                  <div class="small text-muted">Move-in 20 Oct · 1 month</div>
+                </div>
+                <div class="score-ring" style="--value: 77; --size: 54px">
+                  <div class="score-ring__inner">77<small>match</small></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-action="accept"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    data-action="reject"
+                  >
+                    Decline
+                  </button>
+                  <a
+                    href="{{ route('owner.chat') }}"
+                    class="btn btn-ghost btn-square text-primary-bt"
+                    aria-label="Message Emily Carter"
+                    ><i class="bi bi-chat-dots"></i
+                  ></a>
+                </div>
+              </article>
+
+              <!-- Request 4 (accepted) -->
+              <article
+                class="panel request-row"
+                data-request="4"
+                data-status="accepted"
+              >
+                <span class="avatar avatar-lg">K</span>
+                <div class="flex-main">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h2 class="request-row__name">Khaled Yousef</h2>
+                    <span class="badge-soft ms-0">Treatment</span>
+                    <span class="verified-note"
+                      ><i class="bi bi-patch-check-fill"></i>ID verified</span
+                    >
+                  </div>
+                  <div class="small text-muted">
+                    Studio — Sweileh
+                  </div>
+                  <div class="small text-muted">
+                    Move-in 10 Oct · 2 months
+                  </div>
+                </div>
+                <div class="score-ring" style="--value: 70; --size: 54px">
+                  <div class="score-ring__inner">70<small>match</small></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="status status--success">Accepted</span>
+                  <a
+                    href="{{ route('owner.chat') }}"
+                    class="btn btn-ghost btn-square text-primary-bt"
+                    aria-label="Message Khaled Yousef"
+                    ><i class="bi bi-chat-dots"></i
+                  ></a>
+                </div>
+              </article>
+
+              <!-- Request 5 (declined) -->
+              <article
+                class="panel request-row"
+                data-request="5"
+                data-status="rejected"
+              >
+                <span class="avatar avatar-lg">R</span>
+                <div class="flex-main">
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h2 class="request-row__name">Rana Samir</h2>
+                    <span class="badge-soft ms-0">Relocation</span>
+                    <span class="verified-note"
+                      ><i class="bi bi-patch-check-fill"></i>ID verified</span
+                    >
+                  </div>
+                  <div class="small text-muted">
+                    Room in a shared apartment — Al Jubeiha
+                  </div>
+                  <div class="small text-muted">
+                    Move-in 5 Oct · 12 months
+                  </div>
+                </div>
+                <div class="score-ring" style="--value: 54; --size: 54px">
+                  <div class="score-ring__inner">54<small>match</small></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="status status--danger">Declined</span>
+                  <a
+                    href="{{ route('owner.chat') }}"
+                    class="btn btn-ghost btn-square text-primary-bt"
+                    aria-label="Message Rana Samir"
+                    ><i class="bi bi-chat-dots"></i
+                  ></a>
+                </div>
+              </article>
+            </div>
+          </section>
+      </main>
+    </div>
+@endsection
