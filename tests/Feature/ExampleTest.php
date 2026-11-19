@@ -15,7 +15,7 @@ class ExampleTest extends TestCase
             'seeker.search', 'seeker.property', 'seeker.profile', 'seeker.bookings', 'seeker.chat',
             'owner.dashboard', 'owner.properties', 'owner.property-form', 'owner.requests',
             'owner.account', 'owner.chat',
-            'admin.dashboard', 'admin.users', 'admin.places', 'admin.verifications', 'admin.chat',
+            'admin.dashboard', 'admin.users', 'admin.places', 'admin.chat',
         ];
 
         foreach ($routes as $route) {

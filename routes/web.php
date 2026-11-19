@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\VerificationController;
 Route::get('/', [PageController::class, 'show'])->defaults('page', 'home.index')->name('home');
 Route::get('/index.html', [PageController::class, 'legacy'])->defaults('target', 'home');
 Route::get('/seeker/bookings', [PageController::class, 'show'])->defaults('page', 'seeker.bookings')->name('seeker.bookings');
@@ -21,10 +21,12 @@ Route::get('/owner/chat', [PageController::class, 'show'])->defaults('page', 'ow
 Route::get('/owner/chat.html', [PageController::class, 'legacy'])->defaults('target', 'owner.chat');
 Route::get('/owner/dashboard', [PageController::class, 'show'])->defaults('page', 'owner.dashboard')->name('owner.dashboard');
 Route::get('/owner/dashboard.html', [PageController::class, 'legacy'])->defaults('target', 'owner.dashboard');
-Route::get('/owner/properties', [PageController::class, 'show'])->defaults('page', 'owner.properties')->name('owner.properties');
+Route::get('/owner/properties', [VerificationController::class, 'ownerProperties'])->name('owner.properties');
 Route::get('/owner/properties.html', [PageController::class, 'legacy'])->defaults('target', 'owner.properties');
 Route::get('/owner/property-form', [PageController::class, 'show'])->defaults('page', 'owner.property-form')->name('owner.property-form');
 Route::get('/owner/property-form.html', [PageController::class, 'legacy'])->defaults('target', 'owner.property-form');
+Route::get('/owner/properties/{property}/edit', [VerificationController::class, 'ownerEdit'])
+    ->whereNumber('property')->name('owner.properties.edit');
 Route::get('/owner/requests', [PageController::class, 'show'])->defaults('page', 'owner.requests')->name('owner.requests');
 Route::get('/owner/requests.html', [PageController::class, 'legacy'])->defaults('target', 'owner.requests');
 Route::get('/admin/chat', [PageController::class, 'show'])->defaults('page', 'admin.chat')->name('admin.chat');
@@ -35,7 +37,6 @@ Route::get('/admin/places', [PageController::class, 'show'])->defaults('page', '
 Route::get('/admin/places.html', [PageController::class, 'legacy'])->defaults('target', 'admin.places');
 Route::get('/admin/users', [PageController::class, 'show'])->defaults('page', 'admin.users')->name('admin.users');
 Route::get('/admin/users.html', [PageController::class, 'legacy'])->defaults('target', 'admin.users');
-Route::get('/admin/verifications', [PageController::class, 'show'])->defaults('page', 'admin.verifications')->name('admin.verifications');
 Route::get('/admin/verifications.html', [PageController::class, 'legacy'])->defaults('target', 'admin.verifications');
 Route::get('/auth/forgot-password', [PageController::class, 'show'])->defaults('page', 'auth.forgot-password')->name('auth.forgot-password');
 Route::get('/auth/forgot-password.html', [PageController::class, 'legacy'])->defaults('target', 'auth.forgot-password');
@@ -50,3 +51,13 @@ Route::get('/auth/reset-password.html', [PageController::class, 'legacy'])->defa
 Route::get('/auth/verify-email', [PageController::class, 'show'])->defaults('page', 'auth.verify-email')->name('auth.verify-email');
 Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])->defaults('target', 'auth.verify-email');
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
+Route::resource('admin/verifications', VerificationController::class)
+    ->only(['index', 'update'])
+    ->names([
+        'index' => 'admin.verifications',
+        'update' => 'admin.verifications.update',
+    ]);
+Route::get('/admin/verifications/{verification}/document', [VerificationController::class, 'document'])
+    ->whereNumber('verification')->name('admin.verifications.document');
+Route::post('/properties/verification', [VerificationController::class, 'store'])
+    ->name('properties.verification.store');
