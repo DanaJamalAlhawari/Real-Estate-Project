@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\RealEstateUser;
 
 return [
 
@@ -64,10 +64,9 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => app\Models\RealEstateUser::class,
+            'model' => RealEstateUser::class,
         ],
 
-        // env('AUTH_MODEL', User::class),
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

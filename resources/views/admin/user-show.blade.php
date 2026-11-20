@@ -7,6 +7,7 @@
 <main class="container py-4">
     <a href="{{ route('admin.users') }}">&larr; Back to users</a>
     <h1 class="mt-3">User details</h1>
+    <x-logout-form buttonClass="btn btn-outline-danger btn-sm mb-3" />
 
     @php
         $profile = $user->role === 'agent'

@@ -34,8 +34,7 @@
           ></a>
         </div>
 
-        <!-- After submit: a 6-digit code is emailed (verify-email.html), then
-             seekers go to onboarding and owners to their dashboard -->
+        <!-- After submit, the user verifies the phone with an SMS code. -->
         <form
           class="auth-form"
           id="registerForm"
@@ -171,15 +170,15 @@
                 name="phone"
                 value="{{ old('phone') }}"
                 autocomplete="tel"
-                placeholder="07X XXX XXXX"
+                required
+                placeholder="+9627XXXXXXXX"
               />
             </div>
             <div class="col-12 mt-1">
               <small class="text-muted"
                 ><i class="bi bi-telephone"></i>
                 <span
-                  >Shown to the people you deal with on Makan so they can call
-                  you.</span
+                  >Enter the number in international format, for example +9627XXXXXXXX.</span
                 ></small
               >
             </div>

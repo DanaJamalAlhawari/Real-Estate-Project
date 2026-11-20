@@ -20,6 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
 
     $middleware->redirectGuestsTo('/auth/login');
 
+    $middleware->redirectUsersTo(function (Request $request) {
+        return match ($request->user()?->role) {
+            'tenant' => route('seeker.search'),
+            'agent' => route('owner.dashboard'),
+            'admin' => route('admin.dashboard'),
+            default => route('home'),
+        };
+    });
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

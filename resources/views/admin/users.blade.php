@@ -7,6 +7,7 @@
 <main class="container py-4">
     <h1>Users</h1>
     <p class="text-muted">Registered customers and agents.</p>
+    <x-logout-form buttonClass="btn btn-outline-danger btn-sm mb-3" />
 
     <form method="GET" action="{{ route('admin.users') }}" class="mb-3">
         <label for="q" class="form-label">Search by email</label>

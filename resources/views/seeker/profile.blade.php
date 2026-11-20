@@ -92,9 +92,7 @@
                 <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                  <a class="dropdown-item text-danger" href="{{ route('home') }}"
-                    >Log out</a
-                  >
+                  <x-logout-form />
                 </li>
               </ul>
             </div>

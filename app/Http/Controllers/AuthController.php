@@ -26,7 +26,12 @@ class AuthController extends Controller
             'role' => ['required', 'in:tenant,agent'],
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:real_estate_users,email'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => [
+                'required',
+                'regex:/^\+[1-9][0-9]{7,14}$/',
+                'unique:tenant_profiles,phone',
+                'unique:agent_profiles,phone',
+            ],
             'agency_name' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'terms' => ['accepted'],
@@ -43,19 +48,17 @@ class AuthController extends Controller
                 'role' => $data['role'],
             ]);
 
+            $profileData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $data['phone'],
+            ];
+
             if ($data['role'] === 'agent') {
-                $user->agentProfile()->create([
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'phone' => $data['phone'],
-                    'agency_name' => $data['agency_name'] ?? null,
-                ]);
+                $profileData['agency_name'] = $data['agency_name'] ?? null;
+                $user->agentProfile()->create($profileData);
             } else {
-                $user->tenantProfile()->create([
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'phone' => $data['phone'],
-                ]);
+                $user->tenantProfile()->create($profileData);
             }
 
             return $user;
@@ -74,15 +77,16 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            return $this->redirectByRole($request->user());
+        if (! Auth::attempt($credentials)) {
+            return back()
+                ->withErrors(['email' => 'Email or password are wrong'])
+                ->onlyInput('email');
         }
 
-        return back()
-            ->withErrors(['email' => 'Email or password are wrong'])
-            ->onlyInput('email');
+        $user = $request->user();
+        $request->session()->regenerate();
+
+        return $this->redirectByRole($user);
     }
 
     public function logout(Request $request)

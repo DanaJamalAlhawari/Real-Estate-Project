@@ -94,20 +94,7 @@
             </div>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="remember"
-                name="remember"
-                value="1"
-              />
-              <label
-                class="form-check-label small"
-                for="remember"
-              >Remember me</label>
-            </div>
+          <div class="text-end mb-4">
             <a href="{{ route('auth.forgot-password') }}" class="small">Forgot password?</a>
           </div>
 
@@ -115,28 +102,6 @@
             type="submit"
             class="btn btn-accent btn-lg w-100"
           >Log in</button>
-
-          <div class="divider-text">
-            <span>or</span>
-          </div>
-
-          <!-- Log in with Google / Apple -->
-          <div class="d-grid gap-2">
-            <button
-              type="button"
-              class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
-              data-provider="google"
-            >
-              <i class="bi bi-google"></i><span>Continue with Google</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
-              data-provider="apple"
-            >
-              <i class="bi bi-apple"></i><span>Continue with Apple</span>
-            </button>
-          </div>
 
           <p class="text-center small mt-4 mb-0">
             <span class="text-muted">Don't have an account?</span>
