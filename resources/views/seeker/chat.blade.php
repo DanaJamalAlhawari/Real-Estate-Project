@@ -70,6 +70,39 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
                 </div>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button
+                class="app-user app-user--avatar"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Account menu, Sara Khaled"
+              >
+                <span class="avatar">S</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
+                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <x-logout-form />
+                </li>
+              </ul>
+            </div>
+            <button
+              class="navbar-toggler border-0"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#appNav"
+              aria-controls="appNav"
+              aria-expanded="false"
+              aria-label="Menu"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
 
                 <!-- Page links + search, grouped in one capsule -->
                 <div class="collapse navbar-collapse" id="appNav">
