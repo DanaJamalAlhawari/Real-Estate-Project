@@ -174,21 +174,21 @@
           class="btn-check"
           name="status"
           id="rfAccepted"
-          value="accepted" />
+          value="confirmed" />
         <label class="chip-select py-2" for="rfAccepted">Accepted</label>
         <input
           type="radio"
           class="btn-check"
           name="status"
           id="rfRejected"
-          value="rejected" />
-        <label class="chip-select py-2" for="rfRejected">Declined</label>
+          value="cancelled" />
+        <label class="chip-select py-2" for="rfRejected">Rejected</label>
       </div>
 
       <!-- Request list -->
       <div class="d-flex flex-column gap-3" id="requestsList">
         @forelse ($bookings as $booking)
-        <!-- Request 1 -->
+        <!-- Request  -->
         <article
           class="panel request-row"
           data-request="{{ $booking->id }}"
@@ -198,9 +198,9 @@
           </span>
           <div class="flex-main">
             <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">Sara Khaled</h2>
-              <span class="badge-soft ms-0">Study</span>
-              <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
+              <h2 class="request-row__name">
+                {{ $booking->tenant->name ?? 'Unknown Customer' }}
+              </h2>
             </div>
             <div class="small text-muted">
               {{ $booking->property->title ?? 'Property unavailable' }}
@@ -210,173 +210,141 @@
               · {{ $booking->duration }} {{ $booking->duration_unit }}
             </div>
           </div>
-          <div class="score-ring" style="--value: 92; --size: 54px">
-            <div class="score-ring__inner">92<small>match</small></div>
-          </div>
           <div class="d-flex flex-wrap align-items-center gap-2">
+
+            @if ($booking->status === 'pending')
+
+            <!-- Accept Button -->
             <button
               type="button"
               class="btn btn-primary"
-              data-action="accept">
+              data-bs-toggle="modal"
+              data-bs-target="#acceptModal{{ $booking->id }}">
               Accept
             </button>
+
+            <!-- Reject Button -->
             <button
               type="button"
               class="btn btn-ghost"
-              data-action="reject">
-              Decline
+              data-bs-toggle="modal"
+              data-bs-target="#rejectModal{{ $booking->id }}">
+              Reject
             </button>
+
+            @elseif ($booking->status === 'confirmed')
+            <span class="status status--success">
+              Accepted
+            </span>
+            @elseif ($booking->status === 'cancelled')
+            <span class="status status--danger">
+              Rejected
+            </span>
+            @elseif ($booking->status === 'completed')
+            <span class="status status--success">
+              Completed
+            </span>
+            @endif
+
             <a
               href="{{ route('owner.chat') }}"
               class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message Sara Khaled"><i class="bi bi-chat-dots"></i></a>
+              aria-label="Message {{ $booking->tenant?->name ?? 'customer' }}"
+              title="Message {{ $booking->tenant?->name ?? 'customer' }}">
+              <i class="bi bi-chat-dots"></i>
+            </a>
+
           </div>
         </article>
 
-        <!-- Request 2 -->
-        <article
-          class="panel request-row"
-          data-request="2"
-          data-status="pending">
-          <span class="avatar avatar-lg">M</span>
-          <div class="flex-main">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">
-                {{ $booking->tenant->name ?? 'Unknown Customer' }}
-              </h2>
-              <span class="badge-soft ms-0">Work</span>
-              <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
-            </div>
-            <div class="small text-muted">
-              Room in a shared apartment — Al Jubeiha
-            </div>
-            <div class="small text-muted">
-              Move-in 15 Nov · 3 months
-            </div>
-          </div>
-          <div class="score-ring" style="--value: 81; --size: 54px">
-            <div class="score-ring__inner">81<small>match</small></div>
-          </div>
-          <div class="d-flex flex-wrap align-items-center gap-2">
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-action="accept">
-              Accept
-            </button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              data-action="reject">
-              Decline
-            </button>
-            <a
-              href="{{ route('owner.chat') }}"
-              class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message Mohammad Al Ali"><i class="bi bi-chat-dots"></i></a>
-          </div>
-        </article>
+        <!-- confirem Accept -->
+        <div class="modal fade"
+          id="acceptModal{{ $booking->id }}"
+          tabindex="-1"
+          aria-hidden="true">
 
-        <!-- Request 3 -->
-        <article
-          class="panel request-row"
-          data-request="3"
-          data-status="pending">
-          <span class="avatar avatar-lg">E</span>
-          <div class="flex-main">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">Emily Carter</h2>
-              <span class="badge-soft ms-0">Tourism</span>
-            </div>
-            <div class="small text-muted">
-              Studio — Al Jubeiha
-            </div>
-            <div class="small text-muted">Move-in 20 Oct · 1 month</div>
-          </div>
-          <div class="score-ring" style="--value: 77; --size: 54px">
-            <div class="score-ring__inner">77<small>match</small></div>
-          </div>
-          <div class="d-flex flex-wrap align-items-center gap-2">
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-action="accept">
-              Accept
-            </button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              data-action="reject">
-              Decline
-            </button>
-            <a
-              href="{{ route('owner.chat') }}"
-              class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message Emily Carter"><i class="bi bi-chat-dots"></i></a>
-          </div>
-        </article>
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-        <!-- Request 4 (accepted) -->
-        <article
-          class="panel request-row"
-          data-request="4"
-          data-status="accepted">
-          <span class="avatar avatar-lg">K</span>
-          <div class="flex-main">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">Khaled Yousef</h2>
-              <span class="badge-soft ms-0">Treatment</span>
-              <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
-            </div>
-            <div class="small text-muted">
-              Studio — Sweileh
-            </div>
-            <div class="small text-muted">
-              Move-in 10 Oct · 2 months
-            </div>
-          </div>
-          <div class="score-ring" style="--value: 70; --size: 54px">
-            <div class="score-ring__inner">70<small>match</small></div>
-          </div>
-          <div class="d-flex flex-wrap align-items-center gap-2">
-            <span class="status status--success">Accepted</span>
-            <a
-              href="{{ route('owner.chat') }}"
-              class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message Khaled Yousef"><i class="bi bi-chat-dots"></i></a>
-          </div>
-        </article>
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm Acceptance</h5>
+                <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal">
+                </button>
+              </div>
 
-        <!-- Request 5 (declined) -->
-        <article
-          class="panel request-row"
-          data-request="5"
-          data-status="rejected">
-          <span class="avatar avatar-lg">R</span>
-          <div class="flex-main">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">Rana Samir</h2>
-              <span class="badge-soft ms-0">Relocation</span>
-              <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
-            </div>
-            <div class="small text-muted">
-              Room in a shared apartment — Al Jubeiha
-            </div>
-            <div class="small text-muted">
-              Move-in 5 Oct · 12 months
+              <div class="modal-body">
+                Are you sure you want to accept the booking request from
+                <strong>{{ $booking->tenant?->name ?? 'this customer' }}</strong>?
+              </div>
+
+              <div class="modal-footer">
+                <button type="button"
+                  class="btn btn-ghost"
+                  data-bs-dismiss="modal">
+                  Cancel
+                </button>
+
+                <form action="{{ route('owner.requests.accept', $booking->id) }}"
+                  method="POST">
+                  @csrf
+                  @method('PATCH')
+
+                  <button type="submit" class="btn btn-primary">
+                    Yes, Accept
+                  </button>
+                </form>
+              </div>
+
             </div>
           </div>
-          <div class="score-ring" style="--value: 54; --size: 54px">
-            <div class="score-ring__inner">54<small>match</small></div>
+        </div>
+
+        <!-- confirem Reject -->
+        <div class="modal fade"
+          id="rejectModal{{ $booking->id }}"
+          tabindex="-1"
+          aria-hidden="true">
+
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm Rejection</h5>
+                <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal">
+                </button>
+              </div>
+
+              <div class="modal-body">
+                Are you sure you want to reject the booking request from
+                <strong>{{ $booking->tenant?->name ?? 'this customer' }}</strong>?
+              </div>
+
+              <div class="modal-footer">
+                <button type="button"
+                  class="btn btn-ghost"
+                  data-bs-dismiss="modal">
+                  Cancel
+                </button>
+
+                <form action="{{ route('owner.requests.reject', $booking->id) }}"
+                  method="POST">
+                  @csrf
+                  @method('PATCH')
+
+                  <button type="submit" class="btn btn-danger">
+                    Yes, Reject
+                  </button>
+                </form>
+              </div>
+
+            </div>
           </div>
-          <div class="d-flex flex-wrap align-items-center gap-2">
-            <span class="status status--danger">Declined</span>
-            <a
-              href="{{ route('owner.chat') }}"
-              class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message Rana Samir"><i class="bi bi-chat-dots"></i></a>
-          </div>
-        </article>
+        </div>
+
         @empty
         <div class="panel text-center p-4">
           <p class="text-muted mb-0">No booking requests found.</p>
@@ -386,4 +354,44 @@
     </section>
   </main>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const filters = document.querySelectorAll(
+      '#requestFilters input[name="status"]'
+    );
+
+    const bookings = document.querySelectorAll(
+      '#requestsList .request-row'
+    );
+
+    filters.forEach(function(filter) {
+
+      filter.addEventListener('change', function() {
+
+        const selectedStatus = this.value;
+
+        bookings.forEach(function(booking) {
+
+          const bookingStatus = booking.dataset.status;
+
+          if (
+            selectedStatus === 'all' ||
+            bookingStatus === selectedStatus
+          ) {
+            booking.style.display = '';
+          } else {
+            booking.style.display = 'none';
+          }
+
+        });
+
+      });
+
+    });
+
+  });
+</script>
+
 @endsection

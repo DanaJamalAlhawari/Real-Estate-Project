@@ -18,6 +18,35 @@ class BookingRequestController extends Controller
         return view('owner.requests', ['bookings' => $bookings]);
     }
 
+    public function accept(Booking $booking)
+    {
+        $booking = Booking::whereHas('property', function ($query) {
+            $query->where('agent_id', 1);
+        })->where('id', $booking->id)->firstOrFail();
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('owner.requests')->with('error', 'This booking cannot be accepted.');
+        }
+        $booking->status = 'confirmed';
+        $booking->save();
+        return redirect()->route('owner.requests')->with('success', 'Booking accepted successfully.');
+    }
+
+    public function reject(Booking $booking)
+    {
+        $booking = Booking::whereHas('property', function ($query) {
+            $query->where('agent_id', 1);
+        })->where('id', $booking->id)->firstOrFail();
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('owner.requests')->with('error', 'This booking cannot be rejected.');
+        }
+
+        $booking->status = 'cancelled';
+        $booking->save();
+        return redirect()->route('owner.requests')->with('success', 'Booking rejected successfully.');
+    }
+
     /**
      * Show the form for creating a new resource.
      */

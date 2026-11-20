@@ -183,6 +183,10 @@ Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])
 //Booking Request
 Route::get('/owner/requests',[BookingRequestController::class,'index'])
     ->name('owner.requests'); 
+Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])
+    ->name('owner.requests.accept'); 
+Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])
+    ->name('owner.requests.reject');       
 
 
 
