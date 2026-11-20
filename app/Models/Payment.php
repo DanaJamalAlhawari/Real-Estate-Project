@@ -4,12 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Payment extends Model
 {
     protected $table = 'payments';
 
-    protected $guarded = ['*'];
+    protected $fillable = [
+        'booking_id',
+        'tenant_id',
+        'amount',
+        'payment_method',
+        'transaction_id',
+        'status',
+        'paid_at',
+    ];
 
     protected function casts(): array
     {
@@ -35,5 +44,10 @@ class Payment extends Model
             RealEstateUser::class,
             'tenant_id'
         );
+    }
+
+    public function commission(): HasOne
+    {
+        return $this->hasOne(Commission::class);
     }
 }
