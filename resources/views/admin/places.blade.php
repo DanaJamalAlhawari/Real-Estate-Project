@@ -86,12 +86,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, System admin"
+            aria-label="Account menu, {{ auth()->user()->display_name }}"
           >
-            <span class="avatar">A</span>
+            <span class="avatar">{{ auth()->user()->display_initial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">System admin</h6></li>
+            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
             <li>
               <x-logout-form />
             </li>

@@ -34,7 +34,6 @@
           ></a>
         </div>
 
-        <!-- After submit, the user verifies the phone with an SMS code. -->
         <form
           class="auth-form"
           id="registerForm"
@@ -63,7 +62,7 @@
                 name="role"
                 id="roleTenant"
                 value="tenant"
-                checked
+                @checked(old('role', 'tenant') === 'tenant')
               />
               <label class="choice-card" for="roleTenant">
                 <span class="ci"><i class="bi bi-search-heart"></i></span>
@@ -80,6 +79,7 @@
                 name="role"
                 id="roleAgent"
                 value="agent"
+                @checked(old('role') === 'agent')
               />
               <label class="choice-card" for="roleAgent">
                 <span class="ci"><i class="bi bi-house-door"></i></span>
