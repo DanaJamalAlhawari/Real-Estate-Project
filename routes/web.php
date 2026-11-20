@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VerificationController;
@@ -31,7 +30,7 @@ Route::get('/owner/requests', [PageController::class, 'show'])->defaults('page',
 Route::get('/owner/requests.html', [PageController::class, 'legacy'])->defaults('target', 'owner.requests');
 Route::get('/admin/chat', [PageController::class, 'show'])->defaults('page', 'admin.chat')->name('admin.chat');
 Route::get('/admin/chat.html', [PageController::class, 'legacy'])->defaults('target', 'admin.chat');
-Route::get('/admin/dashboard', [PageController::class, 'show'])->defaults('page', 'admin.dashboard')->name('admin.dashboard');
+Route::get('/admin/dashboard', [PageController::class, 'adminDashboard'])->name('admin.dashboard');
 Route::get('/admin/dashboard.html', [PageController::class, 'legacy'])->defaults('target', 'admin.dashboard');
 Route::get('/admin/places', [PageController::class, 'show'])->defaults('page', 'admin.places')->name('admin.places');
 Route::get('/admin/places.html', [PageController::class, 'legacy'])->defaults('target', 'admin.places');
