@@ -102,12 +102,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, Abu Ahmad"
+            aria-label="Account menu, {{ auth()->user()->display_name }}"
           >
-            <span class="avatar">A</span>
+            <span class="avatar">{{ auth()->user()->display_initial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
             <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
@@ -173,7 +173,7 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Welcome back, Abu Ahmad</h1>
+            <h1>Welcome back, {{ auth()->user()->display_name }}</h1>
             <p>Here's how your properties did over the last 30 days.</p>
           </div>
           <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
