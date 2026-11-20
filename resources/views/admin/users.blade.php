@@ -1,350 +1,68 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Users")
+@section('title', 'Users')
 @section('roleStyle', 'admin')
-@section('bodyAttributes') data-role="admin" data-page="users"@endsection
 
 @section('content')
-    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
-    <input
-      type="checkbox"
-      class="sidebar-toggle"
-      id="sidebarToggle"
-      aria-label="Collapse the menu"
-    />
+<main class="container py-4">
+    <h1>Users</h1>
+    <p class="text-muted">Registered customers and agents.</p>
 
-    <!-- ===== Topbar ===== -->
-    <header class="app-topbar">
-      <button
-        class="icon-btn d-lg-none"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#appSidebar"
-        aria-label="Menu"
-      >
-        <i class="bi bi-list"></i>
-      </button>
-      <label
-        for="sidebarToggle"
-        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
-        aria-hidden="true"
-      >
-        <i class="bi bi-list"></i>
-      </label>
-      <a class="brand" href="{{ route('admin.dashboard') }}"
-        ><span class="brand-mark">M</span><span>Makan</span></a
-      >
-      <div class="ms-auto d-flex align-items-center gap-1">
-        <!-- Messages: icon with unread count -->
-        <a
-          class="icon-btn"
-          href="{{ route('admin.chat') }}"
-          aria-label="Messages, 2 unread"
-        >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
-        </a>
-        <div class="dropdown">
-          <button
-            class="icon-btn"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-label="Notifications"
-          >
-            <i class="bi bi-bell"></i><span class="dot"></span>
-          </button>
-          <div
-            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
-            style="width: 320px"
-          >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
-            <div class="py-1">
-              <a
-                class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                href="{{ route('admin.verifications') }}"
-              >
-                <span
-                  class="kpi-icon flex-shrink-0"
-                  style="width: 34px; height: 34px; font-size: 1rem"
-                  ><i class="bi bi-patch-check"></i
-                ></span>
-                <span class="small">
-                  <span class="d-block"
-                    >4 verification requests waiting for review</span
-                  >
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >Today</span
-                  >
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="dropdown">
-          <button
-            class="app-user app-user--avatar"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            aria-label="Account menu, System admin"
-          >
-            <span class="avatar">A</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">System admin</h6></li>
-            <li>
-              <a class="dropdown-item text-danger" href="{{ route('home') }}"
-                >Log out</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-    </header>
-
-    <div class="app-shell">
-      <!-- ===== Sidebar ===== -->
-      <aside
-        class="app-sidebar offcanvas-lg offcanvas-start"
-        tabindex="-1"
-        id="appSidebar"
-      >
-        <div class="offcanvas-header border-bottom">
-          <a class="brand" href="{{ route('home') }}"
-            ><span class="brand-mark">M</span><span>Makan</span></a
-          >
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="offcanvas"
-            data-bs-target="#appSidebar"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="offcanvas-body">
-          <div class="side-label">Admin</div>
-          <a class="side-link" href="{{ route('admin.dashboard') }}" title="Dashboard"
-            ><i class="bi bi-grid-1x2"></i
-            ><span class="flex-grow-1">Dashboard</span></a
-          >
-          <a class="side-link" href="{{ route('admin.verifications') }}" title="Verifications"
-            ><i class="bi bi-patch-check"></i
-            ><span class="flex-grow-1">Verifications</span
-            ><span class="side-badge">4</span></a
-          >
-          <a class="side-link active" href="{{ route('admin.users') }}" aria-current="page" title="Users"
-            ><i class="bi bi-people"></i
-            ><span class="flex-grow-1">Users</span></a
-          >
-          <a class="side-link" href="{{ route('admin.places') }}" title="Areas"
-            ><i class="bi bi-geo-alt"></i
-            ><span class="flex-grow-1">Areas</span></a
-          >
-          <a class="side-link" href="{{ route('admin.chat') }}" title="Messages"
-            ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span
-            ><span class="side-badge">2</span></a
-          >
-        </div>
-      </aside>
-
-      <!-- ===== Content ===== -->
-      <main class="app-main">
-        <!-- 1. Page header -->
-        <div class="page-head">
-          <div>
-            <h1>Users</h1>
-            <p>Manage home seeker and property owner accounts.</p>
-          </div>
-        </div>
-
-        <!-- 2. Count and search -->
-        <div
-          class="users-toolbar d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3"
-        >
-          <h2 class="h5 mb-0" id="usersTitle">
-            All users <span class="text-muted fw-normal">· 1,284</span>
-          </h2>
-          <form class="search-input" role="search" id="usersSearch" method="post" action="{{ route('demo.notice') }}" data-demo-form>
-              @csrf
-            <i class="bi bi-search"></i>
+    <form method="GET" action="{{ route('admin.users') }}" class="mb-3">
+        <label for="q" class="form-label">Search by email</label>
+        <div class="input-group">
             <input
-              type="search"
-              class="form-control"
-              id="usersQuery"
-              name="q"
-              placeholder="Search by name or email..."
-              aria-label="Search by name or email"
-            />
-          </form>
+                id="q"
+                name="q"
+                type="search"
+                class="form-control"
+                value="{{ request('q') }}"
+                placeholder="name@example.com"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    @if ($users->isEmpty())
+        <div class="alert alert-info">No customers or agents found.</div>
+    @else
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                        @php
+                            $profile = $user->role === 'agent'
+                                ? $user->agentProfile
+                                : $user->tenantProfile;
+                        @endphp
+                        <tr>
+                            <td>
+                                {{ trim(($profile->first_name ?? '') . ' ' . ($profile->last_name ?? '')) ?: 'Name not provided' }}
+                            </td>
+                            <td>{{ $user->email }}</td>
+                            <td>{{ $user->role === 'agent' ? 'Agent' : 'Customer' }}</td>
+                            <td>{{ $profile->phone ?? '—' }}</td>
+                            <td>{{ $user->created_at?->format('Y-m-d') ?? '—' }}</td>
+                            <td>
+                                <a href="{{ route('admin.users.show', $user->id) }}">Details</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
 
-        <!-- 3. Users table -->
-        <section aria-labelledby="usersTitle">
-          <div class="panel panel-table">
-            <div class="table-responsive">
-              <table class="table bt-table users-table">
-                <thead>
-                  <tr>
-                    <th scope="col">User</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">Joined</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="usersBody">
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">S</span
-                        ><span
-                          ><b>Sara Khaled</b
-                          ><small>sara@example.com</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Home seeker</td>
-                    <td class="text-muted">Oct 2</td>
-                    <td><span class="status status--success">Active</span></td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        data-action="suspend"
-                        aria-label="Suspend Sara Khaled"
-                      >
-                        Suspend
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">A</span
-                        ><span
-                          ><b>Abu Ahmad</b
-                          ><small>abuahmad@example.com</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Property owner</td>
-                    <td class="text-muted">Sep 12</td>
-                    <td><span class="status status--success">Active</span></td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        data-action="suspend"
-                        aria-label="Suspend Abu Ahmad"
-                      >
-                        Suspend
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">R</span
-                        ><span
-                          ><b>Al Riyada Real Estate Office</b
-                          ><small>info@riyada.jo</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Property owner</td>
-                    <td class="text-muted">Sep 3</td>
-                    <td><span class="status status--success">Active</span></td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        data-action="suspend"
-                        aria-label="Suspend Al Riyada Real Estate Office"
-                      >
-                        Suspend
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">F</span
-                        ><span
-                          ><b>Fadi Mansour</b
-                          ><small>fadi.m@example.com</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Property owner</td>
-                    <td class="text-muted">Aug 28</td>
-                    <td>
-                      <span class="status status--danger">Suspended</span>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        data-action="activate"
-                        aria-label="Reactivate Fadi Mansour"
-                      >
-                        Reactivate
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">M</span
-                        ><span
-                          ><b>Mohammad Al Ali</b
-                          ><small>m.ali@example.com</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Home seeker</td>
-                    <td class="text-muted">Aug 25</td>
-                    <td><span class="status status--success">Active</span></td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        data-action="suspend"
-                        aria-label="Suspend Mohammad Al Ali"
-                      >
-                        Suspend
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="cell-user">
-                        <span class="avatar">E</span
-                        ><span
-                          ><b>Emily Carter</b
-                          ><small>emily.c@example.com</small></span
-                        >
-                      </div>
-                    </td>
-                    <td>Home seeker</td>
-                    <td class="text-muted">Aug 20</td>
-                    <td><span class="status status--success">Active</span></td>
-                    <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        data-action="suspend"
-                        aria-label="Suspend Emily Carter"
-                      >
-                        Suspend
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+        {{ $users->withQueryString()->links() }}
+    @endif
+</main>
 @endsection
