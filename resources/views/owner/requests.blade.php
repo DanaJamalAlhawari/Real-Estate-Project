@@ -122,9 +122,9 @@
       <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"><i class="bi bi-house-door"></i><span class="flex-grow-1">My properties</span></a>
       <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"><i class="bi bi-plus-square"></i><span class="flex-grow-1">Add property</span></a>
       <a class="side-link active" href="{{ route('owner.requests') }}" aria-current="page" title="Booking requests"><i class="bi bi-inbox"></i><span class="flex-grow-1">Booking requests</span>
-        <<span class="side-badge">
+        <span class="side-badge">
           {{ $bookings->where('status', 'pending')->count() }}
-          </span>
+        </span>
       </a>
       <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span><span class="side-badge">1</span></a>
       <a class="side-link" href="{{ route('owner.account') }}" title="My account"><i class="bi bi-person-badge"></i><span class="flex-grow-1">My account</span></a>
@@ -166,7 +166,9 @@
           name="status"
           id="rfPending"
           value="pending" />
-        <label class="chip-select py-2" for="rfPending">Awaiting your reply (3)</label>
+        <label class="chip-select py-2" for="rfPending">
+          Awaiting your reply ({{ $bookings->where('status', 'pending')->count() }})
+        </label>
         <input
           type="radio"
           class="btn-check"
@@ -185,12 +187,15 @@
 
       <!-- Request list -->
       <div class="d-flex flex-column gap-3" id="requestsList">
+        @forelse ($bookings as $booking)
         <!-- Request 1 -->
         <article
           class="panel request-row"
-          data-request="1"
-          data-status="pending">
-          <span class="avatar avatar-lg">S</span>
+          data-request="{{ $booking->id }}"
+          data-status="{{ $booking->status }}">
+          <span class="avatar avatar-lg">
+            {{ strtoupper(substr($booking->tenant?->name ?? 'U', 0, 1)) }}
+          </span>
           <div class="flex-main">
             <div class="d-flex flex-wrap align-items-center gap-2">
               <h2 class="request-row__name">Sara Khaled</h2>
@@ -198,10 +203,11 @@
               <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
             </div>
             <div class="small text-muted">
-              Studio — Al Jubeiha
+              {{ $booking->property->title ?? 'Property unavailable' }}
             </div>
             <div class="small text-muted">
-              Move-in 1 Nov · 6 months
+              Move-in {{ $booking->start_date }}
+              · {{ $booking->duration }} {{ $booking->duration_unit }}
             </div>
           </div>
           <div class="score-ring" style="--value: 92; --size: 54px">
@@ -235,7 +241,9 @@
           <span class="avatar avatar-lg">M</span>
           <div class="flex-main">
             <div class="d-flex flex-wrap align-items-center gap-2">
-              <h2 class="request-row__name">Mohammad Al Ali</h2>
+              <h2 class="request-row__name">
+                {{ $booking->tenant->name ?? 'Unknown Customer' }}
+              </h2>
               <span class="badge-soft ms-0">Work</span>
               <span class="verified-note"><i class="bi bi-patch-check-fill"></i>ID verified</span>
             </div>
@@ -369,6 +377,11 @@
               aria-label="Message Rana Samir"><i class="bi bi-chat-dots"></i></a>
           </div>
         </article>
+        @empty
+        <div class="panel text-center p-4">
+          <p class="text-muted mb-0">No booking requests found.</p>
+        </div>
+        @endforelse
       </div>
     </section>
   </main>

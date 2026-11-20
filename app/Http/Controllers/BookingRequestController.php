@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Owner;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
-use Illuminate\Support\Facades\DB;
 
 class BookingRequestController extends Controller
 {
@@ -14,10 +12,10 @@ class BookingRequestController extends Controller
      */
     public function index()
     {
-        $bookings=Booking::whereHas('property',function($query){
+        $bookings = Booking::whereHas('property', function ($query) {
             $query->where('agent_id', 1);
-        })->with('property')->get();
-        return view('owner.requests', ['bookings'=>$bookings]);
+        })->with('property', 'tenant')->get();
+        return view('owner.requests', ['bookings' => $bookings]);
     }
 
     /**

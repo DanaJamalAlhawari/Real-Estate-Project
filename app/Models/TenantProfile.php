@@ -20,7 +20,6 @@ class TenantProfile extends Model
     protected function casts(): array
     {
         return [
-            'is_phone_verified' => 'boolean',
         ];
     }
 
