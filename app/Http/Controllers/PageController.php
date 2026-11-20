@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Commission;
 use App\Models\DemoHome;
+use App\Models\Message;
 use App\Models\Property;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,10 @@ final class PageController extends Controller
 {
     public function show(string $page): View
     {
+        if ($page === 'owner.dashboard') {
+            return $this->ownerDashboard();
+        }
+
         $homes = in_array($page, ['home.index', 'seeker.search', 'seeker.property'], true)
             ? DemoHome::all()
             : [];
@@ -27,6 +32,52 @@ final class PageController extends Controller
         }
 
         return view($page, $data);
+    }
+
+    private function ownerDashboard(): View
+    {
+        $agent = request()->user();
+        $data = [
+            'agentName' => null,
+            'verificationStatus' => null,
+            'totalProperties' => 0,
+            'activeProperties' => 0,
+            'recentBookingCount' => 0,
+            'pendingBookingCount' => 0,
+            'pendingBookings' => collect(),
+            'unreadMessageCount' => 0,
+            'propertyPreview' => collect(),
+            'latestVerifiedProperty' => null,
+        ];
+
+        if (!$agent instanceof RealEstateUser || $agent->role !== 'agent') {
+            return view('owner.dashboard', $data);
+        }
+
+        $profile = $agent->agentProfile;
+        $name = trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? ''));
+        $properties = $agent->properties();
+        $bookings = Booking::whereHas('property', fn ($query) => $query->where('agent_id', $agent->id));
+        $pendingBookings = (clone $bookings)->where('status', 'pending');
+
+        return view('owner.dashboard', [
+            'agentName' => $name ?: $agent->email,
+            'verificationStatus' => $profile?->verification_status,
+            'totalProperties' => (clone $properties)->count(),
+            'activeProperties' => (clone $properties)->whereIn('status', ['available', 'partially_rented'])->count(),
+            'recentBookingCount' => $bookings->where('created_at', '>=', now()->subDays(30))->count(),
+            'pendingBookingCount' => (clone $pendingBookings)->count(),
+            'pendingBookings' => $pendingBookings->with(['property', 'tenant.tenantProfile'])
+                ->latest()->limit(3)->get(),
+            'unreadMessageCount' => Message::where('is_read', false)
+                ->whereHas('conversation', fn ($query) => $query
+                    ->where('agent_id', $agent->id)
+                    ->whereColumn('conversations.tenant_id', 'messages.sender_id'))
+                ->count(),
+            'propertyPreview' => (clone $properties)->latest()->limit(4)->get(['id', 'title']),
+            'latestVerifiedProperty' => $properties->where('verification_status', 'verified')
+                ->whereNotNull('verified_at')->latest('verified_at')->first(['title', 'verified_at']),
+        ]);
     }
 
     public function legacy(Request $request, string $target): RedirectResponse
