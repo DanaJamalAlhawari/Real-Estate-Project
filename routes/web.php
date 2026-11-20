@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\http\Controllers\FavoriteController;
+
 
 Route::get('/', [PageController::class, 'show'])->defaults('page', 'home.index')->name('home');
 Route::get('/index.html', [PageController::class, 'legacy'])->defaults('target', 'home');
@@ -50,3 +52,18 @@ Route::get('/auth/reset-password.html', [PageController::class, 'legacy'])->defa
 Route::get('/auth/verify-email', [PageController::class, 'show'])->defaults('page', 'auth.verify-email')->name('auth.verify-email');
 Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])->defaults('target', 'auth.verify-email');
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
+Route::get('/seeker/favorites', [FavoriteController::class, 'index'])->middleware('auth')->name('seeker.favorites');
+Route::post('/seeker/favorites/{property}', [FavoriteController::class, 'store'])
+->middleware('auth')->name('seeker.favorites.store');
+Route::delete('/seeker/favorites/{property}', [FavoriteController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('seeker.favorites.destroy');
+
+    /// i have to remove it when i merrger all the work
+    if (app()->environment('local')) {
+    Route::get('/preview/favorites', function () {
+        return view('seeker.favorites', [
+            'favorites' => collect(),
+        ]);
+    });
+}

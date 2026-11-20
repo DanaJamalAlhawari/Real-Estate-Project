@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\User;
-
+use App\Models\RealEstateUser;
 return [
 
     /*
@@ -64,7 +63,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => env('AUTH_MODEL', RealEstateUser::class),
         ],
 
         // 'users' => [
