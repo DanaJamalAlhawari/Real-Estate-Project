@@ -42,26 +42,30 @@
         <form
           class="auth-form"
           id="loginForm"
-         method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('seeker.search') }}">
-              @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+          method="POST"
+          action="{{ route('auth.login.store') }}">
+          @csrf
           <h1>Welcome back</h1>
           <p class="text-muted mb-4">Log in to pick up where you left off.</p>
 
           <div class="mb-3">
-            <label class="form-label" for="login">Email or phone number</label>
+            <label class="form-label" for="email">Email address</label>
             <div class="input-icon">
               <i class="bi bi-person"></i>
               <input
-                type="text"
                 class="form-control"
-                id="login"
-                name="login"
+                id="email"
+                name="email"
+                type="email"
+                value="{{ old('email') }}"
                 autocomplete="username"
                 required
-                placeholder="name@example.com or 07X XXX XXXX"
+                placeholder="name@example.com"
               />
             </div>
+            @error('email')
+              <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
           </div>
 
           <div class="mb-2">
@@ -98,7 +102,6 @@
                 id="remember"
                 name="remember"
                 value="1"
-                checked
               />
               <label
                 class="form-check-label small"

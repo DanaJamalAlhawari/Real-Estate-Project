@@ -39,9 +39,18 @@
         <form
           class="auth-form"
           id="registerForm"
-         method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('auth.verify-email') }}">
-              @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+          method="POST"
+          action="{{ route('auth.register.store') }}">
+          @csrf
+          @if ($errors->any())
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
           <h1>Create your account</h1>
           <p class="text-muted mb-4">It takes a minute.</p>
 
@@ -53,11 +62,11 @@
                 type="radio"
                 class="btn-check"
                 name="role"
-                id="roleSeeker"
-                value="seeker"
+                id="roleTenant"
+                value="tenant"
                 checked
               />
-              <label class="choice-card" for="roleSeeker">
+              <label class="choice-card" for="roleTenant">
                 <span class="ci"><i class="bi bi-search-heart"></i></span>
                 <span
                   ><b>Looking for a home</b
@@ -70,10 +79,10 @@
                 type="radio"
                 class="btn-check"
                 name="role"
-                id="roleOwner"
-                value="owner"
+                id="roleAgent"
+                value="agent"
               />
-              <label class="choice-card" for="roleOwner">
+              <label class="choice-card" for="roleAgent">
                 <span class="ci"><i class="bi bi-house-door"></i></span>
                 <span
                   ><b>A property owner</b
@@ -133,6 +142,7 @@
               class="form-control"
               id="name"
               name="full_name"
+                value="{{ old('full_name') }}"
               autocomplete="name"
               required
               placeholder="e.g. Sara Khaled"
@@ -146,6 +156,7 @@
                 class="form-control"
                 id="email"
                 name="email"
+                value="{{ old('email') }}"
                 autocomplete="email"
                 required
                 placeholder="name@example.com"
@@ -158,6 +169,7 @@
                 class="form-control"
                 id="phone"
                 name="phone"
+                value="{{ old('phone') }}"
                 autocomplete="tel"
                 placeholder="07X XXX XXXX"
               />
@@ -194,7 +206,7 @@
                 type="password"
                 class="form-control"
                 id="confirmPassword"
-                name="confirm_password"
+                name="password_confirmation"
                 autocomplete="new-password"
                 required
                 minlength="8"
