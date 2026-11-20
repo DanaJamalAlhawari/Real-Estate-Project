@@ -1,302 +1,252 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Messages")
+@section('title', 'Makan — Messages')
 @section('roleStyle', 'seeker')
 @section('bodyAttributes') data-role="seeker" data-page="chat"@endsection
 
 @section('content')
     <!-- ===== Navbar ===== -->
     <header class="site-header app-nav">
-      <nav class="navbar navbar-expand-lg" aria-label="Main">
-        <div class="container">
-          <a class="brand" href="{{ route('seeker.search') }}"
-            ><span class="brand-mark">M</span><span>Makan</span></a
-          >
+        <nav class="navbar navbar-expand-lg" aria-label="Main">
+            <div class="container">
+                <a class="brand" href="{{ route('seeker.search') }}"><span class="brand-mark">M</span><span>Makan</span></a>
 
-          <!-- Messages, notifications + user menu (stay visible on phones) -->
-          <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
-            <!-- Messages: icon with unread count -->
-            <a
-              class="icon-btn is-active"
-              href="{{ route('seeker.chat') }}"
-              aria-label="Messages, 2 unread"
-              aria-current="page"
-            >
-              <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
-            </a>
-            <div class="dropdown">
-              <button
-                class="icon-btn"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-label="Notifications"
-              >
-                <i class="bi bi-bell"></i><span class="dot"></span>
-              </button>
-              <div
-                class="dropdown-menu dropdown-menu-end shadow-sm p-0"
-                style="width: 320px"
-              >
-                <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
-                <div class="py-1">
-                  <a
-                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                    href="{{ route('seeker.property') }}"
-                  >
-                    <span
-                      class="kpi-icon flex-shrink-0"
-                      style="width: 34px; height: 34px; font-size: 1rem"
-                      ><i class="bi bi-stars"></i
-                    ></span>
-                    <span class="small">
-                      <span class="d-block"
-                        >A new home just listed in Al Jubeiha with a 92%
-                        match</span
-                      >
-                      <span class="text-muted" style="font-size: 0.72rem"
-                        >10 minutes ago</span
-                      >
-                    </span>
-                  </a>
-                  <a
-                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                    href="{{ route('seeker.bookings') }}"
-                  >
-                    <span
-                      class="kpi-icon flex-shrink-0"
-                      style="width: 34px; height: 34px; font-size: 1rem"
-                      ><i class="bi bi-check2-circle"></i
-                    ></span>
-                    <span class="small">
-                      <span class="d-block"
-                        >Abu Ahmad accepted your booking</span
-                      >
-                      <span class="text-muted" style="font-size: 0.72rem"
-                        >1 hour ago</span
-                      >
-                    </span>
-                  </a>
+                <!-- Messages, notifications + user menu (stay visible on phones) -->
+                <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
+                    <!-- Messages: icon with unread count -->
+                    <a class="icon-btn is-active" href="{{ route('seeker.chat') }}" aria-label="Messages, 2 unread"
+                        aria-current="page">
+                        <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
+                    </a>
+                    <div class="dropdown">
+                        <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i><span class="dot"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-sm p-0" style="width: 320px">
+                            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+                            <div class="py-1">
+                                <a class="dropdown-item d-flex gap-2 py-2 text-wrap" href="{{ route('seeker.property') }}">
+                                    <span class="kpi-icon flex-shrink-0"
+                                        style="width: 34px; height: 34px; font-size: 1rem"><i
+                                            class="bi bi-stars"></i></span>
+                                    <span class="small">
+                                        <span class="d-block">A new home just listed in Al Jubeiha with a 92%
+                                            match</span>
+                                        <span class="text-muted" style="font-size: 0.72rem">10 minutes ago</span>
+                                    </span>
+                                </a>
+                                <a class="dropdown-item d-flex gap-2 py-2 text-wrap" href="{{ route('seeker.bookings') }}">
+                                    <span class="kpi-icon flex-shrink-0"
+                                        style="width: 34px; height: 34px; font-size: 1rem"><i
+                                            class="bi bi-check2-circle"></i></span>
+                                    <span class="small">
+                                        <span class="d-block">Abu Ahmad accepted your booking</span>
+                                        <span class="text-muted" style="font-size: 0.72rem">1 hour ago</span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="app-user app-user--avatar" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" aria-label="Account menu, Sara Khaled">
+                            <span class="avatar">S</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <h6 class="dropdown-header">Sara Khaled</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider" />
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ route('home') }}">Log out</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#appNav" aria-controls="appNav" aria-expanded="false" aria-label="Menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
                 </div>
-              </div>
-            </div>
-            <div class="dropdown">
-              <button
-                class="app-user app-user--avatar"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                aria-label="Account menu, Sara Khaled"
-              >
-                <span class="avatar">S</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
-                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="{{ route('home') }}"
-                    >Log out</a
-                  >
-                </li>
-              </ul>
-            </div>
-            <button
-              class="navbar-toggler border-0"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#appNav"
-              aria-controls="appNav"
-              aria-expanded="false"
-              aria-label="Menu"
-            >
-              <span class="navbar-toggler-icon"></span>
-            </button>
-          </div>
 
-          <!-- Page links + search, grouped in one capsule -->
-          <div class="collapse navbar-collapse" id="appNav">
-            <div class="nav-group">
-              <ul class="navbar-nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ route('seeker.search') }}"
-                    ><i class="bi bi-stars"></i><span>Discover</span></a
-                  >
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ route('seeker.bookings') }}"
-                    ><i class="bi bi-calendar-check"></i><span>My bookings</span
-                    ><span class="side-badge">1</span></a
-                  >
-                </li>
-              </ul>
-              <span class="nav-group-divider" aria-hidden="true"></span>
-              <!-- Search: plain GET form, opens the Discover page -->
-              <form
-                class="nav-search"
-                action="{{ route('seeker.search') }}"
-                method="get"
-                role="search"
-              >
-                <i class="bi bi-search" aria-hidden="true"></i>
-                <input
-                  type="search"
-                  class="form-control"
-                  name="q"
-                  placeholder="Search by area..."
-                  aria-label="Search homes by neighborhood"
-                />
-              </form>
+                <!-- Page links + search, grouped in one capsule -->
+                <div class="collapse navbar-collapse" id="appNav">
+                    <div class="nav-group">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('seeker.search') }}"><i
+                                        class="bi bi-stars"></i><span>Discover</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('seeker.bookings') }}"><i
+                                        class="bi bi-calendar-check"></i><span>My bookings</span><span
+                                        class="side-badge">1</span></a>
+                            </li>
+                        </ul>
+                        <span class="nav-group-divider" aria-hidden="true"></span>
+                        <!-- Search: plain GET form, opens the Discover page -->
+                        <form class="nav-search" action="{{ route('seeker.search') }}" method="get" role="search">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            <input type="search" class="form-control" name="q" placeholder="Search by area..."
+                                aria-label="Search homes by neighborhood" />
+                        </form>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </nav>
+        </nav>
     </header>
 
     <!-- ===== Content ===== -->
     <main class="app-page container">
         <!-- 1. Page header -->
         <div class="page-head mb-3">
-          <h1>Messages</h1>
+            <h1>Messages</h1>
         </div>
 
         <div class="chat">
-          <!-- 2. Conversation list -->
-          <div class="chat-list" aria-label="Conversations">
-            <form class="chat-list-head" role="search" id="chatSearch" method="post" action="{{ route('demo.notice') }}" data-demo-form>
-              @csrf
-              <div class="search-input">
-                <i class="bi bi-search"></i>
-                <input
-                  type="search"
-                  class="form-control"
-                  name="q"
-                  placeholder="Search conversations..."
-                  aria-label="Search conversations"
-                />
-              </div>
-            </form>
-            <div id="chatList">
-              <a href="{{ route('seeker.chat') }}" class="chat-item active" aria-current="true">
-                <span class="avatar flex-shrink-0">A</span>
-                <span class="meta">
-                  <b><span>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></span><time>10:24 AM</time></b>
-                  <span class="chat-prop">Studio — Al Jubeiha</span>
-                  <span>Great, see you Thursday.</span>
-                </span>
-                <span class="unread" aria-label="2 new messages">2</span>
-              </a>
-              <a href="{{ route('seeker.chat') }}" class="chat-item">
-                <span class="avatar flex-shrink-0">R</span>
-                <span class="meta">
-                  <b><span>Al Riyada Real Estate Office <span class="role-tag role-tag--owner">Owner</span></span><time>Yesterday</time></b>
-                  <span class="chat-prop">2-bedroom apartment — Tla Al Ali</span>
-                  <span>Bills aren't included, but they average 35 JOD.</span>
-                </span>
-              </a>
-              <a href="{{ route('seeker.chat') }}" class="chat-item">
-                <span class="avatar flex-shrink-0">U</span>
-                <span class="meta">
-                  <b><span>Umm Yazan <span class="role-tag role-tag--owner">Owner</span></span><time>Monday</time></b>
-                  <span class="chat-prop">1-bedroom apartment — Shmeisani</span>
-                  <span>Welcome! The apartment is ready now.</span>
-                </span>
-              </a>
-              <a href="{{ route('seeker.chat') }}" class="chat-item">
-                <span class="avatar avatar--support flex-shrink-0"
-                  ><i class="bi bi-headset"></i
-                ></span>
-                <span class="meta">
-                  <b
-                    ><span>Makan Support <span class="role-tag role-tag--admin">Admin</span></span
-                    ><time>Sunday</time></b
-                  >
-                  <span class="chat-prop">Booking BK-1042</span>
-                  <span>You pay the rent directly to the owner — no fees on Makan.</span>
-                </span>
-              </a>
-            </div>
-          </div>
-
-          <!-- 3. Open conversation -->
-          <section class="chat-thread" aria-label="Conversation with Abu Ahmad">
-            <div class="chat-head">
-              <span class="avatar">A</span>
-              <div class="flex-grow-1 lh-sm">
-                <b>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></b>
-                <small class="is-online">Online now</small>
-              </div>
-              <div class="dropdown">
-                <button
-                  type="button"
-                  class="btn btn-link text-muted px-2"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  aria-label="Options"
-                >
-                  <i class="bi bi-three-dots-vertical fs-5"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                  <li>
-                    <a class="dropdown-item" href="{{ route('seeker.property') }}"
-                      ><i class="bi bi-house-door me-2"></i>View property</a
-                    >
-                  </li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li>
-                    <button type="button" class="dropdown-item text-danger">
-                      <i class="bi bi-flag me-2"></i>Report conversation
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            <!-- 2. Conversation list -->
+            <div class="chat-list" aria-label="Conversations">
+                <form class="chat-list-head" role="search" id="chatSearch" method="post"
+                    action="{{ route('demo.notice') }}" data-demo-form>
+                    @csrf
+                    <div class="search-input">
+                        <i class="bi bi-search"></i>
+                        <input type="search" class="form-control" name="q" placeholder="Search conversations..."
+                            aria-label="Search conversations" />
+                    </div>
+                </form>
+                <div id="chatList">
+                    <a href="{{ route('seeker.chat') }}" class="chat-item active" aria-current="true">
+                        <span class="avatar flex-shrink-0">A</span>
+                        <span class="meta">
+                            <b><span>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></span><time>10:24
+                                    AM</time></b>
+                            <span class="chat-prop">Studio — Al Jubeiha</span>
+                            <span>Great, see you Thursday.</span>
+                        </span>
+                        <span class="unread" aria-label="2 new messages">2</span>
+                    </a>
+                    <a href="{{ route('seeker.chat') }}" class="chat-item">
+                        <span class="avatar flex-shrink-0">R</span>
+                        <span class="meta">
+                            <b><span>Al Riyada Real Estate Office <span
+                                        class="role-tag role-tag--owner">Owner</span></span><time>Yesterday</time></b>
+                            <span class="chat-prop">2-bedroom apartment — Tla Al Ali</span>
+                            <span>Bills aren't included, but they average 35 JOD.</span>
+                        </span>
+                    </a>
+                    <a href="{{ route('seeker.chat') }}" class="chat-item">
+                        <span class="avatar flex-shrink-0">U</span>
+                        <span class="meta">
+                            <b><span>Umm Yazan <span
+                                        class="role-tag role-tag--owner">Owner</span></span><time>Monday</time></b>
+                            <span class="chat-prop">1-bedroom apartment — Shmeisani</span>
+                            <span>Welcome! The apartment is ready now.</span>
+                        </span>
+                    </a>
+                    <a href="{{ route('seeker.chat') }}" class="chat-item">
+                        <span class="avatar avatar--support flex-shrink-0"><i class="bi bi-headset"></i></span>
+                        <span class="meta">
+                            <b><span>Makan Support <span
+                                        class="role-tag role-tag--admin">Admin</span></span><time>Sunday</time></b>
+                            <span class="chat-prop">Booking BK-1042</span>
+                            <span>You pay the rent directly to the owner — no fees on Makan.</span>
+                        </span>
+                    </a>
+                </div>
             </div>
 
-            <!-- Property being discussed -->
-            <div class="chat-context">
-              <span class="t ph ph-1" aria-hidden="true"></span>
-              <span class="flex-grow-1 text-muted"
-                >About <b class="text-body">Studio — Al Jubeiha</b> · 265
-                JOD</span
-              >
-              <a href="{{ route('seeker.property') }}" class="fw-semibold">View property</a>
-            </div>
+            <!-- 3. Open conversation -->
+            <section class="chat-thread" aria-label="Conversation with Abu Ahmad">
+                <div class="chat-head">
+                    <span class="avatar">A</span>
+                    <div class="flex-grow-1 lh-sm">
+                        <b>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></b>
+                        <small class="is-online">Online now</small>
+                    </div>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-link text-muted px-2" data-bs-toggle="dropdown"
+                            aria-expanded="false" aria-label="Options">
+                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('seeker.property') }}"><i
+                                        class="bi bi-house-door me-2"></i>View property</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider" />
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item text-danger">
+                                    <i class="bi bi-flag me-2"></i>Report conversation
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-            <!-- Messages -->
-            <div class="chat-body" id="chatMessages" aria-live="polite">
-              <span class="day-sep">Today</span>
-              <div class="msg me">
-                Hi, is the studio still available from the start of the
-                month?<time>09:58</time>
-              </div>
-              <div class="msg">
-                Hi Sara, yes it is. It also has a small study desk.<time>10:05</time>
-              </div>
-              <div class="msg me">
-                Sounds good, I sent a booking request for Nov 1.<time>10:20</time>
-              </div>
-              <div class="msg">Great, see you Thursday.<time>10:24</time></div>
-            </div>
+                <!-- Property being discussed -->
+                <div class="chat-context">
+                    <span class="t ph ph-1" aria-hidden="true"></span>
+                    <span class="flex-grow-1 text-muted">About <b class="text-body">Studio — Al Jubeiha</b> · 265
+                        JOD</span>
+                    <a href="{{ route('seeker.property') }}" class="fw-semibold">View property</a>
+                </div>
 
-            <!-- Write a message -->
-            <form class="chat-input" id="chatForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
-              @csrf
-              <input
-                type="text"
-                class="form-control"
-                name="message"
-                aria-label="Your message"
-                placeholder="Type your message..."
-                autocomplete="off"
-                required
-              />
-              <button
-                type="submit"
-                class="btn btn-primary d-inline-flex align-items-center gap-2"
-              >
-                <i class="bi bi-send"></i>Send
-              </button>
-            </form>
-          </section>
+                <!-- Messages -->
+                <div class="chat-body" id="chatMessages" aria-live="polite">
+                    @isset($conversation)
+                        @foreach ($messages as $message)
+                            <div class="msg {{ (int) $message->sender_id === $currentUserId ? 'me' : '' }}"
+                                data-message-id="{{ $message->id }}">
+                                {{ $message->body }}
+                            </div>
+                        @endforeach
+                    @else
+                        <span class="day-sep">Today</span>
+
+                        <div class="msg me">
+                            Hi, is the studio still available from the start of the month?
+                            <time>09:58</time>
+                        </div>
+
+                        <div class="msg">
+                            Hi Sara, yes it is. It also has a small study desk.
+                            <time>10:05</time>
+                        </div>
+
+                        <div class="msg me">
+                            Sounds good, I sent a booking request for Nov 1.
+                            <time>10:20</time>
+                        </div>
+
+                        <div class="msg">
+                            Great, see you Thursday.
+                            <time>10:24</time>
+                        </div>
+                    @endisset
+                </div>
+
+                <!-- Write a message -->
+                @isset($conversation)
+                    <form class="chat-input" id="chatForm" method="post"
+                        action="{{ route('conversations.messages.store', ['conversation' => $conversation]) }}" data-chat-form
+                        data-conversation-id="{{ $conversation->id }}" data-current-user-id="{{ $currentUserId }}">
+                    @else
+                        <form class="chat-input" id="chatForm" method="post" action="{{ route('demo.notice') }}"
+                            data-demo-form>
+                        @endisset
+                        @csrf
+                        <input type="text" class="form-control" name="body" aria-label="Your message"
+                            placeholder="Type your message..." autocomplete="off" required />
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-send"></i>Send
+                        </button>
+                    </form>
+            </section>
         </div>
-      </main>
+    </main>
 @endsection

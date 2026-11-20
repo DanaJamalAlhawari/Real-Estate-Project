@@ -51,4 +51,12 @@ class Conversation extends Model
             'conversation_id'
         );
     }
+
+    public function hasParticipant(RealEstateUser $user): bool
+{
+    return in_array((int) $user->getKey(), [
+        (int) $this->tenant_id,
+        (int) $this->agent_id,
+    ], true);
+}
 }

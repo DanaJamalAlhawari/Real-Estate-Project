@@ -3,6 +3,9 @@
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ConversationMessageController;
+
+
 Route::get('/', [PageController::class, 'show'])->defaults('page', 'home.index')->name('home');
 Route::get('/index.html', [PageController::class, 'legacy'])->defaults('target', 'home');
 Route::get('/seeker/bookings', [PageController::class, 'show'])->defaults('page', 'seeker.bookings')->name('seeker.bookings');
@@ -50,3 +53,21 @@ Route::get('/auth/reset-password.html', [PageController::class, 'legacy'])->defa
 Route::get('/auth/verify-email', [PageController::class, 'show'])->defaults('page', 'auth.verify-email')->name('auth.verify-email');
 Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])->defaults('target', 'auth.verify-email');
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
+
+
+
+
+
+
+// ---------------------------------------------------------------
+
+
+
+
+Route::post('/conversations/{conversation}/messages', [ConversationMessageController::class, 'store'])
+    ->middleware('auth')
+    ->name('conversations.messages.store');
+
+    Route::get('/conversations/{conversation}', [ConversationMessageController::class, 'show'])
+    ->middleware('auth')
+    ->name('conversations.show');
