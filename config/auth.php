@@ -3,6 +3,7 @@
 use App\Models\RealEstateUser;
 return [
 
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
@@ -63,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', RealEstateUser::class),
+            'model' => RealEstateUser::class,
         ],
 
         // 'users' => [

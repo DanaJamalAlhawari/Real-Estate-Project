@@ -43,12 +43,17 @@
             <div
               class="d-flex flex-column flex-xl-row align-items-xl-center gap-2 py-3 py-xl-0"
             >
-              <a class="btn btn-outline-primary" href="{{ route('auth.login') }}"
-                >Log in</a
-              >
-              <a class="btn btn-accent" href="{{ route('auth.register') }}"
-                >Start matching</a
-              >
+              @auth
+                <a class="btn btn-outline-primary" href="{{ match (auth()->user()->role) {
+                    'tenant' => route('seeker.search'),
+                    'agent' => route('owner.dashboard'),
+                    'admin' => route('admin.dashboard'),
+                    default => route('home'),
+                } }}">Go to my dashboard</a>
+              @else
+                <a class="btn btn-outline-primary" href="{{ route('auth.login') }}">Log in</a>
+                <a class="btn btn-accent" href="{{ route('auth.register') }}">Start matching</a>
+              @endauth
             </div>
           </div>
         </div>

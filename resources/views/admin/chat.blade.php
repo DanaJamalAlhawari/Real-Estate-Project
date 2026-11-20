@@ -94,9 +94,7 @@
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             <li><h6 class="dropdown-header">System admin</h6></li>
             <li>
-              <a class="dropdown-item text-danger" href="{{ route('home') }}"
-                >Log out</a
-              >
+              <x-logout-form />
             </li>
           </ul>
         </div>
