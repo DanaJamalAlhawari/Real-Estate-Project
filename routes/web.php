@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PropertyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Owner\BookingRequestController;
+
 
 Route::get('/', [PageController::class, 'show'])->defaults('page', 'home.index')->name('home');
 Route::get('/index.html', [PageController::class, 'legacy'])->defaults('target', 'home');
@@ -21,12 +24,38 @@ Route::get('/owner/chat', [PageController::class, 'show'])->defaults('page', 'ow
 Route::get('/owner/chat.html', [PageController::class, 'legacy'])->defaults('target', 'owner.chat');
 Route::get('/owner/dashboard', [PageController::class, 'show'])->defaults('page', 'owner.dashboard')->name('owner.dashboard');
 Route::get('/owner/dashboard.html', [PageController::class, 'legacy'])->defaults('target', 'owner.dashboard');
-Route::get('/owner/properties', [PageController::class, 'show'])->defaults('page', 'owner.properties')->name('owner.properties');
+
+// properties 
+Route::get('/owner/properties', [PropertyController::class, 'index'])
+    ->name('owner.properties');
+Route::patch('/owner/properties/{id}/visibility', [PropertyController::class, 'toggleVisibility'])
+    ->name('properties.visibility');
+Route::get('/owner/properties/{id}/edit', [PropertyController::class, 'edit'])
+    ->name('properties.edit');
+Route::get('/owner/property-form', [PropertyController::class, 'create'])
+    ->name('owner.property-form');
+Route::post('/owner/properties', [PropertyController::class, 'store'])
+    ->name('properties.store');
+Route::put('/owner/properties/{id}', [PropertyController::class, 'update'])
+    ->name('properties.update');
+Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])
+    ->name('properties.destroy');
+
+
+//Booking Request
+Route::get('/owner/requests',[BookingRequestController::class,'index'])
+    ->name('owner.requests'); 
+
+
+// Route::get('/owner/properties', [PageController::class, 'show'])->defaults('page', 'owner.properties')->name('owner.properties');
 Route::get('/owner/properties.html', [PageController::class, 'legacy'])->defaults('target', 'owner.properties');
 Route::get('/owner/property-form', [PageController::class, 'show'])->defaults('page', 'owner.property-form')->name('owner.property-form');
 Route::get('/owner/property-form.html', [PageController::class, 'legacy'])->defaults('target', 'owner.property-form');
 Route::get('/owner/requests', [PageController::class, 'show'])->defaults('page', 'owner.requests')->name('owner.requests');
 Route::get('/owner/requests.html', [PageController::class, 'legacy'])->defaults('target', 'owner.requests');
+
+
+
 Route::get('/admin/chat', [PageController::class, 'show'])->defaults('page', 'admin.chat')->name('admin.chat');
 Route::get('/admin/chat.html', [PageController::class, 'legacy'])->defaults('target', 'admin.chat');
 Route::get('/admin/dashboard', [PageController::class, 'show'])->defaults('page', 'admin.dashboard')->name('admin.dashboard');
@@ -50,3 +79,6 @@ Route::get('/auth/reset-password.html', [PageController::class, 'legacy'])->defa
 Route::get('/auth/verify-email', [PageController::class, 'show'])->defaults('page', 'auth.verify-email')->name('auth.verify-email');
 Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])->defaults('target', 'auth.verify-email');
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
+
+
+// Route::get('/owner/propertie' ,[PropertyController::class,'index'])->name('owner.properties');
