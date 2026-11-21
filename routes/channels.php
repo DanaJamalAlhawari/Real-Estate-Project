@@ -16,6 +16,9 @@ Broadcast::channel('conversations.{conversationId}', function ($user, $conversat
     if ($user instanceof RealEstateUser && $conversation->hasParticipant($user)) {
         return true;
     }
-        return false;
-
+    return false;
+});
+Broadcast::channel('inbox.{userId}', function ($user, $userId): bool {
+    return $user instanceof RealEstateUser
+        && (string) $user->getKey() === (string) $userId;
 });

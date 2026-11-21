@@ -14,10 +14,7 @@
                 <!-- Messages, notifications + user menu (stay visible on phones) -->
                 <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
                     <!-- Messages: icon with unread count -->
-                    <a class="icon-btn is-active" href="{{ route('seeker.chat') }}" aria-label="Messages, 2 unread"
-                        aria-current="page">
-                        <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
-                    </a>
+                    @include('partials.seeker-messages-link')
                     <div class="dropdown">
                         <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
                             <i class="bi bi-bell"></i><span class="dot"></span>
@@ -61,7 +58,7 @@
                                 <hr class="dropdown-divider" />
                             </li>
                             <li>
-                                <a class="dropdown-item text-danger" href="{{ route('home') }}">Log out</a>
+                                <x-logout-form />
                             </li>
                         </ul>
                     </div>
@@ -70,39 +67,6 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
                 </div>
-              </div>
-            </div>
-            <div class="dropdown">
-              <button
-                class="app-user app-user--avatar"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                aria-label="Account menu, Sara Khaled"
-              >
-                <span class="avatar">S</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
-                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <x-logout-form />
-                </li>
-              </ul>
-            </div>
-            <button
-              class="navbar-toggler border-0"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#appNav"
-              aria-controls="appNav"
-              aria-expanded="false"
-              aria-label="Menu"
-            >
-              <span class="navbar-toggler-icon"></span>
-            </button>
-          </div>
 
                 <!-- Page links + search, grouped in one capsule -->
                 <div class="collapse navbar-collapse" id="appNav">
@@ -113,7 +77,7 @@
                                         class="bi bi-stars"></i><span>Discover</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('seeker.bookings') }}"><i
+                                <a class="nav-link active" aria-current="page" href="{{ route('seeker.bookings') }}"><i
                                         class="bi bi-calendar-check"></i><span>My bookings</span><span
                                         class="side-badge">1</span></a>
                             </li>
@@ -139,147 +103,161 @@
         </div>
 
         <div class="chat">
-            <!-- 2. Conversation list -->
             <div class="chat-list" aria-label="Conversations">
                 <form class="chat-list-head" role="search" id="chatSearch" method="post"
                     action="{{ route('demo.notice') }}" data-demo-form>
                     @csrf
                     <div class="search-input">
-                        <i class="bi bi-search"></i>
+                        <i class="bi bi-search" aria-hidden="true"></i>
                         <input type="search" class="form-control" name="q" placeholder="Search conversations..."
                             aria-label="Search conversations" />
                     </div>
                 </form>
+
                 <div id="chatList">
-                    <a href="{{ route('seeker.chat') }}" class="chat-item active" aria-current="true">
-                        <span class="avatar flex-shrink-0">A</span>
-                        <span class="meta">
-                            <b><span>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></span><time>10:24
-                                    AM</time></b>
-                            <span class="chat-prop">Studio — Al Jubeiha</span>
-                            <span>Great, see you Thursday.</span>
-                        </span>
-                        <span class="unread" aria-label="2 new messages">2</span>
-                    </a>
-                    <a href="{{ route('seeker.chat') }}" class="chat-item">
-                        <span class="avatar flex-shrink-0">R</span>
-                        <span class="meta">
-                            <b><span>Al Riyada Real Estate Office <span
-                                        class="role-tag role-tag--owner">Owner</span></span><time>Yesterday</time></b>
-                            <span class="chat-prop">2-bedroom apartment — Tla Al Ali</span>
-                            <span>Bills aren't included, but they average 35 JOD.</span>
-                        </span>
-                    </a>
-                    <a href="{{ route('seeker.chat') }}" class="chat-item">
-                        <span class="avatar flex-shrink-0">U</span>
-                        <span class="meta">
-                            <b><span>Umm Yazan <span
-                                        class="role-tag role-tag--owner">Owner</span></span><time>Monday</time></b>
-                            <span class="chat-prop">1-bedroom apartment — Shmeisani</span>
-                            <span>Welcome! The apartment is ready now.</span>
-                        </span>
-                    </a>
-                    <a href="{{ route('seeker.chat') }}" class="chat-item">
-                        <span class="avatar avatar--support flex-shrink-0"><i class="bi bi-headset"></i></span>
-                        <span class="meta">
-                            <b><span>Makan Support <span
-                                        class="role-tag role-tag--admin">Admin</span></span><time>Sunday</time></b>
-                            <span class="chat-prop">Booking BK-1042</span>
-                            <span>You pay the rent directly to the owner — no fees on Makan.</span>
-                        </span>
-                    </a>
+                    @forelse ($conversations as $chat)
+                        @php($isActive = isset($conversation) && $conversation->is($chat))
+
+                        <a href="{{ route('conversations.show', ['conversation' => $chat]) }}" @class(['chat-item', 'active' => $isActive])
+                            @if ($isActive) aria-current="page" @endif>
+                            <span class="avatar flex-shrink-0">
+                                <i class="bi bi-chat-dots" aria-hidden="true"></i>
+                            </span>
+
+                            <span class="meta">
+                                <b>Conversation #{{ $chat->id }}</b>
+
+                                @if ($chat->last_message_at)
+                                    <time>{{ \Illuminate\Support\Carbon::parse($chat->last_message_at)->format('d M, g:i A') }}</time>
+                                @endif
+                            </span>
+
+                            <span class="unread" data-unread-for="{{ $chat->id }}"
+                                aria-label="{{ $chat->unread_count }} unread messages"
+                                @if ($chat->unread_count == 0) hidden @endif>
+                                {{ $chat->unread_count }}
+                            </span>
+                        </a>
+                    @empty
+                        <p class="text-muted px-3 py-2 mb-0">No conversations yet.</p>
+                    @endforelse
                 </div>
             </div>
 
-            <!-- 3. Open conversation -->
-            <section class="chat-thread" aria-label="Conversation with Abu Ahmad">
-                <div class="chat-head">
-                    <span class="avatar">A</span>
-                    <div class="flex-grow-1 lh-sm">
-                        <b>Abu Ahmad <span class="role-tag role-tag--owner">Owner</span></b>
-                        <small class="is-online">Online now</small>
+            @isset($conversation)
+                <section class="chat-thread" aria-label="Conversation {{ $conversation->id }}">
+                    <div class="chat-head">
+                        <span class="avatar">A</span>
+                        <div class="flex-grow-1 lh-sm">
+                            <b>
+                                {{ $ownerName !== '' ? $ownerName : 'Property owner' }}
+                                <span class="role-tag role-tag--owner">Owner</span>
+                            </b>
+
+                        </div>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-link text-muted px-2" data-bs-toggle="dropdown"
+                                aria-expanded="false" aria-label="Options">
+                                <i class="bi bi-three-dots-vertical fs-5"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('seeker.property') }}">
+                                        <i class="bi bi-house-door me-2"></i>View property
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item text-danger">
+                                        <i class="bi bi-flag me-2"></i>Report conversation
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-link text-muted px-2" data-bs-toggle="dropdown"
-                            aria-expanded="false" aria-label="Options">
-                            <i class="bi bi-three-dots-vertical fs-5"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('seeker.property') }}"><i
-                                        class="bi bi-house-door me-2"></i>View property</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider" />
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item text-danger">
-                                    <i class="bi bi-flag me-2"></i>Report conversation
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
 
-                <!-- Property being discussed -->
-                <div class="chat-context">
-                    <span class="t ph ph-1" aria-hidden="true"></span>
-                    <span class="flex-grow-1 text-muted">About <b class="text-body">Studio — Al Jubeiha</b> · 265
-                        JOD</span>
-                    <a href="{{ route('seeker.property') }}" class="fw-semibold">View property</a>
-                </div>
+                    @isset($chatProperty)
+                        <div class="chat-context">
+                            <span class="flex-grow-1 text-muted">
+                                About <b class="text-body">{{ $chatProperty->title }}</b>
 
-                <!-- Messages -->
-                <div class="chat-body" id="chatMessages" aria-live="polite">
-                    @isset($conversation)
-                        @foreach ($messages as $message)
-                            <div class="msg {{ (int) $message->sender_id === $currentUserId ? 'me' : '' }}"
-                                data-message-id="{{ $message->id }}">
-                                {{ $message->body }}
-                            </div>
-                        @endforeach
-                    @else
-                        <span class="day-sep">Today</span>
+                                @if ($chatProperty->price !== null)
+                                    · {{ number_format((float) $chatProperty->price, 2) }} JOD
+                                @endif
+                            </span>
 
-                        <div class="msg me">
-                            Hi, is the studio still available from the start of the month?
-                            <time>09:58</time>
-                        </div>
-
-                        <div class="msg">
-                            Hi Sara, yes it is. It also has a small study desk.
-                            <time>10:05</time>
-                        </div>
-
-                        <div class="msg me">
-                            Sounds good, I sent a booking request for Nov 1.
-                            <time>10:20</time>
-                        </div>
-
-                        <div class="msg">
-                            Great, see you Thursday.
-                            <time>10:24</time>
+                            <a href="{{ route('seeker.property.details', ['home' => $chatProperty->id]) }}" class="fw-semibold">
+                                View property
+                            </a>
                         </div>
                     @endisset
-                </div>
 
-                <!-- Write a message -->
-                @isset($conversation)
+                    <div class="chat-body" id="chatMessages" aria-live="polite">
+                        @foreach ($messages as $message)
+                            @php($isMine = (int) $message->sender_id === $currentUserId)
+
+                            <div @class(['chat-message-row', 'is-mine' => $isMine]) data-message-id="{{ $message->id }}">
+                                <div @class(['msg', 'me' => $isMine])>
+                                    @if ($message->replyTo)
+                                        <blockquote class="small border-start border-2 ps-2 mb-1">
+                                            {{ $message->replyTo->body }}
+                                        </blockquote>
+                                    @endif
+
+                                    <span data-message-text>{{ $message->body }}</span>
+                                    <div data-message-reactions class="d-flex flex-wrap gap-1">
+                                        @foreach ($message->reactions as $reaction)
+                                            <span data-reaction-user="{{ $reaction->user_id }}">{{ $reaction->emoji }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <button type="button" class="chat-reply-button" data-reply-button
+                                    aria-label="Reply to message" title="Reply">
+                                    <i class="bi bi-reply" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="chat-reply-button" data-reaction-button
+                                    aria-label="React to message" title="React">
+                                    <i class="bi bi-emoji-smile" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div data-reply-preview class="px-3 py-2 border-top small" hidden>
+                        <span>Replying to: </span>
+                        <span data-reply-text></span>
+
+                        <button type="button" class="btn btn-sm btn-link" data-cancel-reply>
+                            Cancel
+                        </button>
+                    </div>
+
                     <form class="chat-input" id="chatForm" method="post"
                         action="{{ route('conversations.messages.store', ['conversation' => $conversation]) }}" data-chat-form
-                        data-conversation-id="{{ $conversation->id }}" data-current-user-id="{{ $currentUserId }}">
-                    @else
-                        <form class="chat-input" id="chatForm" method="post" action="{{ route('demo.notice') }}"
-                            data-demo-form>
-                        @endisset
+                        data-conversation-id="{{ $conversation->id }}" data-current-user-id="{{ $currentUserId }}"
+                        data-read-url="{{ route('conversations.read', ['conversation' => $conversation]) }}"
+                        data-reaction-url="{{ route('conversations.messages.reaction', [
+                            'conversation' => $conversation,
+                            'messageId' => '__MESSAGE_ID__',
+                        ]) }}">
                         @csrf
+                        <input type="hidden" name="reply_to_id" value="">
+
                         <input type="text" class="form-control" name="body" aria-label="Your message"
                             placeholder="Type your message..." autocomplete="off" required />
+
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <i class="bi bi-send"></i>Send
                         </button>
                     </form>
-            </section>
+                </section>
+            @else
+                <div class="chat-thread p-4 text-muted">
+                    Select a conversation to view its messages.
+                </div>
+            @endisset
         </div>
     </main>
 @endsection

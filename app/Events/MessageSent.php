@@ -11,9 +11,7 @@ class MessageSent implements ShouldBroadcastNow
 {
     use Dispatchable;
 
-    public function __construct(private Message $message)
-    {
-    }
+    public function __construct(private Message $message) {}
 
     public function broadcastOn(): array
     {
@@ -24,10 +22,6 @@ class MessageSent implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        return [
-            'id' => $this->message->id,
-            'body' => $this->message->body,
-            'sender_id' => $this->message->sender_id,
-        ];
+        return $this->message->chatPayload();
     }
 }

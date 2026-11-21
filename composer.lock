@@ -3642,7 +3642,6 @@
             "published-time": "2026-11-14T23:35:39+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "ratchet/rfc6455",
             "version": "v0.4.1",
             "source": {
@@ -4254,22 +4253,6 @@
                 "shasum": ""
             },
             "require": {
-=======
-            "name": "symfony/clock",
-            "version": "v7.4.21",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/clock.git",
-                "reference": "07437f612dca89c1894c1db04491002b1e798f03"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/clock/zipball/07437f612dca89c1894c1db04491002b1e798f03",
-                "reference": "07437f612dca89c1894c1db04491002b1e798f03",
-                "shasum": ""
-            },
-            "require": {
->>>>>>> 3c1203eab9d8e1c9c31dbb6b2d550cba8154e9c9
                 "php": ">=8.2",
                 "psr/clock": "^1.0",
                 "symfony/polyfill-php83": "^1.28"

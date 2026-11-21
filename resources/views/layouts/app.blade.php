@@ -13,9 +13,10 @@
             href="{{ asset('assets/css/pages/' . trim($__env->yieldContent('roleStyle')) . '.css') }}" />
     @endif
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}" />
-    @isset($conversation)
+    @if (auth()->user() instanceof \App\Models\RealEstateUser)
+        <meta name="makan-user-id" content="{{ auth()->id() }}">
         @vite('resources/js/app.js')
-    @endisset
+    @endif
 </head>
 
 <body @yield('bodyAttributes')>
@@ -25,7 +26,7 @@
     <script src="{{ asset('assets/js/models/homes.js') }}" defer></script>
     <script src="{{ asset('assets/js/views/bayti.js') }}" defer></script>
     <script src="{{ asset('assets/js/controllers/bayti.js') }}" defer></script>
-    
+
 </body>
 
 </html>
