@@ -1,39 +1,12 @@
 @extends('layouts.app')
-
-<!-- library Leaflet to lacation -->
-
 @push('styles')
-
-<link
-
-  rel="stylesheet"
-
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 @endpush
-
-<!---------------------------------->
-
 @section('title', isset($property) ? 'Makan — Edit property' : 'Makan — Add property')
-
 @section('roleStyle', 'owner')
-
 @section('bodyAttributes') data-role="owner" data-page="property-form"@endsection
-
 @section('content')
-
-<!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
-
-<input
-
-  type="checkbox"
-
-  class="sidebar-toggle"
-
-  id="sidebarToggle"
-
-  aria-label="Collapse the menu" />
-
+<input type="checkbox" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse the menu" />
 <!-- ===== Topbar ===== -->
     <header class="app-topbar">
       <button
@@ -140,133 +113,109 @@
     </header>
 
     <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a
+            class="side-link active"
+            href="{{ route('owner.property-form') }}"
+            aria-current="page"
+            title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
 
-  <!-- ===== Sidebar ===== -->
-
-  <aside
-
-    class="app-sidebar offcanvas-lg offcanvas-start"
-
-    tabindex="-1"
-
-    id="appSidebar">
-
-    <div class="offcanvas-header border-bottom">
-
-      <a class="brand" href="{{ route('home') }}"><span class="brand-mark">M</span><span>Makan</span></a>
-
-      <button
-
-        type="button"
-
-        class="btn-close"
-
-        data-bs-dismiss="offcanvas"
-
-        data-bs-target="#appSidebar"
-
-        aria-label="Close"></button>
-
-    </div>
-
-    <div class="offcanvas-body">
-
-      <div class="side-label">Property owner</div>
-
-      <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"><i class="bi bi-grid-1x2"></i><span class="flex-grow-1">Dashboard</span></a>
-
-      <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"><i class="bi bi-house-door"></i><span class="flex-grow-1">My properties</span></a>
-
-      <a
-
-        class="side-link active"
-
-        href="{{ route('owner.property-form') }}"
-
-        aria-current="page"
-
-        title="Add property"><i class="bi bi-plus-square"></i><span class="flex-grow-1">Add property</span></a>
-
-      <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"><i class="bi bi-inbox"></i><span class="flex-grow-1">Booking requests</span><span class="side-badge">3</span></a>
-
-      <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span><span class="side-badge">1</span></a>
-
-      <a class="side-link" href="{{ route('owner.account') }}" title="My account"><i class="bi bi-person-badge"></i><span class="flex-grow-1">My account</span></a>
-
-    </div>
-
-  </aside>
-
-  <!-- ===== Content ===== -->
-
-  <main class="app-main">
-
-    <!-- 1. Page header -->
-
-    <div class="page-head">
-
-      <div>
-
-        <h1>{{ isset($property) ? 'Edit property' : 'Add property' }}</h1>
-
-        <p>
-
-          The more details you fill in, the more accurately your property
-
-          matches with seekers.
-
-        </p>
-
-      </div>
-
-    </div>
-
-    <div class="row g-4 align-items-start">
-
-      <!-- ===== Form ===== -->
-
-      <div class="col-lg-8">
-
-        <form
-
-          id="propertyForm"
-
-          method="POST"
-
-          action="{{ isset($property) ? route('properties.update', $property->id) : route('properties.store') }}"
-
-          enctype="multipart/form-data">
-
-          @csrf
-
-          {{-- Display validation errors --}}
-
-          @if ($errors->any())
-
-          <div class="alert alert-danger mt-3" role="alert">
-
-            <strong>Failed to save property:</strong>
-
-            <ul class="mb-0 mt-2">
-
-              @foreach ($errors->all() as $error)
-
-              <li>{{ $error }}</li>
-
-              @endforeach
-
-            </ul>
-
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        @isset($property)
+          <div class="page-head">
+            <div>
+              <h1>Edit property</h1>
+              <p>{{ $property->title }}</p>
+            </div>
+            <a href="{{ route('owner.properties') }}" class="btn btn-outline-secondary">My properties</a>
           </div>
-
-          @endif
-
-          @if(isset($property))
-
-          @method('PUT')
-
-          @endif
-
+          <form class="panel form-section" action="{{ route('properties.verification.store') }}" method="post" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
+            <h2>Ownership verification</h2>
+            <p>Status: {{ ucfirst($property->verification_status) }}</p>
+            @if (session('success'))
+              <p class="text-success" role="status">{{ session('success') }}</p>
+            @endif
+            @if ($errors->any())
+              <p class="text-danger" role="alert">{{ $errors->first() }}</p>
+            @endif
+            <label for="ownershipDocument" class="form-label">Ownership document (PDF, JPG, or PNG, up to 5 MB)</label>
+            <input id="ownershipDocument" class="form-control mb-3" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
+            <button class="btn btn-accent" type="submit">Upload document</button>
+          </form>
+        @else
+          <div class="page-head">
+            <div>
+              <h1>Add property</h1>
+              <p>The more details you fill in, the more accurately your property matches with seekers.</p>
+            </div>
+          </div>
+        @endisset
+        <div class="row g-4 align-items-start">
+          <div class="col-lg-8">
+            <form id="propertyForm" method="POST" action="{{ isset($property) ? route('properties.update', $property->id) : route('properties.store') }}" enctype="multipart/form-data">
+              @csrf
+              @if(isset($property))
+                @method('PUT')
+              @endif
+              @if ($errors->any())
+                <div class="alert alert-danger mt-3" role="alert">
+                  <strong>Failed to save property:</strong>
+                  <ul class="mb-0 mt-2">
+                    @foreach ($errors->all() as $error)
+                      <li>{{ $error }}</li>
+                    @endforeach
+                  </ul>
+                </div>
+              @endif
           <!-- 1. Basic details -->
 
           <section class="panel form-section" aria-labelledby="secBasics">
@@ -1110,11 +1059,8 @@
     </aside>
 
 </div>
-
-</main>
-
-</div>
-
+      </main>
+    </div>
 @push('scripts')
 
 <script>
@@ -1684,5 +1630,4 @@
 </script>
 
 @endpush
-
 @endsection

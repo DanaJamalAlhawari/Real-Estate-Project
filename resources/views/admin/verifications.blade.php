@@ -70,7 +70,7 @@
                 ></span>
                 <span class="small">
                   <span class="d-block"
-                    >4 verification requests waiting for review</span
+                    >{{ $queues->get('pending', collect())->count() }} ownership documents waiting for review</span
                   >
                   <span class="text-muted" style="font-size: 0.72rem"
                     >Today</span
@@ -157,8 +157,7 @@
           <div>
             <h1>Verifications</h1>
             <p>
-              Review owner and office documents before granting the "Verified"
-              badge.
+              Review property ownership documents before granting the "Verified" badge.
             </p>
           </div>
         </div>
@@ -170,127 +169,43 @@
               class="panel p-0 overflow-hidden"
               aria-label="Request queue"
             >
+              @php
+                $activeStatus = $selectedProperty?->verification_status ?? 'pending';
+                $tabs = ['pending' => 'Pending', 'verified' => 'Approved', 'rejected' => 'Rejected'];
+              @endphp
               <ul class="nav pill-tabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button
-                    class="nav-link active"
-                    data-bs-toggle="tab"
-                    data-bs-target="#queue-pending"
-                    type="button"
-                    role="tab"
-                    aria-controls="queue-pending"
-                    aria-selected="true"
-                  >
-                    Pending (4)
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button
-                    class="nav-link"
-                    data-bs-toggle="tab"
-                    data-bs-target="#queue-approved"
-                    type="button"
-                    role="tab"
-                    aria-controls="queue-approved"
-                    aria-selected="false"
-                  >
-                    Approved
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button
-                    class="nav-link"
-                    data-bs-toggle="tab"
-                    data-bs-target="#queue-rejected"
-                    type="button"
-                    role="tab"
-                    aria-controls="queue-rejected"
-                    aria-selected="false"
-                  >
-                    Rejected
-                  </button>
-                </li>
+                @foreach ($tabs as $status => $label)
+                  <li class="nav-item" role="presentation">
+                    <button
+                      @class(['nav-link', 'active' => $status === $activeStatus])
+                      data-bs-toggle="tab"
+                      data-bs-target="#queue-{{ $status }}"
+                      type="button"
+                      role="tab"
+                      aria-controls="queue-{{ $status }}"
+                      aria-selected="{{ $status === $activeStatus ? 'true' : 'false' }}"
+                    >{{ $label }}@if ($status === 'pending') ({{ $queues->get($status, collect())->count() }})@endif</button>
+                  </li>
+                @endforeach
               </ul>
-
               <div class="tab-content">
-                <!-- Pending -->
-                <div
-                  class="tab-pane fade show active"
-                  id="queue-pending"
-                  role="tabpanel"
-                  tabindex="0"
-                >
-                  <div id="queuePendingList">
-                    <a
-                      href="#reviewPanel"
-                      class="queue-item is-active"
-                      aria-current="true"
-                    >
-                      <span class="avatar">A</span>
-                      <span class="flex-grow-1 min-w-0"
-                        ><b class="d-block">Abu Ahmad</b
-                        ><small>Owner · 2 documents · 4 properties</small></span
-                      >
-                      <span class="small text-muted">9:12 AM</span>
-                    </a>
-                    <a href="#reviewPanel" class="queue-item">
-                      <span class="avatar">R</span>
-                      <span class="flex-grow-1 min-w-0"
-                        ><b class="d-block">Al Riyada Real Estate Office</b
-                        ><small>Office · 3 documents · 1 property</small></span
-                      >
-                      <span class="small text-muted">8:40 AM</span>
-                    </a>
-                    <a href="#reviewPanel" class="queue-item">
-                      <span class="avatar">Y</span>
-                      <span class="flex-grow-1 min-w-0"
-                        ><b class="d-block">Umm Yazan</b
-                        ><small>Owner · 2 documents · 1 property</small></span
-                      >
-                      <span class="small text-muted">Yesterday</span>
-                    </a>
-                    <a href="#reviewPanel" class="queue-item">
-                      <span class="avatar">S</span>
-                      <span class="flex-grow-1 min-w-0"
-                        ><b class="d-block">Sami Haddad</b
-                        ><small>Owner · 1 document · No listings yet</small></span
-                      >
-                      <span class="small text-muted">Yesterday</span>
-                    </a>
+                @foreach ($tabs as $status => $label)
+                  <div @class(['tab-pane fade', 'show active' => $status === $activeStatus])
+                       id="queue-{{ $status }}" role="tabpanel" tabindex="0">
+                    @forelse ($queues->get($status, collect()) as $property)
+                      <a href="{{ route('admin.verifications', ['property' => $property->id]) }}#reviewPanel"
+                         @class(['queue-item', 'is-active' => $selectedProperty?->id === $property->id])>
+                        <span class="avatar">{{ Str::substr($property->title, 0, 1) }}</span>
+                        <span class="flex-grow-1 min-w-0">
+                          <b class="d-block">{{ $property->title }}</b>
+                          <small>{{ $property->address }}</small>
+                        </span>
+                      </a>
+                    @empty
+                      <p class="text-muted small text-center p-4 mb-0">No {{ strtolower($label) }} ownership verifications.</p>
+                    @endforelse
                   </div>
-                </div>
-                <!-- Approved -->
-                <div
-                  class="tab-pane fade"
-                  id="queue-approved"
-                  role="tabpanel"
-                  tabindex="0"
-                >
-                  <div id="queueApprovedList">
-                    <p class="text-muted small text-center p-4 mb-0">
-                      <i
-                        class="bi bi-patch-check d-block fs-3 text-primary-bt mb-1"
-                      ></i
-                      >Approved requests will appear here.
-                    </p>
-                  </div>
-                </div>
-                <!-- Rejected -->
-                <div
-                  class="tab-pane fade"
-                  id="queue-rejected"
-                  role="tabpanel"
-                  tabindex="0"
-                >
-                  <div id="queueRejectedList">
-                    <p class="text-muted small text-center p-4 mb-0">
-                      <i
-                        class="bi bi-x-circle d-block fs-3 text-primary-bt mb-1"
-                      ></i
-                      >Rejected requests will appear here.
-                    </p>
-                  </div>
-                </div>
+                @endforeach
               </div>
             </section>
           </div>
@@ -302,140 +217,65 @@
               id="reviewPanel"
               aria-labelledby="reviewName"
             >
-              <!-- Applicant -->
-              <div
-                class="review-head d-flex flex-wrap align-items-center gap-3"
-              >
-                <span class="avatar avatar-lg">A</span>
-                <div class="flex-grow-1">
-                  <b class="d-block fs-5" id="reviewName">Abu Ahmad</b>
-                  <span class="small text-muted"
-                    >Individual owner · Joined Sep 12 · 4 properties</span
-                  >
-                </div>
-                <span class="status status--pending">Pending</span>
-              </div>
+              @if (session('success'))
+                <p class="text-success" role="status">{{ session('success') }}</p>
+              @endif
+              @if ($errors->any())
+                <p class="text-danger" role="alert">{{ $errors->first() }}</p>
+              @endif
 
-              <form id="verifyForm" name="verifyForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
-              @csrf
-                <!-- Documents -->
-                <h2 class="h6 mt-4 mb-2">Uploaded documents</h2>
+              @if ($selectedProperty)
+                <div class="review-head d-flex flex-wrap align-items-center gap-3">
+                  <span class="avatar avatar-lg">{{ Str::substr($selectedProperty->title, 0, 1) }}</span>
+                  <div class="flex-grow-1">
+                    <b class="d-block fs-5" id="reviewName">{{ $selectedProperty->title }}</b>
+                    <span class="small text-muted">{{ $selectedProperty->address }}</span>
+                  </div>
+                  <span @class([
+                    'status',
+                    'status--pending' => $activeStatus === 'pending',
+                    'status--success' => $activeStatus === 'verified',
+                    'status--danger' => $activeStatus === 'rejected',
+                  ])>{{ $tabs[$activeStatus] }}</span>
+                </div>
+
+                <h2 class="h6 mt-4 mb-2">Uploaded document</h2>
                 <div class="row g-3" id="reviewDocs">
                   <div class="col-sm-6">
                     <div class="doc-card">
-                      <div class="doc-preview">
-                        <i class="bi bi-file-earmark-text"></i>id-front.jpg
-                      </div>
-                      <div
-                        class="d-flex justify-content-between align-items-center px-3 py-1"
-                      >
-                        <b class="small">National ID</b>
-                        <a
-                          href="#"
-                          class="small fw-semibold text-decoration-none py-2"
-                          aria-label="Open national ID"
-                          >Open</a
-                        >
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="doc-card">
-                      <div class="doc-preview">
-                        <i class="bi bi-file-earmark-text"></i>ownership.pdf
-                      </div>
-                      <div
-                        class="d-flex justify-content-between align-items-center px-3 py-1"
-                      >
+                      <div class="doc-preview"><i class="bi bi-file-earmark-text"></i>Ownership document</div>
+                      <div class="d-flex justify-content-between align-items-center px-3 py-1">
                         <b class="small">Title deed</b>
-                        <a
-                          href="#"
-                          class="small fw-semibold text-decoration-none py-2"
-                          aria-label="Open title deed"
-                          >Open</a
-                        >
+                        <a href="{{ route('admin.verifications.document', $selectedProperty) }}"
+                           target="_blank" rel="noopener"
+                           class="small fw-semibold text-decoration-none py-2">Open</a>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Checklist -->
-                <h2 class="h6 mt-4 mb-1">Checklist</h2>
-                <fieldset id="reviewChecks">
-                  <legend class="visually-hidden">Checklist</legend>
-                  <label class="check-row" for="chkName"
-                    ><input
-                      class="form-check-input m-0"
-                      type="checkbox"
-                      id="chkName"
-                      name="checks"
-                      value="name"
-                      checked
-                    />Name on the ID matches the account name</label
-                  >
-                  <label class="check-row" for="chkValid"
-                    ><input
-                      class="form-check-input m-0"
-                      type="checkbox"
-                      id="chkValid"
-                      name="checks"
-                      value="valid"
-                      checked
-                    />ID is valid and not expired</label
-                  >
-                  <label class="check-row" for="chkOwner"
-                    ><input
-                      class="form-check-input m-0"
-                      type="checkbox"
-                      id="chkOwner"
-                      name="checks"
-                      value="owner"
-                    />Title deed is in the same person's name, or there is a
-                    power of attorney</label
-                  >
-                  <label class="check-row" for="chkAddress"
-                    ><input
-                      class="form-check-input m-0"
-                      type="checkbox"
-                      id="chkAddress"
-                      name="checks"
-                      value="address"
-                    />Property address matches the listing</label
-                  >
-                </fieldset>
-
-                <!-- Note -->
-                <label for="vnote" class="form-label mt-3"
-                  >Note (sent to the owner if you reject)</label
-                >
-                <textarea
-                  class="form-control"
-                  id="vnote"
-                  name="note"
-                  rows="2"
-                  placeholder="e.g. The ID photo isn't clear"
-                ></textarea>
-
-                <!-- Actions -->
-                <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
-                  <button
-                    type="submit"
-                    class="btn btn-outline-danger"
-                    name="decision"
-                    value="reject"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    type="submit"
-                    class="btn btn-primary d-inline-flex align-items-center gap-2"
-                    name="decision"
-                    value="approve"
-                  >
-                    <i class="bi bi-patch-check"></i>Approve &amp; grant badge
-                  </button>
-                </div>
-              </form>
+                @if ($activeStatus === 'pending')
+                  <form id="verifyForm" method="post" action="{{ route('admin.verifications.update', $selectedProperty) }}">
+                    @csrf
+                    @method('PATCH')
+                    <label for="vnote" class="form-label mt-3">Admin notes</label>
+                    <textarea class="form-control" id="vnote" name="note" rows="2" maxlength="2000"
+                              placeholder="e.g. The title deed is not legible">{{ old('note') }}</textarea>
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+                      <button type="submit" class="btn btn-outline-danger" name="decision" value="reject">Reject</button>
+                      <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" name="decision" value="approve">
+                        <i class="bi bi-patch-check"></i>Approve &amp; grant badge
+                      </button>
+                    </div>
+                  </form>
+                @elseif ($selectedProperty->admin_notes)
+                  <h2 class="h6 mt-4 mb-2">Admin notes</h2>
+                  <p>{{ $selectedProperty->admin_notes }}</p>
+                @endif
+              @else
+                <h2 class="h6" id="reviewName">Property review</h2>
+                <p class="text-muted mb-0">Select a property to review its ownership document.</p>
+              @endif
             </section>
           </div>
         </div>
