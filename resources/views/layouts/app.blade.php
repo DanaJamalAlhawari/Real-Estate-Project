@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Makan')</title>
+    @stack('styles')
+    @stack('scripts')
     <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/icons/bootstrap-icons.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />

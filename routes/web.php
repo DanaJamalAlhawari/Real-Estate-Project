@@ -6,6 +6,9 @@ use App\Http\Controllers\AgentEarningsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\BookingRequestController;
+use App\Http\Controllers\DiscoverController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReviewController;
@@ -14,6 +17,8 @@ use App\Http\Controllers\TenantProfileController;
 use App\Http\Controllers\ConversationMessageController;
 use App\Http\Controllers\SeekerPropertyController;
 use App\Http\Controllers\VerificationController;
+
+
 
 
 Route::get('/', [PageController::class, 'show'])
@@ -218,11 +223,38 @@ Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
 
 
+// properties 
+Route::get('/owner/properties', [PropertyController::class, 'index'])
+    ->name('owner.properties');
+Route::patch('/owner/properties/{id}/visibility', [PropertyController::class, 'toggleVisibility'])
+    ->name('properties.visibility');
+Route::get('/owner/properties/{id}/edit', [PropertyController::class, 'edit'])
+    ->name('properties.edit');
+Route::get('/owner/property-form', [PropertyController::class, 'create'])
+    ->name('owner.property-form');
+Route::post('/owner/properties', [PropertyController::class, 'store'])
+    ->name('properties.store');
+Route::put('/owner/properties/{id}', [PropertyController::class, 'update'])
+    ->name('properties.update');
+Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])
+    ->name('properties.destroy');
 
 
+//Booking Request
+Route::get('/owner/requests',[BookingRequestController::class,'index'])
+    ->name('owner.requests'); 
+Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])
+    ->name('owner.requests.accept'); 
+Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])
+    ->name('owner.requests.reject');
 
+// Discover Page
+Route::get('seeker/search', [DiscoverController::class, 'index'])
+    ->name('seeker.search');
+    
 
-// ---------------------------------------------------------------
+ 
+
 
 
 
