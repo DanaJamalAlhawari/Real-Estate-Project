@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Add property")
+@section('title', isset($property) ? 'Makan — Edit property' : 'Makan — Add property')
 @section('roleStyle', 'owner')
 @section('bodyAttributes') data-role="owner" data-page="property-form"@endsection
 
@@ -174,6 +174,31 @@
 
       <!-- ===== Content ===== -->
       <main class="app-main">
+        @isset($property)
+          <div class="page-head">
+            <div>
+              <h1>Edit property</h1>
+              <p>{{ $property->title }}</p>
+            </div>
+            <a href="{{ route('owner.properties') }}" class="btn btn-outline-secondary">My properties</a>
+          </div>
+
+          <form class="panel form-section" action="{{ route('properties.verification.store') }}" method="post" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
+            <h2>Ownership verification</h2>
+            <p>Status: {{ ucfirst($property->verification_status) }}</p>
+            @if (session('success'))
+              <p class="text-success" role="status">{{ session('success') }}</p>
+            @endif
+            @if ($errors->any())
+              <p class="text-danger" role="alert">{{ $errors->first() }}</p>
+            @endif
+            <label for="ownershipDocument" class="form-label">Ownership document (PDF, JPG, or PNG, up to 5 MB)</label>
+            <input id="ownershipDocument" class="form-control mb-3" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
+            <button class="btn btn-accent" type="submit">Upload document</button>
+          </form>
+        @else
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
@@ -678,6 +703,7 @@
             </div>
           </aside>
         </div>
+        @endisset
       </main>
     </div>
 @endsection
