@@ -89,8 +89,8 @@ Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
         ->name('seeker.property.conversation');
    
 
-    Route::get('/seeker/search', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.search')->name('seeker.search');
+    Route::get('/seeker/search', [DiscoverController::class, 'index'])
+        ->name('seeker.search');
     Route::get('/seeker/search.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.search');
 
@@ -249,8 +249,6 @@ Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::clas
     ->name('owner.requests.reject');
 
 // Discover Page
-Route::get('seeker/search', [DiscoverController::class, 'index'])
-    ->name('seeker.search');
     
 
  
