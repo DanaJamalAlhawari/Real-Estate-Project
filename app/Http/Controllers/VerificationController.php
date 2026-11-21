@@ -33,7 +33,8 @@ class VerificationController extends Controller
         $properties = Property::whereNotNull('ownership_deed_url')->get();
 
         $queues = $properties->groupBy('verification_status');
-        $selectedProperty = $queues->get('pending')?->first();
+        $selectedProperty = $properties->find($request->integer('property'))
+            ?? $queues->get('pending')?->first();
 
         return view('admin.verifications', compact('queues', 'selectedProperty'));
     }

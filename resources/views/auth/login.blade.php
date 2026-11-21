@@ -42,26 +42,30 @@
         <form
           class="auth-form"
           id="loginForm"
-         method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('seeker.search') }}">
-              @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+          method="POST"
+          action="{{ route('auth.login.store') }}">
+          @csrf
           <h1>Welcome back</h1>
           <p class="text-muted mb-4">Log in to pick up where you left off.</p>
 
           <div class="mb-3">
-            <label class="form-label" for="login">Email or phone number</label>
+            <label class="form-label" for="email">Email address</label>
             <div class="input-icon">
               <i class="bi bi-person"></i>
               <input
-                type="text"
                 class="form-control"
-                id="login"
-                name="login"
+                id="email"
+                name="email"
+                type="email"
+                value="{{ old('email') }}"
                 autocomplete="username"
                 required
-                placeholder="name@example.com or 07X XXX XXXX"
+                placeholder="name@example.com"
               />
             </div>
+            @error('email')
+              <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
           </div>
 
           <div class="mb-2">
@@ -90,21 +94,7 @@
             </div>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="remember"
-                name="remember"
-                value="1"
-                checked
-              />
-              <label
-                class="form-check-label small"
-                for="remember"
-              >Remember me</label>
-            </div>
+          <div class="text-end mb-4">
             <a href="{{ route('auth.forgot-password') }}" class="small">Forgot password?</a>
           </div>
 
@@ -112,28 +102,6 @@
             type="submit"
             class="btn btn-accent btn-lg w-100"
           >Log in</button>
-
-          <div class="divider-text">
-            <span>or</span>
-          </div>
-
-          <!-- Log in with Google / Apple -->
-          <div class="d-grid gap-2">
-            <button
-              type="button"
-              class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
-              data-provider="google"
-            >
-              <i class="bi bi-google"></i><span>Continue with Google</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
-              data-provider="apple"
-            >
-              <i class="bi bi-apple"></i><span>Continue with Apple</span>
-            </button>
-          </div>
 
           <p class="text-center small mt-4 mb-0">
             <span class="text-muted">Don't have an account?</span>

@@ -111,9 +111,7 @@
             <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
-              <a class="dropdown-item text-danger" href="{{ route('home') }}"
-                >Log out</a
-              >
+              <x-logout-form />
             </li>
           </ul>
         </div>
