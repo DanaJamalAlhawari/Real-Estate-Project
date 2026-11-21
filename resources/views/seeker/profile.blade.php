@@ -83,12 +83,12 @@
                 type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                aria-label="Account menu, Sara Khaled"
+                aria-label="Account menu, {{ auth()->user()->display_name }}"
               >
-                <span class="avatar">S</span>
+                <span class="avatar">{{ auth()->user()->display_initial }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
+                <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
                 <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -165,9 +165,9 @@
             <div class="col-lg-4">
               <aside class="panel" aria-label="My account">
                 <div class="text-center pb-3 border-bottom">
-                  <span class="avatar avatar-xl mb-2">S</span>
-                  <b class="d-block fs-5">Sara Khaled</b>
-                  <div class="small text-muted">sara@example.com</div>
+                  <span class="avatar avatar-xl mb-2">{{ auth()->user()->display_initial }}</span>
+                  <b class="d-block fs-5">{{ auth()->user()->display_name }}</b>
+                  <div class="small text-muted">{{ auth()->user()->email }}</div>
                   <span class="status status--success mt-2"
                     >Email verified</span
                   >
