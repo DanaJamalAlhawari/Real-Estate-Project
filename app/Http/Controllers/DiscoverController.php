@@ -21,7 +21,9 @@ class DiscoverController extends Controller
 
         $query = Property::with(['images' => function ($q) {
             $q->orderByDesc('is_primary');
-        }, 'rooms', 'services']);
+        }, 'rooms', 'services'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
         
         // Apply filters Button
         if ($request->filled('category')) {
@@ -41,7 +43,23 @@ class DiscoverController extends Controller
 
         $properties = $query->get();
 
-        return view('seeker.search', compact('properties'));
+        $favorites = $request->user()->favoriteProperties()
+            ->with(['images' => function ($q) {
+                $q->orderByDesc('is_primary');
+            }])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->get();
+
+        $favoriteIds = $favorites->pluck('id')->all();
+        $favoritesCount = $favorites->count();
+
+        return view('seeker.search', compact(
+            'properties',
+            'favorites',
+            'favoriteIds',
+            'favoritesCount',
+        ));
     }
 
 
