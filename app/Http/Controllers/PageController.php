@@ -42,7 +42,7 @@ final class PageController extends Controller
                 ->get();
 
             // Dana's code: get this user's favorites and favorite IDs
-            $data['favorites'] = $user?->favoriteProperties()
+            $data['favorites'] = Auth::user()?->favoriteProperties()
                 ->with('images')
                 ->withAvg('reviews', 'rating')
                 ->withCount('reviews')
