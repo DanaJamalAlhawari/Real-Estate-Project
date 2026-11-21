@@ -826,6 +826,14 @@
 
       </section>
 
+      @unless(isset($property))
+        <section class="panel form-section" aria-labelledby="secOwnership">
+          <h2 id="secOwnership">Ownership verification</h2>
+          <label for="createOwnershipDocument" class="form-label">Ownership document (optional, up to 5 MB)</label>
+          <input id="createOwnershipDocument" class="form-control" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png">
+        </section>
+      @endunless
+
       <!-- 4. Location -->
 
       <section class="panel form-section" aria-labelledby="secLocation">

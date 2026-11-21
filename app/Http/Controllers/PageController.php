@@ -7,11 +7,12 @@ use App\Models\Commission;
 use App\Models\DemoHome;
 use App\Models\Message;
 use App\Models\Property;
-use App\Models\RealEstateUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Models\RealEstateUser;
+use Illuminate\Support\Facades\Auth;
 
 final class PageController extends Controller
 {
@@ -28,10 +29,11 @@ final class PageController extends Controller
         $data = ['homes' => $homes];
 
         if ($page === 'seeker.search') {
-            $ordered = collect($homes)->groupBy(fn (array $home) => (int) $home['featured']);
+            $ordered = collect($homes)->groupBy(fn(array $home) => (int) $home['featured']);
             $data['featuredHomes'] = $ordered->get(1, collect())->concat($ordered->get(0, collect()));
             $data['defaultFavorites'] = $data['featuredHomes']->whereIn('id', [1, 4]);
 
+            // Dana's code: get available, verified properties
             $data['properties'] = Property::where('status', 'available')
                 ->where('verification_status', 'verified')
                 ->with('images')
@@ -39,31 +41,29 @@ final class PageController extends Controller
                 ->withCount('reviews')
                 ->get();
 
-            $user = $request->user();
-
-            $data['favorites'] = $user instanceof RealEstateUser && $user->role === 'tenant'
-                ? $user->favoriteProperties()
-                    ->with('images')
-                    ->withAvg('reviews', 'rating')
-                    ->withCount('reviews')
-                    ->get()
-                : collect();
+            // Dana's code: get this user's favorites and favorite IDs
+            $data['favorites'] = Auth::user()?->favoriteProperties()
+                ->with('images')
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews')
+                ->get() ?? collect();
 
             $data['favoriteIds'] = $data['favorites']->pluck('id')->all();
             $data['favoritesCount'] = $data['favorites']->count();
         }
 
+//dana added code
         if ($page === 'seeker.property' && $request->filled('property_id')) {
-            $property = Property::where('verification_status', 'verified')
-                ->where('status', '!=', 'hidden')
-                ->findOrFail($request->query('property_id'));
+    $property = Property::where('verification_status', 'verified')
+        ->where('status', '!=', 'hidden')
+        ->findOrFail($request->query('property_id'));
 
-            $data['property'] = $property;
-        }
+    $data['property'] = $property;
+    //
+}
 
         return view($page, $data);
     }
-
     public function showProperty(Request $request): View
     {
         $propertyId = filter_var(
@@ -102,12 +102,12 @@ final class PageController extends Controller
             'latestVerifiedProperty' => null,
         ];
 
-        if (! $agent instanceof RealEstateUser || $agent->role !== 'agent') {
+        if (!$agent instanceof RealEstateUser || $agent->role !== 'agent') {
             return view('owner.dashboard', $data);
         }
 
         $profile = $agent->agentProfile;
-        $name = trim(($profile?->first_name ?? '') . ' ' . ($profile?->last_name ?? ''));
+        $name = trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? ''));
         $properties = $agent->properties();
         $bookings = Booking::whereHas('property', fn ($query) => $query->where('agent_id', $agent->id));
         $pendingBookings = (clone $bookings)->where('status', 'pending');
@@ -141,13 +141,11 @@ final class PageController extends Controller
     {
         return back();
     }
-
     public function adminDashboard(): View
     {
         $totalUsers = RealEstateUser::count();
         $totalProperties = Property::count();
         $monthStart = now()->startOfMonth();
-
         $bookingsThisMonth = Booking::where('created_at', '>=', $monthStart)
             ->where('created_at', '<', $monthStart->copy()->addMonth())
             ->count();
@@ -157,7 +155,6 @@ final class PageController extends Controller
             ->where('ownership_deed_url', 'like', 'verifications/%')
             ->get(['title', 'ownership_deed_url'])
             ->filter(fn (Property $property) => $documents->exists($property->ownership_deed_url));
-
         $pendingVerificationCount = $pendingProperties->count();
         $pendingVerificationPreview = $pendingProperties->take(4);
 
@@ -167,7 +164,6 @@ final class PageController extends Controller
 
         for ($monthsAgo = 5; $monthsAgo >= 0; $monthsAgo--) {
             $month = $monthStart->copy()->subMonths($monthsAgo);
-
             $monthlyCommissionRevenue[] = [
                 'label' => $month->format('M'),
                 'amount' => (clone $paidCommissions)
