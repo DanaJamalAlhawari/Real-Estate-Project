@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class VerificationController extends Controller
@@ -80,27 +81,32 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'admin', 403);
 
-        $request->validate([
+        $data = $request->validate([
             'decision' => 'required|in:approve,reject',
             'note' => 'nullable|string',
+            'commission_rate' => 'exclude_unless:decision,approve|nullable|numeric|decimal:0,2|min:0|max:100',
         ]);
 
-        $property = Property::findOrFail($verification);
+        DB::transaction(function () use ($request, $verification, $data) {
+            $property = Property::lockForUpdate()->findOrFail($verification);
 
-        abort_unless($property->verification_status === 'pending', 403);
-        abort_unless(
-            str_starts_with($property->ownership_deed_url ?? '', 'verifications/')
-                && Storage::disk('local')->exists($property->ownership_deed_url),
-            403,
-        );
+            abort_unless($property->verification_status === 'pending', 403);
+            abort_unless(
+                str_starts_with($property->ownership_deed_url ?? '', 'verifications/')
+                    && Storage::disk('local')->exists($property->ownership_deed_url),
+                403,
+            );
 
-        $approved = $request->decision === 'approve';
-
-        $property->verification_status = $approved ? 'verified' : 'rejected';
-        $property->verified_at = $approved ? now() : null;
-        $property->reviewed_by = $request->user()->id;
-        $property->admin_notes = $request->note;
-        $property->save();
+            $approved = $data['decision'] === 'approve';
+            $property->approved_commission_rate = $approved
+                ? ($data['commission_rate'] ?? config('commissions.category_rates.'.$property->category))
+                : null;
+            $property->verification_status = $approved ? 'verified' : 'rejected';
+            $property->verified_at = $approved ? now() : null;
+            $property->reviewed_by = $request->user()->id;
+            $property->admin_notes = $data['note'] ?? null;
+            $property->save();
+        });
 
         return redirect()->route('admin.verifications')
             ->with('success', 'Verification updated');

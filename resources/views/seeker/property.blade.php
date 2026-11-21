@@ -3,6 +3,7 @@
 @section('roleStyle', 'seeker')
 @section('bodyAttributes') data-role="seeker" data-page="property"@endsection
 @section('content')
+<script src="{{ asset('assets/js/controllers/booking-calendar.js') }}" defer></script>
 <x-seeker-navbar />
 
 <main class="app-page container">
@@ -63,20 +64,27 @@
                     @if ($errors->any())
                         <p class="text-danger" role="alert">{{ $errors->first() }}</p>
                     @endif
-                    <form method="post" action="{{ route('seeker.bookings.store', $property) }}">
+                    <form method="post" action="{{ route('seeker.bookings.store', $property) }}"
+                          data-booking-calendar data-reserved="{{ $reservedDates->toJson() }}">
                         @csrf
                         <div class="mb-3">
-                            <label for="moveIn" class="form-label">Move-in date</label>
+                            <label for="moveIn" class="form-label">Start date</label>
                             <input type="date" id="moveIn" name="moveIn" class="form-control"
                                    min="{{ today()->toDateString() }}" value="{{ old('moveIn') }}" required>
                         </div>
                         <div class="mb-3">
-                            <label for="duration" class="form-label">Duration</label>
-                            <select class="form-select" id="duration" name="duration">
-                                @foreach ([3, 6, 12] as $months)
-                                    <option value="{{ $months }}" @selected(old('duration', 6) == $months)>{{ $months }} months</option>
-                                @endforeach
-                            </select>
+                            <label for="moveOut" class="form-label">End date (checkout)</label>
+                            <input type="date" id="moveOut" name="moveOut" class="form-control"
+                                   min="{{ today()->addDay()->toDateString() }}" value="{{ old('moveOut') }}" required>
+                        </div>
+                        <div class="mb-3" data-calendar hidden>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-previous aria-label="Previous month">‹</button>
+                                <strong class="small" data-calendar-month aria-live="polite"></strong>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-next aria-label="Next month">›</button>
+                            </div>
+                            <div class="d-grid gap-1 text-center" style="grid-template-columns: repeat(7, minmax(0, 1fr))" data-calendar-days></div>
+                            <p class="small text-muted mt-2 mb-0" data-calendar-help aria-live="polite"></p>
                         </div>
                         <button type="submit" class="btn btn-accent btn-lg w-100">Request booking</button>
                     </form>

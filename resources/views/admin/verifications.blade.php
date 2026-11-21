@@ -203,19 +203,31 @@
                   <form id="verifyForm" method="post" action="{{ route('admin.verifications.update', $selectedProperty) }}">
                     @csrf
                     @method('PATCH')
+                    <label for="commission-rate" class="form-label">Commission rate (%)</label>
+                    <input class="form-control" type="number" id="commission-rate" name="commission_rate"
+                           min="0" max="100" step="0.01"
+                           value="{{ old('commission_rate', config('commissions.category_rates.'.$selectedProperty->category)) }}">
+                    @error('commission_rate')
+                      <p class="text-danger small">{{ $message }}</p>
+                    @enderror
                     <label for="vnote" class="form-label mt-3">Admin notes</label>
                     <textarea class="form-control" id="vnote" name="note" rows="2" maxlength="2000"
                               placeholder="e.g. The title deed is not legible">{{ old('note') }}</textarea>
                     <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
-                      <button type="submit" class="btn btn-outline-danger" name="decision" value="reject">Reject</button>
+                      <button type="submit" class="btn btn-outline-danger" name="decision" value="reject" formnovalidate>Reject</button>
                       <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" name="decision" value="approve">
                         <i class="bi bi-patch-check"></i>Approve &amp; grant badge
                       </button>
                     </div>
                   </form>
-                @elseif ($selectedProperty->admin_notes)
-                  <h2 class="h6 mt-4 mb-2">Admin notes</h2>
-                  <p>{{ $selectedProperty->admin_notes }}</p>
+                @else
+                  @if ($selectedProperty->approved_commission_rate !== null)
+                    <p class="mt-3">Approved commission: {{ $selectedProperty->approved_commission_rate }}%</p>
+                  @endif
+                  @if ($selectedProperty->admin_notes)
+                    <h2 class="h6 mt-4 mb-2">Admin notes</h2>
+                    <p>{{ $selectedProperty->admin_notes }}</p>
+                  @endif
                 @endif
               @else
                 <h2 class="h6" id="reviewName">Property review</h2>

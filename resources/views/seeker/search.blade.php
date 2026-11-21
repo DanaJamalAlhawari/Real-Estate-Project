@@ -36,10 +36,16 @@
     </div>
   </div>
 
+  <x-seeker-assistant :cities="$assistantCities" :types="$assistantTypes" :bookings="$assistantBookings" />
+
   <div class="seeker-results-layout">
     <aside class="panel seeker-filters" aria-labelledby="filterHeading">
       <h2 class="h5 mb-3" id="filterHeading"><i class="bi bi-sliders me-2" aria-hidden="true"></i>Filters</h2>
       <form id="seekerFilters" action="{{ route('seeker.search') }}" method="get">
+        @if (request()->filled('city'))
+          <input type="hidden" name="city" value="{{ request('city') }}">
+          <p class="small">City: {{ request('city') }}</p>
+        @endif
         <fieldset class="mb-3">
           <legend class="form-label">Property type</legend>
           <div class="d-grid gap-2">

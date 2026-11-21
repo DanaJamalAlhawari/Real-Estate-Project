@@ -22,14 +22,11 @@
                 @if ($booking->property?->verification_status === 'verified' && in_array($booking->property->status, ['available', 'partially_rented'], true))
                     <a href="{{ route('seeker.property.details', ['property_id' => $booking->property_id]) }}">View property</a>
                 @endif
-                @foreach ($booking->payments->where('status', 'pending') as $payment)
-                    @if ($booking->status === 'confirmed')
-                        <form method="post" action="{{ route('payments.mock.confirm', $payment) }}" class="mt-2">
-                            @csrf
-                            <button class="btn btn-outline-primary" type="submit">Confirm test payment</button>
-                        </form>
-                    @endif
-                @endforeach
+                @if ($booking->payments->contains('status', 'successful'))
+                    <a class="btn btn-outline-primary ms-2" href="{{ route('payments.mock.show', $booking) }}">View payment receipt</a>
+                @elseif ($booking->status === 'confirmed')
+                    <a class="btn btn-accent ms-2" href="{{ route('payments.mock.show', $booking) }}">Pay</a>
+                @endif
             </article>
         @empty
             <p class="panel text-muted">You have no booking requests yet.</p>

@@ -9,7 +9,7 @@
 @include('partials.admin-sidebar')
 <main class="app-main">
     <h1>Commission management</h1>
-    <p class="text-muted">Set a separate active rate for each agent and review commissions from successful payments.</p>
+    <p class="text-muted">Review commissions from successful payments. Mock checkout uses the rate approved for the property.</p>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -85,7 +85,7 @@
             @method('DELETE')
         </form>
     @empty
-        <p class="alert alert-info">No rates yet. Add an active rate for each agent to enable commission calculation.</p>
+        <p class="alert alert-info">No per-agent rates have been set.</p>
     @endforelse
 
     <h2 class="h4 mt-4">Commission records</h2>
@@ -99,7 +99,12 @@
                     @foreach ($commissions as $commission)
                         <tr>
                             <td>{{ $commission->payment_id ?? 'Older record' }}</td>
-                            <td>{{ $commission->payment?->status ?? 'Older record' }}</td>
+                            <td>
+                                {{ $commission->payment?->status ?? 'Older record' }}
+                                @if (str_starts_with($commission->payment?->transaction_id ?? '', 'mock-'))
+                                    <span class="badge text-bg-secondary">Mock</span>
+                                @endif
+                            </td>
                             <td>{{ $commission->agent?->email ?? '—' }}</td>
                             <td>{{ $commission->commission_rate }}%</td>
                             <td>{{ number_format((float) $commission->commission_amount, 2) }}</td>

@@ -38,6 +38,13 @@ class SeekerPropertyController extends Controller
             'property' => $property,
             'saved' => $request->user()->favoriteProperties()->whereKey($property->id)->exists(),
             'homes' => [],
+            'reservedDates' => $property->bookings()->reserved()
+                ->where('end_date', '>', today()->toDateString())
+                ->orderBy('start_date')->get(['start_date', 'end_date'])
+                ->map(fn ($booking) => [
+                    $booking->start_date->toDateString(),
+                    $booking->end_date->toDateString(),
+                ]),
         ]);
     }
     public function startConversation(Request $request, Property $property): RedirectResponse

@@ -59,6 +59,11 @@
     </div>
 
     <!-- ===== 2. Booking requests ===== -->
+    @if (session('error'))
+      <p class="alert alert-danger" role="alert">{{ session('error') }}</p>
+    @elseif (session('success'))
+      <p class="alert alert-success" role="status">{{ session('success') }}</p>
+    @endif
     <section aria-label="Booking requests">
       <!-- Filters -->
       <div
@@ -120,8 +125,7 @@
               {{ $booking->property->title ?? 'Property unavailable' }}
             </div>
             <div class="small text-muted">
-              Move-in {{ $booking->start_date }}
-              · {{ $booking->duration }} {{ $booking->duration_unit }}
+              {{ $booking->start_date->format('j M Y') }} – {{ $booking->end_date->format('j M Y') }}
             </div>
           </div>
           <div class="d-flex flex-wrap align-items-center gap-2">

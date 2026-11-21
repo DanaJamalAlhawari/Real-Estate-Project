@@ -17,6 +17,7 @@ class DiscoverController extends Controller
         $request->validate([
             'category' => ['nullable', Rule::in(array_keys(Property::CATEGORIES))],
             'q' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'max' => 'nullable|numeric|min:0',
         ]);
 
@@ -44,6 +45,10 @@ class DiscoverController extends Controller
             $query->where('price', '<=', $request->max);
         }
 
+        if ($request->filled('city')) {
+            $query->where('city', $request->city);
+        }
+
         $properties = $query->get();
 
         $favorites = $request->user()->favoriteProperties()
@@ -58,11 +63,19 @@ class DiscoverController extends Controller
         $favoriteIds = $favorites->pluck('id')->all();
         $favoritesCount = $favorites->count();
 
+        $assistantListings = Property::discoverable()->distinct()->get(['city', 'category']);
+        $assistantCities = $assistantListings->pluck('city')->filter()->unique()->sort();
+        $assistantTypes = $assistantListings->pluck('category')->unique();
+        $assistantBookings = $request->user()->bookings()->with('property')->latest('id')->limit(3)->get();
+
         return view('seeker.search', compact(
             'properties',
             'favorites',
             'favoriteIds',
             'favoritesCount',
+            'assistantCities',
+            'assistantTypes',
+            'assistantBookings',
         ));
     }
 

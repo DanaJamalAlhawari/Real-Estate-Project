@@ -272,6 +272,19 @@ class PropertyController extends Controller
                 $uploadedPaths
             ) {
                 // Save property details.
+                $current = Property::lockForUpdate()->findOrFail($property->id);
+                $current->forceFill($property->getDirty());
+                if ($current->getOriginal('category') !== $validated['category']) {
+                    $current->category = $validated['category'];
+                    $current->approved_commission_rate = null;
+                    if ($current->verification_status === 'verified') {
+                        $current->verification_status = 'pending';
+                        $current->reviewed_by = null;
+                        $current->verified_at = null;
+                        $current->admin_notes = null;
+                    }
+                }
+                $property = $current;
                 $property->save();
 
                 // Update property services.

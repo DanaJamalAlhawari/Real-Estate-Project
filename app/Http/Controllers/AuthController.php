@@ -33,10 +33,8 @@ class AuthController extends Controller
                 'unique:tenant_profiles,phone',
                 'unique:agent_profiles,phone',
             ],
-            'agency_name' => ['nullable', 'string', 'max:255'],
-            'license_number' => ['nullable', 'string', 'max:255'],
-            'emergency_contact' => ['nullable', 'string', 'max:30'],
-            'student_id' => ['nullable', 'string', 'max:255'],
+            'owner_type' => ['exclude_unless:role,agent', 'nullable', 'in:individual,agency'],
+            'agency_name' => ['exclude_unless:role,agent', 'exclude_unless:owner_type,agency', 'nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'terms' => ['accepted'],
         ]);
@@ -56,11 +54,8 @@ class AuthController extends Controller
 
             if ($data['role'] === 'agent') {
                 $profileData['agency_name'] = $data['agency_name'] ?? null;
-                $profileData['license_number'] = $data['license_number'] ?? null;
                 $user->agentProfile()->create($profileData);
             } else {
-                $profileData['emergency_contact'] = $data['emergency_contact'] ?? null;
-                $profileData['student_id'] = $data['student_id'] ?? null;
                 $user->tenantProfile()->create($profileData);
             }
 

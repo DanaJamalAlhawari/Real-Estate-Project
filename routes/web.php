@@ -95,7 +95,12 @@ Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
     Route::get('/seeker/search.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.search');
 
-    // Mock payment is available only to the tenant who owns that payment.
+    Route::get('/seeker/bookings/{booking}/payment', [MockPaymentController::class, 'show'])
+        ->whereNumber('booking')->name('payments.mock.show');
+    Route::post('/seeker/bookings/{booking}/payment', [MockPaymentController::class, 'pay'])
+        ->whereNumber('booking')->name('payments.mock.pay');
+
+    // Legacy payment confirmation uses the same checkout transaction.
     Route::post('/payments/{payment}/mock-confirm', [MockPaymentController::class, 'confirm'])
         ->name('payments.mock.confirm');
 });

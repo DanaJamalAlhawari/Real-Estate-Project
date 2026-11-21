@@ -60,6 +60,17 @@ class Booking extends Model
         );
     }
 
+    public function scopeReserved($query)
+    {
+        return $query->whereIn('status', ['confirmed', 'completed']);
+    }
+
+    public function scopeOverlapping($query, $startDate, $endDate)
+    {
+        return $query->whereDate('start_date', '<', $endDate)
+            ->whereDate('end_date', '>', $startDate);
+    }
+
     // العمولة المرتبطة بالحجز
     public function commission(): HasOne
     {

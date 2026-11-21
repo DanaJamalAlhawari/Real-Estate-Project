@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Events\BookingActivity;
 use App\Models\Booking;
 use App\Models\Property;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class BookingRequestController extends Controller
 {
@@ -26,24 +28,46 @@ class BookingRequestController extends Controller
 
     public function store(Request $request, Property $property)
     {
-        abort_unless(Property::discoverable()->whereKey($property->id)->exists(), 404);
-        abort_if($property->price === null, 422, 'This listing has no monthly price.');
-
         $data = $request->validate([
             'moveIn' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
-            'duration' => ['required', 'integer', 'in:3,6,12'],
+            'moveOut' => ['required', 'date_format:Y-m-d', 'after:moveIn'],
         ]);
 
-        $booking = new Booking();
-        $booking->property()->associate($property);
-        $booking->tenant()->associate($request->user());
-        $booking->start_date = $data['moveIn'];
-        $booking->end_date = Carbon::parse($data['moveIn'])->addMonthsNoOverflow((int) $data['duration']);
-        $booking->duration = $data['duration'];
-        $booking->duration_unit = 'monthly';
-        $booking->total_price = (int) round((float) $property->price * 100) * (int) $data['duration'] / 100;
-        $booking->status = 'pending';
-        $booking->save();
+        $start = CarbonImmutable::parse($data['moveIn']);
+        $end = CarbonImmutable::parse($data['moveOut']);
+
+        $property = DB::transaction(function () use ($request, $property, $start, $end) {
+            $property = Property::discoverable()->lockForUpdate()->findOrFail($property->id);
+            abort_if($property->price === null, 422, 'This listing has no monthly price.');
+
+            if ($property->bookings()->reserved()->overlapping($start->toDateString(), $end->toDateString())->exists()) {
+                throw ValidationException::withMessages(['moveIn' => 'These dates overlap an existing booking.']);
+            }
+
+            $total = 0;
+            for ($date = $start; $date < $end; $date = $segmentEnd) {
+                $nextMonth = $date->startOfMonth()->addMonth();
+                $segmentEnd = $nextMonth < $end ? $nextMonth : $end;
+                $total += (float) $property->price * $date->diffInDays($segmentEnd) / $date->daysInMonth;
+            }
+
+            if ($total > 9999999999.99) {
+                throw ValidationException::withMessages(['moveOut' => 'Choose a shorter stay.']);
+            }
+
+            $booking = new Booking();
+            $booking->property()->associate($property);
+            $booking->tenant()->associate($request->user());
+            $booking->start_date = $start;
+            $booking->end_date = $end;
+            $booking->duration = $start->diffInDays($end);
+            $booking->duration_unit = 'daily';
+            $booking->total_price = round($total, 2);
+            $booking->status = 'pending';
+            $booking->save();
+
+            return $property;
+        });
         rescue(fn () => BookingActivity::dispatch(
             (int) $property->agent_id,
             'New booking request for '.$property->title,
@@ -65,17 +89,44 @@ class BookingRequestController extends Controller
 
     private function decide(Request $request, Booking $booking, string $status, string $message)
     {
-        $owned = $this->forAgent($request)->whereKey($booking->id);
-        abort_unless((clone $owned)->exists(), 404);
+        $error = DB::transaction(function () use ($request, $booking, $status) {
+            $property = $request->user()->properties()->lockForUpdate()->findOrFail($booking->property_id);
+            $booking = $property->bookings()->lockForUpdate()->findOrFail($booking->id);
 
-        if (!$owned->where('status', 'pending')->update(['status' => $status])) {
-            return redirect()->route('owner.requests')->with('error', 'This booking is no longer pending.');
+            if ($booking->status !== 'pending') {
+                return 'This booking is no longer pending.';
+            }
+            if ($status === 'confirmed') {
+                if ($property->verification_status !== 'verified') {
+                    return 'This property needs admin approval before accepting bookings.';
+                }
+                if ($property->bookings()->reserved()->overlapping(
+                    $booking->start_date->toDateString(), $booking->end_date->toDateString()
+                )->exists()) {
+                    return 'These dates overlap an existing booking.';
+                }
+                $booking->approved_commission_rate = $property->approved_commission_rate
+                    ?? config('commissions.category_rates.'.$property->category);
+            }
+
+            $booking->status = $status;
+            $booking->save();
+
+            return null;
+        });
+
+        if ($error !== null) {
+            return redirect()->route('owner.requests')->with('error', $error);
         }
 
         rescue(fn () => BookingActivity::dispatch(
             (int) $booking->tenant_id,
-            $status === 'confirmed' ? 'Your booking request was accepted.' : 'Your booking request was declined.',
-            route('seeker.bookings', [], false),
+            $status === 'confirmed'
+                ? 'Your booking for '.$booking->property->title.' was accepted. You can now pay.'
+                : 'Your booking request was declined.',
+            $status === 'confirmed'
+                ? route('payments.mock.show', $booking, false)
+                : route('seeker.bookings', [], false),
         ));
 
         return redirect()->route('owner.requests')->with('success', $message);

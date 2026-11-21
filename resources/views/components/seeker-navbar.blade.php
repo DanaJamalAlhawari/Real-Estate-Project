@@ -6,7 +6,8 @@
     $unread = auth()->user()->unreadMessageCount();
     $pendingBookings = auth()->user()->bookings()->where('status', 'pending')->count();
     $bookingUpdates = auth()->user()->bookings()->whereIn('status', ['confirmed', 'cancelled'])
-        ->with('property')->latest('updated_at')->limit(3)->get();
+        ->with('property')->withExists(['payments as has_successful_payment' => fn ($query) => $query->where('status', 'successful')])
+        ->latest('updated_at')->limit(3)->get();
 @endphp
 
 <header class="site-header app-nav">
@@ -29,8 +30,9 @@
                         <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
                         <div class="py-1">
                             @forelse ($bookingUpdates as $booking)
-                                <a class="dropdown-item text-wrap" href="{{ route('seeker.bookings') }}">
-                                    {{ $booking->property?->title ?? 'Property' }} — {{ ucfirst($booking->status) }}
+                                @php($canPay = $booking->status === 'confirmed' && ! $booking->has_successful_payment)
+                                <a class="dropdown-item text-wrap" href="{{ $canPay ? route('payments.mock.show', $booking) : route('seeker.bookings') }}">
+                                    {{ $booking->property?->title ?? 'Property' }} — {{ $canPay ? 'Accepted. You can now pay.' : ($booking->has_successful_payment ? 'Paid' : ucfirst($booking->status)) }}
                                 </a>
                             @empty
                                 <div class="px-3 py-2 text-muted">No booking updates yet.</div>

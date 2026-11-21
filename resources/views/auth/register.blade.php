@@ -77,11 +77,11 @@
                 type="radio"
                 class="btn-check"
                 name="role"
-                id="roleAgent"
+                id="roleOwner"
                 value="agent"
                 @checked(old('role', request('role')) === 'agent')
               />
-              <label class="choice-card" for="roleAgent">
+              <label class="choice-card" for="roleOwner">
                 <span class="ci"><i class="bi bi-house-door"></i></span>
                 <span
                   ><b>A property owner</b
@@ -101,7 +101,7 @@
                 name="owner_type"
                 id="otIndividual"
                 value="individual"
-                checked
+                @checked(old('owner_type', 'individual') === 'individual')
               />
               <label class="chip-select" for="otIndividual"
                 ><i class="bi bi-person"></i
@@ -113,6 +113,7 @@
                 name="owner_type"
                 id="otAgency"
                 value="agency"
+                @checked(old('owner_type') === 'agency')
               />
               <label class="chip-select" for="otAgency"
                 ><i class="bi bi-building"></i
@@ -129,17 +130,18 @@
               class="form-control"
               id="agencyName"
               name="agency_name"
+              value="{{ old('agency_name') }}"
               autocomplete="organization"
               placeholder="e.g. Al Riyada Real Estate"
             />
           </div>
 
           <div class="row g-3 mb-3">
-            @foreach (['first_name' => 'First name', 'last_name' => 'Last name', 'license_number' => 'License number (agents)', 'emergency_contact' => 'Emergency contact (tenants)', 'student_id' => 'Student ID (tenants)'] as $field => $label)
+            @foreach (['first_name' => 'First name', 'last_name' => 'Last name'] as $field => $label)
               <div class="col-sm-6">
                 <label class="form-label" for="{{ $field }}">{{ $label }}</label>
                 <input class="form-control" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}"
-                       @required(in_array($field, ['first_name', 'last_name'], true))>
+                       required>
               </div>
             @endforeach
           </div>
