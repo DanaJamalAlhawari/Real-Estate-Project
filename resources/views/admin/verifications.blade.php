@@ -37,13 +37,7 @@
       >
       <div class="ms-auto d-flex align-items-center gap-1">
         <!-- Messages: icon with unread count -->
-        <a
-          class="icon-btn"
-          href="{{ route('admin.chat') }}"
-          aria-label="Messages, 2 unread"
-        >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
-        </a>
+        <a class="icon-btn" href="{{ route('admin.chat') }}" aria-label="Messages"><i class="bi bi-chat-dots"></i></a>
         <div class="dropdown">
           <button
             class="icon-btn"
@@ -72,9 +66,6 @@
                   <span class="d-block"
                     >{{ $queues->get('pending', collect())->count() }} ownership documents waiting for review</span
                   >
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >Today</span
-                  >
                 </span>
               </a>
             </div>
@@ -102,53 +93,7 @@
 
     <div class="app-shell">
       <!-- ===== Sidebar ===== -->
-      <aside
-        class="app-sidebar offcanvas-lg offcanvas-start"
-        tabindex="-1"
-        id="appSidebar"
-      >
-        <div class="offcanvas-header border-bottom">
-          <a class="brand" href="{{ route('home') }}"
-            ><span class="brand-mark">M</span><span>Makan</span></a
-          >
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="offcanvas"
-            data-bs-target="#appSidebar"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="offcanvas-body">
-          <div class="side-label">Admin</div>
-          <a class="side-link" href="{{ route('admin.dashboard') }}" title="Dashboard"
-            ><i class="bi bi-grid-1x2"></i
-            ><span class="flex-grow-1">Dashboard</span></a
-          >
-          <a
-            class="side-link active"
-            href="{{ route('admin.verifications') }}"
-            aria-current="page"
-            title="Verifications"
-            ><i class="bi bi-patch-check"></i
-            ><span class="flex-grow-1">Verifications</span
-            ><span class="side-badge">4</span></a
-          >
-          <a class="side-link" href="{{ route('admin.users') }}" title="Users"
-            ><i class="bi bi-people"></i
-            ><span class="flex-grow-1">Users</span></a
-          >
-          <a class="side-link" href="{{ route('admin.places') }}" title="Areas"
-            ><i class="bi bi-geo-alt"></i
-            ><span class="flex-grow-1">Areas</span></a
-          >
-          <a class="side-link" href="{{ route('admin.chat') }}" title="Messages"
-            ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span
-            ><span class="side-badge">2</span></a
-          >
-        </div>
-      </aside>
+      @include('partials.admin-sidebar')
 
       <!-- ===== Content ===== -->
       <main class="app-main">
@@ -258,19 +203,31 @@
                   <form id="verifyForm" method="post" action="{{ route('admin.verifications.update', $selectedProperty) }}">
                     @csrf
                     @method('PATCH')
+                    <label for="commission-rate" class="form-label">Commission rate (%)</label>
+                    <input class="form-control" type="number" id="commission-rate" name="commission_rate"
+                           min="0" max="100" step="0.01"
+                           value="{{ old('commission_rate', config('commissions.category_rates.'.$selectedProperty->category)) }}">
+                    @error('commission_rate')
+                      <p class="text-danger small">{{ $message }}</p>
+                    @enderror
                     <label for="vnote" class="form-label mt-3">Admin notes</label>
                     <textarea class="form-control" id="vnote" name="note" rows="2" maxlength="2000"
                               placeholder="e.g. The title deed is not legible">{{ old('note') }}</textarea>
                     <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
-                      <button type="submit" class="btn btn-outline-danger" name="decision" value="reject">Reject</button>
+                      <button type="submit" class="btn btn-outline-danger" name="decision" value="reject" formnovalidate>Reject</button>
                       <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" name="decision" value="approve">
                         <i class="bi bi-patch-check"></i>Approve &amp; grant badge
                       </button>
                     </div>
                   </form>
-                @elseif ($selectedProperty->admin_notes)
-                  <h2 class="h6 mt-4 mb-2">Admin notes</h2>
-                  <p>{{ $selectedProperty->admin_notes }}</p>
+                @else
+                  @if ($selectedProperty->approved_commission_rate !== null)
+                    <p class="mt-3">Approved commission: {{ $selectedProperty->approved_commission_rate }}%</p>
+                  @endif
+                  @if ($selectedProperty->admin_notes)
+                    <h2 class="h6 mt-4 mb-2">Admin notes</h2>
+                    <p>{{ $selectedProperty->admin_notes }}</p>
+                  @endif
                 @endif
               @else
                 <h2 class="h6" id="reviewName">Property review</h2>

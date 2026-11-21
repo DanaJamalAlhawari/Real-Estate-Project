@@ -36,10 +36,16 @@
     </div>
   </div>
 
+  <x-seeker-assistant :cities="$assistantCities" :types="$assistantTypes" :bookings="$assistantBookings" />
+
   <div class="seeker-results-layout">
     <aside class="panel seeker-filters" aria-labelledby="filterHeading">
       <h2 class="h5 mb-3" id="filterHeading"><i class="bi bi-sliders me-2" aria-hidden="true"></i>Filters</h2>
       <form id="seekerFilters" action="{{ route('seeker.search') }}" method="get">
+        @if (request()->filled('city'))
+          <input type="hidden" name="city" value="{{ request('city') }}">
+          <p class="small">City: {{ request('city') }}</p>
+        @endif
         <fieldset class="mb-3">
           <legend class="form-label">Property type</legend>
           <div class="d-grid gap-2">
@@ -47,26 +53,12 @@
               <input class="form-check-input" type="radio" name="category" value="" {{ !request('category') ? 'checked' : '' }}>
               <span class="form-check-label">All</span>
             </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="studio" {{ request('category') == 'studio' ? 'checked' : '' }}>
-              <span class="form-check-label">Studio</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="student_apartment" {{ request('category') == 'student_apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Student Apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="apartment" {{ request('category') == 'apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="shared-apartment" {{ request('category') == 'shared-apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Shared apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="vacation" {{ request('category') == 'vacation' ? 'checked' : '' }}>
-              <span class="form-check-label">Vacation</span>
-            </label>
+            @foreach (\App\Models\Property::CATEGORIES as $value => $label)
+              <label class="form-check">
+                <input class="form-check-input" type="radio" name="category" value="{{ $value }}" @checked(request('category') === $value)>
+                <span class="form-check-label">{{ $label }}</span>
+              </label>
+            @endforeach
           </div>
         </fieldset>
         <div class="mb-3">

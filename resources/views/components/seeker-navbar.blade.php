@@ -3,6 +3,11 @@
     $tenantName = trim(($tenantProfile?->first_name ?? '') . ' ' . ($tenantProfile?->last_name ?? ''));
     $tenantName = $tenantName !== '' ? $tenantName : auth()->user()->email;
     $tenantInitial = mb_strtoupper(mb_substr($tenantName, 0, 1));
+    $unread = auth()->user()->unreadMessageCount();
+    $pendingBookings = auth()->user()->bookings()->where('status', 'pending')->count();
+    $bookingUpdates = auth()->user()->bookings()->whereIn('status', ['confirmed', 'cancelled'])
+        ->with('property')->withExists(['payments as has_successful_payment' => fn ($query) => $query->where('status', 'successful')])
+        ->latest('updated_at')->limit(3)->get();
 @endphp
 
 <header class="site-header app-nav">
@@ -13,35 +18,25 @@
             </a>
 
             <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
-                <a class="icon-btn" href="{{ route('seeker.chat') }}" aria-label="Messages, 2 unread">
-                    <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
+                <a class="icon-btn" href="{{ route('seeker.chat') }}" data-inbox-messages-link aria-label="Messages, {{ $unread }} unread">
+                    <i class="bi bi-chat-dots"></i><span class="icon-badge" data-inbox-unread @if (!$unread) hidden @endif>{{ $unread }}</span>
                 </a>
 
                 <div class="dropdown">
                     <button class="icon-btn" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
-                        <i class="bi bi-bell"></i><span class="dot"></span>
+                        <i class="bi bi-bell"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm p-0" style="width: 320px">
                         <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
                         <div class="py-1">
-                            <a class="dropdown-item d-flex gap-2 py-2 text-wrap" href="{{ route('seeker.property') }}">
-                                <span class="kpi-icon flex-shrink-0" style="width: 34px; height: 34px; font-size: 1rem">
-                                    <i class="bi bi-stars"></i>
-                                </span>
-                                <span class="small">
-                                    <span class="d-block">A new home just listed in Al Jubeiha with a 92% match</span>
-                                    <span class="text-muted" style="font-size: 0.72rem">10 minutes ago</span>
-                                </span>
-                            </a>
-                            <a class="dropdown-item d-flex gap-2 py-2 text-wrap" href="{{ route('seeker.bookings') }}">
-                                <span class="kpi-icon flex-shrink-0" style="width: 34px; height: 34px; font-size: 1rem">
-                                    <i class="bi bi-check2-circle"></i>
-                                </span>
-                                <span class="small">
-                                    <span class="d-block">Abu Ahmad accepted your booking</span>
-                                    <span class="text-muted" style="font-size: 0.72rem">1 hour ago</span>
-                                </span>
-                            </a>
+                            @forelse ($bookingUpdates as $booking)
+                                @php($canPay = $booking->status === 'confirmed' && ! $booking->has_successful_payment)
+                                <a class="dropdown-item text-wrap" href="{{ $canPay ? route('payments.mock.show', $booking) : route('seeker.bookings') }}">
+                                    {{ $booking->property?->title ?? 'Property' }} — {{ $canPay ? 'Accepted. You can now pay.' : ($booking->has_successful_payment ? 'Paid' : ucfirst($booking->status)) }}
+                                </a>
+                            @empty
+                                <div class="px-3 py-2 text-muted">No booking updates yet.</div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -88,7 +83,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('seeker.bookings') }}">
                                 <i class="bi bi-calendar-check"></i><span>My bookings</span>
-                                <span class="side-badge">1</span>
+                                @if ($pendingBookings)<span class="side-badge">{{ $pendingBookings }}</span>@endif
                             </a>
                         </li>
                     </ul>

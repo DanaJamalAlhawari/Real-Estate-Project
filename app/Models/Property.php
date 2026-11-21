@@ -39,6 +39,19 @@ class Property extends Model
         ];
     }
 
+    public const CATEGORIES = [
+        'studio' => 'Studio',
+        'student_apartment' => 'Student apartment',
+        'apartment' => 'Apartment',
+        'vacation' => 'Vacation',
+    ];
+
+    public function scopeDiscoverable($query)
+    {
+        return $query->where('verification_status', 'verified')
+            ->whereIn('status', ['available', 'partially_rented']);
+    }
+
     // الوكيل المسؤول عن العقار
     public function agent(): BelongsTo
     {

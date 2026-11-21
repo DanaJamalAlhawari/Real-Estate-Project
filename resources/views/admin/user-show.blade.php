@@ -4,10 +4,12 @@
 @section('roleStyle', 'admin')
 
 @section('content')
-<main class="container py-4">
+@include('partials.admin-topbar')
+<div class="app-shell">
+@include('partials.admin-sidebar')
+<main class="app-main">
     <a href="{{ route('admin.users') }}">&larr; Back to users</a>
     <h1 class="mt-3">User details</h1>
-    <x-logout-form buttonClass="btn btn-outline-danger btn-sm mb-3" />
 
     @php
         $profile = $user->role === 'agent'
@@ -35,4 +37,5 @@
         </div>
     </div>
 </main>
+</div>
 @endsection

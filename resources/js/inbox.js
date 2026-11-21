@@ -1,6 +1,7 @@
 const userId = document.querySelector('meta[name="makan-user-id"]')?.content;
 
-if (userId && window.Echo) {
+function connectInbox() {
+    if (!userId || !window.Echo || !window.bootstrap?.Toast) return;
     const container = document.createElement("div");
     container.className = "toast-container position-fixed top-0 end-0 p-3";
     container.setAttribute("aria-live", "polite");
@@ -26,7 +27,17 @@ if (userId && window.Echo) {
         { delay: 5000 },
     );
 
-    window.Echo.private(`inbox.${userId}`).listen(
+    const inbox = window.Echo.private(`inbox.${userId}`);
+    const notify = (title, preview, url, linkLabel) => {
+        container.querySelector(".toast-header strong").textContent = title;
+        container.querySelector("[data-inbox-preview]").textContent = preview;
+        const link = container.querySelector("[data-inbox-link]");
+        link.href = url;
+        link.textContent = linkLabel;
+        toast.show();
+    };
+
+    inbox.listen(
         "InboxMessageReceived",
         (event) => {
             const conversationId = String(event.conversation_id);
@@ -64,10 +75,16 @@ if (userId && window.Echo) {
                 badge.hidden = false;
             }
 
-            container.querySelector("[data-inbox-preview]").textContent =
-                event.preview;
-            container.querySelector("[data-inbox-link]").href = event.url;
-            toast.show();
+            notify("New message", event.preview, event.url, "Open conversation");
         },
     );
+    inbox.listen("BookingActivity", (event) => {
+        notify("Booking update", event.preview, event.url, "View bookings");
+    });
+}
+
+if (document.readyState === "complete") {
+    connectInbox();
+} else {
+    window.addEventListener("load", connectInbox, { once: true });
 }

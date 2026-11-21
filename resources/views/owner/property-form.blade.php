@@ -8,109 +8,7 @@
 @section('content')
 <input type="checkbox" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse the menu" />
 <!-- ===== Topbar ===== -->
-    <header class="app-topbar">
-      <button
-        class="icon-btn d-lg-none"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#appSidebar"
-        aria-label="Menu"
-      >
-        <i class="bi bi-list"></i>
-      </button>
-      <label
-        for="sidebarToggle"
-        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
-        aria-hidden="true"
-      >
-        <i class="bi bi-list"></i>
-      </label>
-      <a class="brand" href="{{ route('owner.dashboard') }}"
-        ><span class="brand-mark">M</span><span>Makan</span></a
-      >
-      <div class="ms-auto d-flex align-items-center gap-1">
-        <!-- Messages: icon with unread count -->
-        <a
-          class="icon-btn"
-          href="{{ route('owner.chat') }}"
-          aria-label="Messages, 1 unread"
-        >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
-        </a>
-        <div class="dropdown">
-          <button
-            class="icon-btn"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-label="Notifications"
-          >
-            <i class="bi bi-bell"></i><span class="dot"></span>
-          </button>
-          <div
-            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
-            style="width: 320px"
-          >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
-            <div class="py-1">
-              <a
-                class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                href="{{ route('owner.requests') }}"
-              >
-                <span
-                  class="kpi-icon flex-shrink-0"
-                  style="width: 34px; height: 34px; font-size: 1rem"
-                  ><i class="bi bi-inbox"></i
-                ></span>
-                <span class="small">
-                  <span class="d-block">New booking request from Sara Khaled</span>
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >10 minutes ago</span
-                  >
-                </span>
-              </a>
-              <a
-                class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                href="{{ route('owner.properties') }}"
-              >
-                <span
-                  class="kpi-icon flex-shrink-0"
-                  style="width: 34px; height: 34px; font-size: 1rem"
-                  ><i class="bi bi-shield-check"></i
-                ></span>
-                <span class="small">
-                  <span class="d-block"
-                    >Your Al Jubeiha studio has been verified</span
-                  >
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >1 hour ago</span
-                  >
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="dropdown">
-          <button
-            class="app-user app-user--avatar"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            aria-label="Account menu, {{ auth()->user()->display_name }}"
-          >
-            <span class="avatar">{{ auth()->user()->display_initial }}</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
-            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <x-logout-form />
-            </li>
-          </ul>
-        </div>
-      </div>
-    </header>
+    <x-owner-topbar />
 
     <div class="app-shell">
       <!-- ===== Sidebar ===== -->
@@ -151,13 +49,11 @@
           >
           <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
             ><i class="bi bi-inbox"></i
-            ><span class="flex-grow-1">Booking requests</span
-            ><span class="side-badge">3</span></a
+            ><span class="flex-grow-1">Booking requests</span></a
           >
           <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
             ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span
-            ><span class="side-badge">1</span></a
+            ><span class="flex-grow-1">Messages</span></a
           >
           <a class="side-link" href="{{ route('owner.account') }}" title="My account"
             ><i class="bi bi-person-badge"></i
@@ -266,69 +162,10 @@
 
                   <option value="">Select Category</option>
 
-                  <option value="student_apartment"
-
-                    {{ old('category', $property->category ?? '') == 'student_apartment' ? 'selected' : '' }}>
-
-                    Student Apartment
-
-                  </option>
-
-                  <option value="apartment"
-
-                    {{ old('category', $property->category ?? '') == 'apartment' ? 'selected' : '' }}>
-
-                    Apartment
-
-                  </option>
-
-                  <option value="vacation"
-
-                    {{ old('category', $property->category ?? '') == 'vacation' ? 'selected' : '' }}>
-
-                    Vacation
-
-                  </option>
-
+                  @foreach (\App\Models\Property::CATEGORIES as $value => $label)
+                    <option value="{{ $value }}" @selected(old('category', $property->category ?? '') === $value)>{{ $label }}</option>
+                  @endforeach
                 </select>
-
-              </div>
-
-              <div class="col-sm-6 col-xl-3">
-
-                <label for="fSize" class="form-label">Size (m²)</label>
-
-                <input
-
-                  type="number"
-
-                  class="form-control"
-
-                  id="fSize"
-
-                  name="size"
-
-                  value="{{ old('size', $property->size ?? '') }}"
-
-                  min="1" />
-
-              </div>
-
-              <div class="col-sm-6 col-xl-3">
-
-                <label for="fFloor" class="form-label">Floor</label>
-
-                <input
-
-                  type="number"
-
-                  class="form-control"
-
-                  id="fFloor"
-
-                  name="floor"
-
-                  value="{{ old('floor', $property->floor ?? '') }}" />
 
               </div>
 
@@ -392,54 +229,6 @@
 
               </div>
 
-              <fieldset class="col-12">
-
-                <legend class="form-label fs-6">Furnished?</legend>
-
-                <div
-
-                  class="d-flex flex-wrap gap-2"
-
-                  role="radiogroup"
-
-                  id="furnishing">
-
-                  <input
-
-                    type="radio"
-
-                    class="btn-check"
-
-                    id="fFurnished"
-
-                    name="furnished"
-
-                    value="yes"
-
-                    {{ old('furnished', $property->furnished ?? 'yes') == 'yes' ? 'checked' : '' }} />
-
-                  <label class="chip-select" for="fFurnished"><i class="bi bi-lamp"></i>Furnished</label>
-
-                  <input
-
-                    type="radio"
-
-                    class="btn-check"
-
-                    id="fUnfurnished"
-
-                    name="furnished"
-
-                    value="no"
-
-                    {{ old('furnished', $property->furnished ?? 'yes') == 'no' ? 'checked' : '' }} />
-
-                  <label class="chip-select" for="fUnfurnished"><i class="bi bi-square"></i>Unfurnished</label>
-
-                </div>
-
-              </fieldset>
-
             </div>
 
             <!-- Amenities srevices -->
@@ -500,220 +289,16 @@
 
                 @endforeach
 
-                <!-- Add Other Service -->
-
-                <div class="mt-3">
-
-                  <label for="customService" class="form-label">
-
-                    Add Other Service
-
-                  </label>
-
-                  <div class="input-group">
-
-                    <input
-
-                      type="text"
-
-                      class="form-control"
-
-                      id="customService"
-
-                      placeholder="e.g. Solar Panels"
-
-                      value="{{ old('new_service') }}">
-
-                    <button
-
-                      type="button"
-
-                      class="btn btn-success"
-
-                      id="addServiceBtn">
-
-                      <i class="bi bi-plus-lg"></i>
-
-                      Add Service
-
-                    </button>
-
-                  </div>
-
-                  <small class="text-muted">
-
-                    Can't find a service? Add it here.
-
-                  </small>
-
-                  <!-- New services will appear here -->
-
-                  <div id="newServicesList" class="d-flex flex-wrap gap-2 mt-3"></div>
-
-                </div>
-
               </div>
 
       </fieldset>
 
       </section>
 
-      <!-- 2. Description + smart assistant -->
-
       <section class="panel form-section" aria-labelledby="secDesc">
-
         <h2 id="secDesc">2. Description</h2>
-
-        <p>
-
-          Write it yourself, or let the assistant write it from the
-
-          details you've filled in.
-
-        </p>
-
-        <div class="ai-box flex-wrap mb-3">
-
-          <i class="bi bi-magic"></i>
-
-          <div class="flex-grow-1">
-
-            <b class="d-block">Smart listing writer</b>
-
-            <span class="small text-muted">Writes a ready Arabic and English description in
-
-              seconds.</span>
-
-          </div>
-
-          <button
-
-            type="button"
-
-            class="btn btn-primary"
-
-            data-action="ai-write"
-
-            aria-controls="fDescAr fDescEn">
-
-            <i class="bi bi-stars"></i>
-
-            <span>Write it for me</span>
-
-          </button>
-
-        </div>
-
-        <ul class="nav seg-tabs mb-2" role="tablist">
-
-          <li class="nav-item" role="presentation">
-
-            <button
-
-              class="nav-link"
-
-              data-bs-toggle="tab"
-
-              data-bs-target="#desc-ar"
-
-              type="button"
-
-              role="tab"
-
-              aria-controls="desc-ar"
-
-              aria-selected="false">
-
-              Arabic
-
-            </button>
-
-          </li>
-
-          <li class="nav-item" role="presentation">
-
-            <button
-
-              class="nav-link active"
-
-              data-bs-toggle="tab"
-
-              data-bs-target="#desc-en"
-
-              type="button"
-
-              role="tab"
-
-              aria-controls="desc-en"
-
-              aria-selected="true">
-
-              English
-
-            </button>
-
-          </li>
-
-        </ul>
-
-        <div class="tab-content">
-
-          <div
-
-            class="tab-pane fade"
-
-            id="desc-ar"
-
-            role="tabpanel"
-
-            tabindex="0">
-
-            <label for="fDescAr" class="visually-hidden">Description in Arabic</label>
-
-            <textarea
-
-              class="form-control"
-
-              id="fDescAr"
-
-              name="description_ar"
-
-              rows="5"
-
-              placeholder="Write the description in Arabic"></textarea>
-
-          </div>
-
-          <div
-
-            class="tab-pane fade show active"
-
-            id="desc-en"
-
-            role="tabpanel"
-
-            tabindex="0">
-
-            <label for="fDescEn" class="visually-hidden">Description in English</label>
-
-            <textarea
-
-              class="form-control"
-
-              id="fDescEn"
-
-              name="description"
-
-              rows="5"
-
-              placeholder="Description in English..."
-
-              required>{{ old('description', $property->description ?? '') }}</textarea>
-
-          </div>
-
-        </div>
-
+        <label for="fDescEn" class="form-label">Property description</label>
+        <textarea class="form-control" id="fDescEn" name="description" rows="5" required>{{ old('description', $property->description ?? '') }}</textarea>
       </section>
 
       <!-- 3. Photos -->
@@ -766,7 +351,7 @@
 
             <img
 
-              src="{{ asset('storage/' . $image->image_url) }}"
+              src="{{ $image->public_url }}"
 
               alt="Property image"
 
@@ -829,8 +414,8 @@
       @unless(isset($property))
         <section class="panel form-section" aria-labelledby="secOwnership">
           <h2 id="secOwnership">Ownership verification</h2>
-          <label for="createOwnershipDocument" class="form-label">Ownership document (optional, up to 5 MB)</label>
-          <input id="createOwnershipDocument" class="form-control" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png">
+          <label for="createOwnershipDocument" class="form-label">Ownership document (PDF, JPG or PNG, up to 5 MB)</label>
+          <input id="createOwnershipDocument" class="form-control" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
         </section>
       @endunless
 
@@ -950,20 +535,6 @@
 
           type="submit"
 
-          class="btn btn-outline-primary btn-lg"
-
-          name="action"
-
-          value="draft">
-
-          Save as draft
-
-        </button>
-
-        <button
-
-          type="submit"
-
           class="btn btn-accent btn-lg"
 
           name="action"
@@ -1071,87 +642,7 @@
     </div>
 @push('scripts')
 
-<script>
 
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const serviceInput = document.getElementById('customService');
-
-    const addServiceBtn = document.getElementById('addServiceBtn');
-
-    const servicesList = document.getElementById('newServicesList');
-
-    addServiceBtn.addEventListener('click', function() {
-
-      const serviceName = serviceInput.value.trim();
-
-      if (!serviceName) {
-
-        alert('Please enter a service name.');
-
-        return;
-
-      }
-
-      const existing = Array.from(
-
-        servicesList.querySelectorAll('input[name="new_services[]"]')
-
-      );
-
-      if (existing.some(input =>
-
-          input.value.toLowerCase() === serviceName.toLowerCase()
-
-        )) {
-
-        alert('Service already added.');
-
-        return;
-
-      }
-
-      const chip = document.createElement('div');
-
-      chip.className = 'd-flex align-items-center gap-2 border rounded-pill px-3 py-2';
-
-      const hiddenInput = document.createElement('input');
-
-      hiddenInput.type = 'hidden';
-
-      hiddenInput.name = 'new_services[]';
-
-      hiddenInput.value = serviceName;
-
-      const serviceText = document.createElement('span');
-
-      serviceText.textContent = serviceName;
-
-      const removeBtn = document.createElement('button');
-
-      removeBtn.type = 'button';
-
-      removeBtn.className = 'btn btn-sm p-0 border-0';
-
-      removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
-
-      removeBtn.addEventListener('click', function() {
-
-        chip.remove();
-
-      });
-
-      chip.append(hiddenInput, serviceText, removeBtn);
-
-      servicesList.appendChild(chip);
-
-      serviceInput.value = '';
-
-    });
-
-  });
-
-</script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -1168,6 +659,7 @@
     const lngEl = el('fLng');
 
     const searchEl = el('locationSearch');
+    const streetEl = el('fStreet');
 
     const button = el('searchLocationBtn');
 
@@ -1343,22 +835,27 @@
 
           option.textContent = name || 'Location result';
 
-          option.addEventListener('click', () => {
+          const chooseLocation = () => {
 
             map.setView([lat, lng], 16);
 
             setLocation(lat, lng, name || 'Property Location');
 
-            if (cityEl) cityEl.value = p.city || p.state || '';
+            if (cityEl) cityEl.value = p.city || p.town || p.village || p.county || p.state || '';
 
-            if (areaEl) areaEl.value = p.district || p.suburb || p.locality || p.name || '';
+            if (areaEl) areaEl.value = p.neighbourhood || p.suburb || p.district || p.locality || p.name || '';
+
+            if (streetEl) {
+              streetEl.value = [p.housenumber, p.street].filter(Boolean).join(' ') || p.name || '';
+              streetEl.dispatchEvent(new Event('input', { bubbles: true }));
+            }
 
             searchEl.value = name;
 
-            results.replaceChildren();
+          };
 
-          });
-
+          option.addEventListener('click', chooseLocation);
+          if (place === places[0]) chooseLocation();
           results.appendChild(option);
 
         });
@@ -1427,7 +924,7 @@
 
         basic: filled('fTitle') && filled('fCategory'),
 
-        description: filled('fDescEn') || filled('fDescAr'),
+        description: filled('fDescEn'),
 
         photos: (field('fPhotos')?.files.length || 0) > 0 ||
 

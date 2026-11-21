@@ -104,6 +104,28 @@ class RealEstateUser extends Authenticatable
         return $this->hasMany(Conversation::class, 'agent_id');
     }
 
+    public function inboxConversations()
+    {
+        return match ($this->role) {
+            'tenant' => Conversation::where('tenant_id', $this->id),
+            'agent' => Conversation::where(function ($query) {
+                $query->where('agent_id', $this->id)->orWhere(function ($support) {
+                    $support->where('tenant_id', $this->id)->whereNull('property_id')
+                        ->whereHas('agent', fn ($admin) => $admin->where('role', 'admin'));
+                });
+            }),
+            'admin' => Conversation::where('agent_id', $this->id)->whereNull('property_id'),
+        };
+    }
+
+    public function unreadMessageCount(): int
+    {
+        return Message::where('is_read', false)
+            ->where('sender_id', '!=', $this->id)
+            ->whereIn('conversation_id', $this->inboxConversations()->select('id'))
+            ->count();
+    }
+
 
     public function sentMessages(): HasMany
     {

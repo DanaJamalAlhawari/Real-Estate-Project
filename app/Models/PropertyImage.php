@@ -11,6 +11,7 @@ class PropertyImage extends Model
 
     protected $fillable = [
         'image_url',
+        'is_primary',
     ];
 
     protected function casts(): array
@@ -18,6 +19,15 @@ class PropertyImage extends Model
         return [
             'is_primary' => 'boolean',
         ];
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        $path = ltrim($this->image_url, '/');
+
+        return asset(str_starts_with($path, 'assets/') || str_starts_with($path, 'storage/')
+            ? $path
+            : 'storage/'.$path);
     }
 
     // العقار المرتبطة فيه الصورة

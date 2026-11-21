@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class VerificationController extends Controller
@@ -30,7 +31,8 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'admin', 403);
 
-        $properties = Property::whereNotNull('ownership_deed_url')->get();
+        $properties = Property::where('ownership_deed_url', 'like', 'verifications/%')->get()
+            ->filter(fn (Property $property) => Storage::disk('local')->exists($property->ownership_deed_url));
 
         $queues = $properties->groupBy('verification_status');
         $selectedProperty = $properties->find($request->integer('property'))
@@ -44,10 +46,11 @@ class VerificationController extends Controller
         abort_unless($request->user()?->role === 'agent', 403);
 
         $request->validate([
+            'property_id' => 'required|integer',
             'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        $property = Property::findOrFail($request->property_id);
+        $property = $request->user()->properties()->findOrFail($request->integer('property_id'));
 
         $path = $request->file('document')->store('verifications', 'local');
         abort_if($path === false, 500, 'Could not store the ownership document.');
@@ -78,27 +81,32 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'admin', 403);
 
-        $request->validate([
+        $data = $request->validate([
             'decision' => 'required|in:approve,reject',
             'note' => 'nullable|string',
+            'commission_rate' => 'exclude_unless:decision,approve|nullable|numeric|decimal:0,2|min:0|max:100',
         ]);
 
-        $property = Property::findOrFail($verification);
+        DB::transaction(function () use ($request, $verification, $data) {
+            $property = Property::lockForUpdate()->findOrFail($verification);
 
-        abort_unless(
-            $property->verification_status === 'pending'
-            && $property->ownership_deed_url
-            && Storage::disk('local')->exists($property->ownership_deed_url),
-            403
-        );
+            abort_unless($property->verification_status === 'pending', 403);
+            abort_unless(
+                str_starts_with($property->ownership_deed_url ?? '', 'verifications/')
+                    && Storage::disk('local')->exists($property->ownership_deed_url),
+                403,
+            );
 
-        $approved = $request->decision === 'approve';
-
-        $property->verification_status = $approved ? 'verified' : 'rejected';
-        $property->verified_at = $approved ? now() : null;
-        $property->reviewed_by = $request->user()->id;
-        $property->admin_notes = $request->note;
-        $property->save();
+            $approved = $data['decision'] === 'approve';
+            $property->approved_commission_rate = $approved
+                ? ($data['commission_rate'] ?? config('commissions.category_rates.'.$property->category))
+                : null;
+            $property->verification_status = $approved ? 'verified' : 'rejected';
+            $property->verified_at = $approved ? now() : null;
+            $property->reviewed_by = $request->user()->id;
+            $property->admin_notes = $data['note'] ?? null;
+            $property->save();
+        });
 
         return redirect()->route('admin.verifications')
             ->with('success', 'Verification updated');

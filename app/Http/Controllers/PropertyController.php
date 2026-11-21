@@ -17,14 +17,14 @@ class PropertyController extends Controller
      */
     public function index()
     {
-        $properties = Property::with('images')->where('agent_id', 1)->get();
+        $properties = Property::with('images')->where('agent_id', request()->user()->id)->get();
         return view('owner.properties', ['properties' => $properties]);
     }
 
     // Hide or show a property
     public function toggleVisibility($id)
     {
-        $property = Property::where('agent_id', 1)->findOrFail($id);
+        $property = Property::where('agent_id', request()->user()->id)->findOrFail($id);
         if ($property->status == 'available') {
             $property->status = 'hidden';
             $property->save();
@@ -40,6 +40,7 @@ class PropertyController extends Controller
      */
     public function create()
     {
+        $this->ensureCanSubmitProperty(request());
         $services = Service::all();
         return view('owner.property-form', ['services' => $services]);
     }
@@ -49,10 +50,11 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureCanSubmitProperty($request);
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'category'    => 'required|string|max:255',
+            'category'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Property::CATEGORIES))],
             'price'       => 'required|numeric|min:0',
             'city'        => 'required|string|max:255',
             'area'        => 'nullable|string|max:255',
@@ -65,14 +67,12 @@ class PropertyController extends Controller
             'services.*'  => 'integer|distinct|exists:services,id',
             'photos'      => 'sometimes|array|max:10',
             'photos.*'    => 'image|mimes:jpg,jpeg,png|max:5120',
-            'document'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'action'      => 'required|in:draft,publish',
+            'document'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'action'      => 'required|in:publish',
         ]);
 
         $document = $validated['document'] ?? null;
-        $agent = $request->user();
-        abort_if($document && $agent?->role !== 'agent', 403);
-        $agentId = $agent?->role === 'agent' ? $agent->id : 1;
+        $agentId = $request->user()->id;
 
         // 2. Get selected services and uploaded photos.
         $services = $validated['services'] ?? [];
@@ -86,7 +86,9 @@ class PropertyController extends Controller
 
             // 4. Upload property photos.
             foreach ($photos as $photo) {
-                $uploadedPaths[] = $photo->store('properties', 'public');
+                $path = $photo->store('properties', 'public');
+                abort_if($path === false, 500, 'Could not store the property photo.');
+                $uploadedPaths[] = $path;
             }
 
             // 5. Save property, services, and image records together.
@@ -173,7 +175,7 @@ class PropertyController extends Controller
      */
     public function edit($id)
     {
-        $property = Property::with(['services', 'images'])->where('agent_id', 1)->findOrFail($id);
+        $property = Property::with(['services', 'images'])->where('agent_id', request()->user()->id)->findOrFail($id);
         $services = Service::all();
         return view('owner.property-form', ['property' => $property, 'services' => $services]);
     }
@@ -184,13 +186,13 @@ class PropertyController extends Controller
     public function update(Request $request, string $id)
     {
         // 1. Find the property belonging to the agent.
-        $property = Property::where('agent_id', 1)->findOrFail($id);
+        $property = Property::where('agent_id', $request->user()->id)->findOrFail($id);
 
         // 2. Validate property details and selected services.
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'category'    => 'required|string|max:255',
+            'category'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Property::CATEGORIES))],
             'price'       => 'required|numeric|min:0',
             'city'        => 'required|string|max:255',
             'area'        => 'nullable|string|max:255',
@@ -258,7 +260,9 @@ class PropertyController extends Controller
 
         try {
             foreach ($newPhotos as $photo) {
-                $uploadedPaths[] = $photo->store('properties', 'public');
+                $path = $photo->store('properties', 'public');
+                abort_if($path === false, 500, 'Could not store the property photo.');
+                $uploadedPaths[] = $path;
             }
 
             \Illuminate\Support\Facades\DB::transaction(function () use (
@@ -268,6 +272,19 @@ class PropertyController extends Controller
                 $uploadedPaths
             ) {
                 // Save property details.
+                $current = Property::lockForUpdate()->findOrFail($property->id);
+                $current->forceFill($property->getDirty());
+                if ($current->getOriginal('category') !== $validated['category']) {
+                    $current->category = $validated['category'];
+                    $current->approved_commission_rate = null;
+                    if ($current->verification_status === 'verified') {
+                        $current->verification_status = 'pending';
+                        $current->reviewed_by = null;
+                        $current->verified_at = null;
+                        $current->admin_notes = null;
+                    }
+                }
+                $property = $current;
                 $property->save();
 
                 // Update property services.
@@ -324,11 +341,18 @@ class PropertyController extends Controller
     public function destroy(string $id)
     {
         //Find the property belonging to this owner
-        $property = Property::where('agent_id', 1)
+        $property = Property::where('agent_id', request()->user()->id)
             ->findOrFail($id);
         $property->delete();
         return redirect()
             ->route('owner.properties')
             ->with('success', 'Property deleted successfully.');
+    }
+
+    private function ensureCanSubmitProperty(Request $request): void
+    {
+        $properties = $request->user()->properties();
+        abort_if((clone $properties)->exists() && !$properties->where('verification_status', 'verified')->exists(),
+            403, 'An admin must approve your first property before you add another.');
     }
 }

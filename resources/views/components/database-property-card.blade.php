@@ -2,6 +2,7 @@
 
 <div class="col-sm-6 col-xxl-4">
     <article class="prop-card">
+        @if (auth()->user()?->role === 'tenant')
         <form
             action="{{ route(
                 $saved ? 'seeker.favorites.destroy' : 'seeker.favorites.store',
@@ -24,13 +25,14 @@
                 <i class="{{ $saved ? 'bi bi-heart-fill' : 'bi bi-heart' }}"></i>
             </button>
         </form>
+        @endif
 
         <div class="prop-media">
-            @php($primaryImage = $property->images->firstWhere('is_primary', true))
+            @php($primaryImage = $property->images->firstWhere('is_primary', true) ?? $property->images->first())
 
             @if ($primaryImage)
                 <img
-                    src="{{ asset($primaryImage->image_url) }}"
+                    src="{{ $primaryImage->public_url }}"
                     alt="{{ $property->title }}"
                     class="w-100 h-100"
                     style="object-fit:cover;"
@@ -51,7 +53,7 @@
         <div class="prop-body">
             <div class="d-flex justify-content-between align-items-start gap-2">
                 <a
-                    href="{{ route('seeker.property', ['property_id' => $property->id]) }}"
+                    href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}"
                     class="prop-title"
                 >
                     {{ $property->title }}
@@ -96,7 +98,7 @@
                     <span>per month</span>
                 </div>
 
-                <a href="{{ route('seeker.property', ['property_id' => $property->id]) }}">
+                <a href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}">
                     View details <i class="bi bi-arrow-right"></i>
                 </a>
             </div>

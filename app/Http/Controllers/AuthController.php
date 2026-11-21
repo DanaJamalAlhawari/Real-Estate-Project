@@ -24,7 +24,8 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'role' => ['required', 'in:tenant,agent'],
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:real_estate_users,email'],
             'phone' => [
                 'required',
@@ -32,16 +33,13 @@ class AuthController extends Controller
                 'unique:tenant_profiles,phone',
                 'unique:agent_profiles,phone',
             ],
-            'agency_name' => ['nullable', 'string', 'max:255'],
+            'owner_type' => ['exclude_unless:role,agent', 'nullable', 'in:individual,agency'],
+            'agency_name' => ['exclude_unless:role,agent', 'exclude_unless:owner_type,agency', 'nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'terms' => ['accepted'],
         ]);
 
-        $nameParts = explode(' ', trim($data['full_name']), 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
-
-        $user = DB::transaction(function () use ($data, $firstName, $lastName) {
+        $user = DB::transaction(function () use ($data) {
             $user = RealEstateUser::create([
                 'email' => $data['email'],
                 'password' => $data['password'],
@@ -49,8 +47,8 @@ class AuthController extends Controller
             ]);
 
             $profileData = [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
                 'phone' => $data['phone'],
             ];
 
