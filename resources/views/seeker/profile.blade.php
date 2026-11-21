@@ -83,31 +83,12 @@
                 type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-               aria-label="Account menu"
+                aria-label="Account menu, {{ auth()->user()->display_name }}"
               >
-                
-
-              <span class="avatar">
-    @if ($profile)
-        {{ mb_substr($profile->first_name, 0, 1) }}
-    @else
-        <i class="bi bi-person" aria-hidden="true"></i>
-    @endif
-</span>
+                <span class="avatar">{{ auth()->user()->display_initial }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                
-
-
-                <li>
-    <h6 class="dropdown-header">
-        @if ($profile)
-            {{ $profile->first_name }} {{ $profile->last_name }}
-        @else
-            My account
-        @endif
-    </h6>
-</li>
+                <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
                 <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -287,22 +268,12 @@
             <div class="col-lg-4">
               <aside class="panel" aria-label="My account">
                 <div class="text-center pb-3 border-bottom">
-                 
-                  <span class="avatar avatar-xl mb-2">
-    <i class="bi bi-person" aria-hidden="true"></i>
-</span>
-
-@if ($profile)
-    <b class="d-block fs-5">
-        {{ $profile->first_name }} {{ $profile->last_name }}
-    </b>
-@else
-    <b class="d-block fs-5">My account</b>
-@endif
-
-<div class="small text-muted">
-    {{ $user->email }}
-</div>
+                  <span class="avatar avatar-xl mb-2">{{ auth()->user()->display_initial }}</span>
+                  <b class="d-block fs-5">{{ auth()->user()->display_name }}</b>
+                  <div class="small text-muted">{{ auth()->user()->email }}</div>
+                  <span class="status status--success mt-2"
+                    >Email verified</span
+                  >
                 </div>
 
                 <!-- Notifications -->

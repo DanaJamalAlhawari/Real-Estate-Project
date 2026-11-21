@@ -9,6 +9,102 @@
 
 @section('content')
 
+          <!-- Messages, notifications + user menu (stay visible on phones) -->
+          <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
+            <!-- Messages: icon with unread count -->
+            <a
+              class="icon-btn"
+              href="{{ route('seeker.chat') }}"
+              aria-label="Messages, 2 unread"
+            >
+              <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
+            </a>
+            <div class="dropdown">
+              <button
+                class="icon-btn"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-label="Notifications"
+              >
+                <i class="bi bi-bell"></i><span class="dot"></span>
+              </button>
+              <div
+                class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+                style="width: 320px"
+              >
+                <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+                <div class="py-1">
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.property') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-stars"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >A new home just listed in Al Jubeiha with a 92%
+                        match</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >10 minutes ago</span
+                      >
+                    </span>
+                  </a>
+                  <a
+                    class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                    href="{{ route('seeker.bookings') }}"
+                  >
+                    <span
+                      class="kpi-icon flex-shrink-0"
+                      style="width: 34px; height: 34px; font-size: 1rem"
+                      ><i class="bi bi-check2-circle"></i
+                    ></span>
+                    <span class="small">
+                      <span class="d-block"
+                        >Abu Ahmad accepted your booking</span
+                      >
+                      <span class="text-muted" style="font-size: 0.72rem"
+                        >1 hour ago</span
+                      >
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown">
+              <button
+                class="app-user app-user--avatar"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Account menu, {{ auth()->user()->display_name }}"
+              >
+                <span class="avatar">{{ auth()->user()->display_initial }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
+                <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <x-logout-form />
+                </li>
+              </ul>
+            </div>
+            <button
+              class="navbar-toggler border-0"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#appNav"
+              aria-controls="appNav"
+              aria-expanded="false"
+              aria-label="Menu"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
 
 <style>
     #databasePropertiesGrid .property-rating {
