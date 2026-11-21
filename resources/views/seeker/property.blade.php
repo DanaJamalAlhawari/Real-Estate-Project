@@ -173,7 +173,18 @@
             <!-- 3. Title and quick facts -->
             <div class="prop-head">
               <div class="d-flex flex-wrap align-items-center gap-2">
-                <h1>Studio — Al Jubeiha</h1>
+                @isset($property)
+    <h1>{{ $property->title }}</h1>
+
+    <a
+        href="{{ route('seeker.reviews.index', ['property' => $property->id]) }}"
+        class="btn btn-outline-primary"
+    >
+        Reviews
+    </a>
+@else
+    <h1>Studio — Al Jubeiha</h1>
+@endisset
                 <span class="status status--info"
                   ><i class="bi bi-patch-check-fill"></i>Verified</span
                 >

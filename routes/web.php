@@ -7,7 +7,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
-use App\http\Controllers\FavoriteController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TenantProfileController;
+
 
 
 Route::get('/', [PageController::class, 'show'])
@@ -17,6 +20,32 @@ Route::get('/index.html', [PageController::class, 'legacy'])
 
 // Tenant pages
 Route::middleware(['auth', 'role:tenant'])->group(function () {
+    Route::get('/seeker/favorites', [FavoriteController::class, 'index'])
+    ->name('seeker.favorites');
+
+Route::post('/seeker/favorites/{property}', [FavoriteController::class, 'store'])
+    ->name('seeker.favorites.store');
+
+Route::delete('/seeker/favorites/{property}', [FavoriteController::class, 'destroy'])
+    ->name('seeker.favorites.destroy');
+
+Route::get('/seeker/properties/{property}/reviews', [ReviewController::class, 'index'])
+    ->name('seeker.reviews.index');
+
+    Route::post('/seeker/properties/{property}/reviews', [ReviewController::class, 'store'])
+    ->name('seeker.reviews.store');
+
+    Route::get('/seeker/reviews/{review}/edit', [ReviewController::class, 'edit'])
+    ->name('seeker.reviews.edit');
+
+    Route::put('/seeker/reviews/{review}', [ReviewController::class, 'update'])
+    ->name('seeker.reviews.update');
+
+Route::delete('/seeker/reviews/{review}', [ReviewController::class, 'destroy'])
+    ->name('seeker.reviews.destroy');
+
+
+
     Route::get('/seeker/bookings', [PageController::class, 'show'])
         ->defaults('page', 'seeker.bookings')->name('seeker.bookings');
     Route::get('/seeker/bookings.html', [PageController::class, 'legacy'])
@@ -27,8 +56,16 @@ Route::middleware(['auth', 'role:tenant'])->group(function () {
     Route::get('/seeker/chat.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.chat');
 
-    Route::get('/seeker/profile', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.profile')->name('seeker.profile');
+    // Route::get('/seeker/profile', [PageController::class, 'show'])
+    //     ->defaults('page', 'seeker.profile')->name('seeker.profile');
+Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
+    ->name('seeker.profile');
+
+    Route::put('/seeker/profile', [TenantProfileController::class, 'update'])
+    ->name('seeker.profile.update');
+
+
+
     Route::get('/seeker/profile.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.profile');
 
@@ -160,18 +197,5 @@ Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])
     ->defaults('target', 'auth.verify-email');
 
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
-Route::get('/seeker/favorites', [FavoriteController::class, 'index'])->middleware('auth')->name('seeker.favorites');
-Route::post('/seeker/favorites/{property}', [FavoriteController::class, 'store'])
-->middleware('auth')->name('seeker.favorites.store');
-Route::delete('/seeker/favorites/{property}', [FavoriteController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('seeker.favorites.destroy');
 
-    /// i have to remove it when i merrger all the work
-    if (app()->environment('local')) {
-    Route::get('/preview/favorites', function () {
-        return view('seeker.favorites', [
-            'favorites' => collect(),
-        ]);
-    });
-}
+    

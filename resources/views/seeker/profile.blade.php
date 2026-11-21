@@ -83,12 +83,31 @@
                 type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                aria-label="Account menu, Sara Khaled"
+               aria-label="Account menu"
               >
-                <span class="avatar">S</span>
+                
+
+              <span class="avatar">
+    @if ($profile)
+        {{ mb_substr($profile->first_name, 0, 1) }}
+    @else
+        <i class="bi bi-person" aria-hidden="true"></i>
+    @endif
+</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><h6 class="dropdown-header">Sara Khaled</h6></li>
+                
+
+
+                <li>
+    <h6 class="dropdown-header">
+        @if ($profile)
+            {{ $profile->first_name }} {{ $profile->last_name }}
+        @else
+            My account
+        @endif
+    </h6>
+</li>
                 <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -158,6 +177,109 @@
           </div>
         </div>
 
+
+        @if (session('success'))
+    <div class="alert alert-success" role="status">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if ($profile)
+    <section class="panel mb-4">
+        <h2 class="h5 mb-3">Personal information</h2>
+
+        <form action="{{ route('seeker.profile.update') }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="first_name" class="form-label">
+                        First name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        class="form-control"
+                        value="{{ old('first_name', $profile->first_name) }}"
+                        maxlength="255"
+                        required
+                    >
+
+                    @error('first_name')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label for="last_name" class="form-label">
+                        Last name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        class="form-control"
+                        value="{{ old('last_name', $profile->last_name) }}"
+                        maxlength="255"
+                        required
+                    >
+
+                    @error('last_name')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label for="emergency_contact" class="form-label">
+                        Emergency contact number (optional)
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="emergency_contact"
+                        name="emergency_contact"
+                        class="form-control"
+                        value="{{ old('emergency_contact', $profile->emergency_contact) }}"
+                        maxlength="30"
+                    >
+
+                    @error('emergency_contact')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label for="student_id" class="form-label">
+                        Student ID (optional)
+                    </label>
+
+                    <input
+                        type="text"
+                        id="student_id"
+                        name="student_id"
+                        class="form-control"
+                        value="{{ old('student_id', $profile->student_id) }}"
+                        maxlength="255"
+                    >
+
+                    @error('student_id')
+                        <p class="text-danger mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">
+                Save personal information
+            </button>
+        </form>
+    </section>
+@endif
+        
+
         <form id="profileForm" method="post" action="{{ route('demo.notice') }}" data-demo-form>
               @csrf
           <div class="row g-4 align-items-start">
@@ -165,12 +287,22 @@
             <div class="col-lg-4">
               <aside class="panel" aria-label="My account">
                 <div class="text-center pb-3 border-bottom">
-                  <span class="avatar avatar-xl mb-2">S</span>
-                  <b class="d-block fs-5">Sara Khaled</b>
-                  <div class="small text-muted">sara@example.com</div>
-                  <span class="status status--success mt-2"
-                    >Email verified</span
-                  >
+                 
+                  <span class="avatar avatar-xl mb-2">
+    <i class="bi bi-person" aria-hidden="true"></i>
+</span>
+
+@if ($profile)
+    <b class="d-block fs-5">
+        {{ $profile->first_name }} {{ $profile->last_name }}
+    </b>
+@else
+    <b class="d-block fs-5">My account</b>
+@endif
+
+<div class="small text-muted">
+    {{ $user->email }}
+</div>
                 </div>
 
                 <!-- Notifications -->
