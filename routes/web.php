@@ -29,28 +29,28 @@ Route::get('/index.html', [PageController::class, 'legacy'])
 // Tenant pages
 Route::middleware(['auth', 'role:tenant'])->group(function () {
     Route::get('/seeker/favorites', [FavoriteController::class, 'index'])
-    ->name('seeker.favorites');
+        ->name('seeker.favorites');
 
-Route::post('/seeker/favorites/{property}', [FavoriteController::class, 'store'])
-    ->name('seeker.favorites.store');
+    Route::post('/seeker/favorites/{property}', [FavoriteController::class, 'store'])
+        ->name('seeker.favorites.store');
 
-Route::delete('/seeker/favorites/{property}', [FavoriteController::class, 'destroy'])
-    ->name('seeker.favorites.destroy');
+    Route::delete('/seeker/favorites/{property}', [FavoriteController::class, 'destroy'])
+        ->name('seeker.favorites.destroy');
 
-Route::get('/seeker/properties/{property}/reviews', [ReviewController::class, 'index'])
-    ->name('seeker.reviews.index');
+    Route::get('/seeker/properties/{property}/reviews', [ReviewController::class, 'index'])
+        ->name('seeker.reviews.index');
 
     Route::post('/seeker/properties/{property}/reviews', [ReviewController::class, 'store'])
-    ->name('seeker.reviews.store');
+        ->name('seeker.reviews.store');
 
     Route::get('/seeker/reviews/{review}/edit', [ReviewController::class, 'edit'])
-    ->name('seeker.reviews.edit');
+        ->name('seeker.reviews.edit');
 
     Route::put('/seeker/reviews/{review}', [ReviewController::class, 'update'])
-    ->name('seeker.reviews.update');
+        ->name('seeker.reviews.update');
 
-Route::delete('/seeker/reviews/{review}', [ReviewController::class, 'destroy'])
-    ->name('seeker.reviews.destroy');
+    Route::delete('/seeker/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('seeker.reviews.destroy');
 
 
 
@@ -66,11 +66,11 @@ Route::delete('/seeker/reviews/{review}', [ReviewController::class, 'destroy'])
 
     // Route::get('/seeker/profile', [PageController::class, 'show'])
     //     ->defaults('page', 'seeker.profile')->name('seeker.profile');
-Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
-    ->name('seeker.profile');
+    Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
+        ->name('seeker.profile');
 
     Route::put('/seeker/profile', [TenantProfileController::class, 'update'])
-    ->name('seeker.profile.update');
+        ->name('seeker.profile.update');
 
 
 
@@ -87,10 +87,10 @@ Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
         ->middleware('auth')
         ->whereNumber('property')
         ->name('seeker.property.conversation');
-   
 
-    Route::get('/seeker/search', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.search')->name('seeker.search');
+
+    Route::get('/seeker/search', [DiscoverController::class, 'index'])
+        ->name('seeker.search');
     Route::get('/seeker/search.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.search');
 
@@ -241,19 +241,17 @@ Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])
 
 
 //Booking Request
-Route::get('/owner/requests',[BookingRequestController::class,'index'])
-    ->name('owner.requests'); 
+Route::get('/owner/requests', [BookingRequestController::class, 'index'])
+    ->name('owner.requests');
 Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])
-    ->name('owner.requests.accept'); 
+    ->name('owner.requests.accept');
 Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])
     ->name('owner.requests.reject');
 
-// Discover Page
-Route::get('seeker/search', [DiscoverController::class, 'index'])
-    ->name('seeker.search');
-    
 
- 
+
+
+
 
 
 

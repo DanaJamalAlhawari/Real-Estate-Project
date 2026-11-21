@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use App\Models\RealEstateUser;
 
 class DiscoverController extends Controller
 {
@@ -22,7 +23,7 @@ class DiscoverController extends Controller
         $query = Property::with(['images' => function ($q) {
             $q->orderByDesc('is_primary');
         }, 'rooms', 'services']);
-        
+
         // Apply filters Button
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -41,7 +42,18 @@ class DiscoverController extends Controller
 
         $properties = $query->get();
 
-        return view('seeker.search', compact('properties'));
+        $user = $request->user();
+
+        $favorites = $user instanceof RealEstateUser && $user->role === 'tenant'
+            ? $user->favoriteProperties()->with(['images', 'rooms', 'services'])->get()
+            : collect();
+
+        return view('seeker.search', [
+            'properties' => $properties,
+            'favorites' => $favorites,
+            'favoritesCount' => $favorites->count(),
+            'favoriteIds' => $favorites->pluck('id')->all(),
+        ]);
     }
 
 
