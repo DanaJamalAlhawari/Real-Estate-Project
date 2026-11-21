@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VerificationController;
+
 
 Route::get('/', [PageController::class, 'show'])
     ->defaults('page', 'home.index')->name('home');
@@ -62,8 +64,8 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
     Route::get('/owner/dashboard.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.dashboard');
 
-    Route::get('/owner/properties', [PageController::class, 'show'])
-        ->defaults('page', 'owner.properties')->name('owner.properties');
+    Route::get('/owner/properties', [VerificationController::class, 'ownerProperties'])
+        ->name('owner.properties');
     Route::get('/owner/properties.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.properties');
 
@@ -71,6 +73,11 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
         ->defaults('page', 'owner.property-form')->name('owner.property-form');
     Route::get('/owner/property-form.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.property-form');
+
+    Route::get('/owner/properties/{property}/edit', [VerificationController::class, 'ownerEdit'])
+        ->whereNumber('property')->name('owner.properties.edit');
+    Route::post('/properties/verification', [VerificationController::class, 'store'])
+        ->name('properties.verification.store');
 
     Route::get('/owner/requests', [PageController::class, 'show'])
         ->defaults('page', 'owner.requests')->name('owner.requests');
@@ -88,8 +95,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/chat.html', [PageController::class, 'legacy'])
         ->defaults('target', 'admin.chat');
 
-    Route::get('/admin/dashboard', [PageController::class, 'show'])
-        ->defaults('page', 'admin.dashboard')->name('admin.dashboard');
+    Route::get('/admin/dashboard', [PageController::class, 'adminDashboard'])
+        ->name('admin.dashboard');
     Route::get('/admin/dashboard.html', [PageController::class, 'legacy'])
         ->defaults('target', 'admin.dashboard');
 
@@ -104,10 +111,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])
         ->whereNumber('user')->name('admin.users.show');
 
-    Route::get('/admin/verifications', [PageController::class, 'show'])
-        ->defaults('page', 'admin.verifications')->name('admin.verifications');
+    Route::resource('admin/verifications', VerificationController::class)
+        ->only(['index', 'update'])
+        ->names([
+            'index' => 'admin.verifications',
+            'update' => 'admin.verifications.update',
+        ]);
     Route::get('/admin/verifications.html', [PageController::class, 'legacy'])
         ->defaults('target', 'admin.verifications');
+    Route::get('/admin/verifications/{verification}/document', [VerificationController::class, 'document'])
+        ->whereNumber('verification')->name('admin.verifications.document');
 
     Route::get('/admin/commissions', [AdminCommissionController::class, 'index'])
         ->name('admin.commissions');

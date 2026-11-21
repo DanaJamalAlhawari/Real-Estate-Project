@@ -5,6 +5,11 @@
 @section('bodyAttributes') data-role="owner" data-page="dashboard"@endsection
 
 @section('content')
+    @php
+      $account = auth()->user();
+      $displayName = $account?->display_name ?? $agentName;
+      $displayInitial = $account?->display_initial ?? Str::upper(Str::substr($displayName ?? 'Agent', 0, 1));
+    @endphp
     <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
     <input
       type="checkbox"
@@ -40,9 +45,9 @@
         <a
           class="icon-btn"
           href="{{ route('owner.chat') }}"
-          aria-label="Messages, 1 unread"
+          aria-label="Messages, {{ $unreadMessageCount }} unread"
         >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">{{ $unreadMessageCount }}</span>
         </a>
         <div class="dropdown">
           <button
@@ -51,7 +56,7 @@
             data-bs-toggle="dropdown"
             aria-label="Notifications"
           >
-            <i class="bi bi-bell"></i><span class="dot"></span>
+            <i class="bi bi-bell"></i>
           </button>
           <div
             class="dropdown-menu dropdown-menu-end shadow-sm p-0"
@@ -69,10 +74,7 @@
                   ><i class="bi bi-inbox"></i
                 ></span>
                 <span class="small">
-                  <span class="d-block">New booking request from Sara Khaled</span>
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >10 minutes ago</span
-                  >
+                  <span class="d-block">{{ $pendingBookingCount }} pending booking {{ Str::plural('request', $pendingBookingCount) }}</span>
                 </span>
               </a>
               <a
@@ -86,11 +88,11 @@
                 ></span>
                 <span class="small">
                   <span class="d-block"
-                    >Your Al Jubeiha studio has been verified</span
+                    >{{ $latestVerifiedProperty ? $latestVerifiedProperty->title.' has been verified' : 'No property verification updates' }}</span
                   >
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >1 hour ago</span
-                  >
+                  @if ($latestVerifiedProperty)
+                    <span class="text-muted small">{{ $latestVerifiedProperty->verified_at->diffForHumans() }}</span>
+                  @endif
                 </span>
               </a>
             </div>
@@ -102,12 +104,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, {{ auth()->user()->display_name }}"
+            aria-label="Account menu, {{ $displayName ?? 'Agent' }}"
           >
-            <span class="avatar">{{ auth()->user()->display_initial }}</span>
+            <span class="avatar">{{ $displayInitial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
+            <li><h6 class="dropdown-header">{{ $displayName ?? 'Agent' }}</h6></li>
             <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
@@ -154,12 +156,12 @@
           <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
             ><i class="bi bi-inbox"></i
             ><span class="flex-grow-1">Booking requests</span
-            ><span class="side-badge">3</span></a
+            ><span class="side-badge">{{ $pendingBookingCount }}</span></a
           >
           <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
             ><i class="bi bi-chat-dots"></i
             ><span class="flex-grow-1">Messages</span
-            ><span class="side-badge">1</span></a
+            ><span class="side-badge">{{ $unreadMessageCount }}</span></a
           >
           <a class="side-link" href="{{ route('owner.account') }}" title="My account"
             ><i class="bi bi-person-badge"></i
@@ -173,8 +175,8 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Welcome back, {{ auth()->user()->display_name }}</h1>
-            <p>Here's how your properties did over the last 30 days.</p>
+            <h1>Welcome back{{ $displayName ? ', '.$displayName : '' }}</h1>
+            <p>Overview of your properties and recent activity.</p>
           </div>
           <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
             <i class="bi bi-plus-lg"></i>
@@ -186,14 +188,12 @@
         <div class="alert-soft flex-wrap mb-4" id="staleAlert">
           <i class="bi bi-arrow-repeat"></i>
           <span class="flex-grow-1"
-            >"3-bedroom apartment — Khalda" needs you to confirm it's still
-            available, or it will be hidden from results tomorrow.</span
+            >Availability reminders are unavailable.</span
           >
           <button
             type="button"
             class="btn btn-alert"
-            data-action="confirm-available"
-            data-property="3"
+            disabled
           >
             Still available
           </button>
@@ -205,7 +205,7 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-eye"></i></span>
               <div>
-                <b>1,325</b><span>Views</span> <span class="trend">+12%</span>
+                <b>—</b><span>Views</span>
               </div>
             </div>
           </div>
@@ -213,21 +213,20 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-inbox"></i></span>
               <div>
-                <b>19</b><span>Booking requests</span>
-                <span class="trend">+4</span>
+                <b>{{ $recentBookingCount }}</b><span>Booking requests · last 30 days</span>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-xl-3">
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-stars"></i></span>
-              <div><b>75%</b><span>Average match</span></div>
+              <div><b>—</b><span>Average match</span></div>
             </div>
           </div>
           <div class="col-sm-6 col-xl-3">
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-house-door"></i></span>
-              <div><b>3 / 4</b><span>Active properties</span></div>
+              <div><b>{{ $activeProperties }} / {{ $totalProperties }}</b><span>Active properties</span></div>
             </div>
           </div>
         </div>
@@ -239,31 +238,9 @@
             <section class="panel" aria-labelledby="viewsTitle">
               <div class="panel-head">
                 <h2 id="viewsTitle">Property views · last 14 days</h2>
-                <span class="trend-up">+12%</span>
               </div>
-              <div
-                class="bar-chart"
-                id="viewsChart"
-                role="img"
-                aria-label="Daily views over the last 14 days, up 12%"
-              >
-                <div class="bar" style="height: 32%"></div>
-                <div class="bar" style="height: 41%"></div>
-                <div class="bar" style="height: 38%"></div>
-                <div class="bar" style="height: 52%"></div>
-                <div class="bar" style="height: 47%"></div>
-                <div class="bar" style="height: 60%"></div>
-                <div class="bar" style="height: 58%"></div>
-                <div class="bar" style="height: 71%"></div>
-                <div class="bar" style="height: 66%"></div>
-                <div class="bar" style="height: 80%"></div>
-                <div class="bar" style="height: 74%"></div>
-                <div class="bar is-hi" style="height: 92%"></div>
-                <div class="bar is-hi" style="height: 88%"></div>
-                <div class="bar is-hi" style="height: 97%"></div>
-              </div>
-              <div class="chart-labels">
-                <span>27 Sep</span><span>3 Oct</span><span>10 Oct</span>
+              <div class="bar-chart align-items-center justify-content-center" id="viewsChart">
+                <span class="text-muted small">Property view data is unavailable.</span>
               </div>
             </section>
 
@@ -274,98 +251,30 @@
                 <a href="{{ route('owner.requests') }}">View all</a>
               </div>
               <ul class="list-clean" id="newRequests">
-                <li class="list-row flex-wrap">
-                  <span class="avatar avatar-lg">S</span>
-                  <div class="grow flex-main">
-                    <b
-                      >Sara Khaled
-                      <span class="fw-medium small text-muted">· Study</span></b
-                    >
-                    <small>Studio — Al Jubeiha · from 1 Nov · 6 months</small>
-                  </div>
-                  <span class="pill-soft">92% match</span>
-                  <div class="d-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-primary btn-sm"
-                      data-action="accept"
-                      data-request="1"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-ghost btn-sm"
-                      data-action="reject"
-                      data-request="1"
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </li>
-                <li class="list-row flex-wrap">
-                  <span class="avatar avatar-lg">M</span>
-                  <div class="grow flex-main">
-                    <b
-                      >Mohammad Al Ali
-                      <span class="fw-medium small text-muted">· Work</span></b
-                    >
-                    <small
-                      >Room in a shared apartment — Al Jubeiha · from 15 Nov · 3
-                      months</small
-                    >
-                  </div>
-                  <span class="pill-soft">81% match</span>
-                  <div class="d-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-primary btn-sm"
-                      data-action="accept"
-                      data-request="2"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-ghost btn-sm"
-                      data-action="reject"
-                      data-request="2"
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </li>
-                <li class="list-row flex-wrap">
-                  <span class="avatar avatar-lg">E</span>
-                  <div class="grow flex-main">
-                    <b
-                      >Emily Carter
-                      <span class="fw-medium small text-muted"
-                        >· Tourism</span
-                      ></b
-                    >
-                    <small>Studio — Al Jubeiha · from 20 Oct · 1 month</small>
-                  </div>
-                  <span class="pill-soft">77% match</span>
-                  <div class="d-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-primary btn-sm"
-                      data-action="accept"
-                      data-request="3"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-ghost btn-sm"
-                      data-action="reject"
-                      data-request="3"
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </li>
+                @forelse ($pendingBookings as $booking)
+                  @php
+                    $tenant = $booking->tenant?->tenantProfile;
+                    $tenantName = trim(($tenant?->first_name ?? '').' '.($tenant?->last_name ?? '')) ?: 'Tenant #'.$booking->tenant_id;
+                  @endphp
+                  <li class="list-row flex-wrap">
+                    <span class="avatar avatar-lg">{{ Str::upper(Str::substr($tenantName, 0, 1)) }}</span>
+                    <div class="grow flex-main">
+                      <b>{{ $tenantName }}</b>
+                      <small>
+                        {{ $booking->property->title }} · from {{ $booking->start_date->format('j M Y') }}
+                        @if ($booking->duration_unit)
+                          · {{ $booking->duration }} {{ Str::plural($booking->duration_unit === 'daily' ? 'day' : Str::beforeLast($booking->duration_unit, 'ly'), $booking->duration) }}
+                        @endif
+                      </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <button type="button" class="btn btn-primary btn-sm" disabled>Accept</button>
+                      <button type="button" class="btn btn-ghost btn-sm" disabled>Decline</button>
+                    </div>
+                  </li>
+                @empty
+                  <li class="list-row text-muted">No pending booking requests.</li>
+                @endforelse
               </ul>
             </section>
           </div>
@@ -375,16 +284,10 @@
             <!-- 6. Featured listing -->
             <section class="panel panel-featured">
               <div class="featured-label">
-                <i class="bi bi-star-fill"></i>Featured listing active
+                <i class="bi bi-star-fill"></i>Featured listing
               </div>
-              <b class="d-block fs-5 mb-1">Studio — Al Jubeiha</b>
-              <p>
-                Shows at the top of results until 30 Oct. It brought in 3× the
-                views this week.
-              </p>
-              <a href="{{ route('owner.account') }}" class="btn btn-light text-primary-bt"
-                >Renew subscription</a
-              >
+              <p>Featured listing data is unavailable.</p>
+              <a href="{{ route('owner.account') }}" class="btn btn-light text-primary-bt">My account</a>
             </section>
 
             <!-- 7. Per-property performance -->
@@ -393,83 +296,25 @@
                 <h2 id="perfTitle">Performance by property</h2>
               </div>
               <div class="d-flex flex-column gap-3" id="propertyPerformance">
-                <div>
+                @forelse ($propertyPreview as $property)
                   <div class="d-flex justify-content-between small mb-1">
-                    <span class="fw-medium">Studio — Al Jubeiha</span
-                    ><span class="text-muted">642 views</span>
+                    <span class="fw-medium">{{ $property->title }}</span>
+                    <span class="text-muted">Views unavailable</span>
                   </div>
-                  <div
-                    class="progress"
-                    role="progressbar"
-                    aria-label="Al Jubeiha studio views"
-                    aria-valuenow="100"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  >
-                    <div class="progress-bar" style="width: 100%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="d-flex justify-content-between small mb-1">
-                    <span class="fw-medium">Room in a shared apartment — Al Jubeiha</span
-                    ><span class="text-muted">318 views</span>
-                  </div>
-                  <div
-                    class="progress"
-                    role="progressbar"
-                    aria-label="Room in a shared apartment views"
-                    aria-valuenow="50"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  >
-                    <div class="progress-bar" style="width: 50%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="d-flex justify-content-between small mb-1">
-                    <span class="fw-medium">3-bedroom apartment — Khalda</span
-                    ><span class="text-muted">211 views</span>
-                  </div>
-                  <div
-                    class="progress"
-                    role="progressbar"
-                    aria-label="Khalda 3-bedroom apartment views"
-                    aria-valuenow="33"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  >
-                    <div class="progress-bar is-warn" style="width: 33%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="d-flex justify-content-between small mb-1">
-                    <span class="fw-medium">Studio — Sweileh</span
-                    ><span class="text-muted">154 views</span>
-                  </div>
-                  <div
-                    class="progress"
-                    role="progressbar"
-                    aria-label="Sweileh studio views"
-                    aria-valuenow="24"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  >
-                    <div class="progress-bar" style="width: 24%"></div>
-                  </div>
-                </div>
+                @empty
+                  <p class="text-muted small mb-0">No properties to show.</p>
+                @endforelse
               </div>
             </section>
 
             <!-- 8. Verification status -->
             <section class="panel d-flex align-items-center gap-3">
-              <span class="kpi-icon is-success"
+              <span @class(['kpi-icon', 'is-success' => $verificationStatus === 'verified'])
                 ><i class="bi bi-patch-check-fill"></i
               ></span>
               <div>
-                <b class="d-block">Your account is verified</b>
-                <span class="small text-muted"
-                  >The badge shows on all your properties.</span
-                >
+                <b class="d-block">Account verification</b>
+                <span class="small text-muted">{{ $verificationStatus ? ucfirst($verificationStatus) : 'Status unavailable' }}</span>
               </div>
             </section>
           </div>

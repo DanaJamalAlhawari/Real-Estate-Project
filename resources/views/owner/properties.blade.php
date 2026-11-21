@@ -174,7 +174,11 @@
         <div class="page-head">
           <div>
             <h1>My properties</h1>
-            <p>4 properties · 3 active</p>
+            @isset($ownedProperties)
+              <p>{{ $ownedProperties->count() }} {{ Str::plural('property', $ownedProperties->count()) }}</p>
+            @else
+              <p>4 properties · 3 active</p>
+            @endisset
           </div>
           <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
             <i class="bi bi-plus-lg"></i>
@@ -184,6 +188,19 @@
 
         <!-- 2. Property list -->
         <div class="d-flex flex-column gap-3" id="ownerProperties">
+          @isset($ownedProperties)
+            @forelse ($ownedProperties as $property)
+              <article class="panel prop-row">
+                <div class="flex-main">
+                  <h2 class="prop-row__title">{{ $property->title }}</h2>
+                  <p class="small text-muted mb-0">Verification: {{ ucfirst($property->verification_status) }}</p>
+                </div>
+                <a href="{{ route('owner.properties.edit', $property) }}" class="btn btn-outline-secondary">Edit property</a>
+              </article>
+            @empty
+              <p class="text-muted">You have no properties yet.</p>
+            @endforelse
+          @else
           <!-- Property 1 -->
           <article class="panel prop-row" data-property="1">
             <div class="listing-thumb ph ph-1" aria-hidden="true"></div>
@@ -351,6 +368,7 @@
               </button>
             </div>
           </article>
+          @endisset
         </div>
       </main>
     </div>

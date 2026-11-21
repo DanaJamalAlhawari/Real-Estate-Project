@@ -70,7 +70,7 @@
                 ></span>
                 <span class="small">
                   <span class="d-block"
-                    >4 verification requests waiting for review</span
+                    >{{ $pendingVerificationCount }} verification requests waiting for review</span
                   >
                   <span class="text-muted" style="font-size: 0.72rem"
                     >Today</span
@@ -128,7 +128,7 @@
           <a class="side-link" href="{{ route('admin.verifications') }}" title="Verifications"
             ><i class="bi bi-patch-check"></i
             ><span class="flex-grow-1">Verifications</span
-            ><span class="side-badge">4</span></a
+            ><span class="side-badge">{{ $pendingVerificationCount }}</span></a
           >
           <a class="side-link" href="{{ route('admin.users') }}" title="Users"
             ><i class="bi bi-people"></i
@@ -162,7 +162,7 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-people"></i></span>
               <div>
-                <b>1,284</b>
+                <b>{{ $totalUsers }}</b>
                 <span>Users</span> <span class="trend">+8%</span>
               </div>
             </div>
@@ -171,7 +171,7 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-house-door"></i></span>
               <div>
-                <b>6</b>
+                <b>{{ $totalProperties }}</b>
                 <span>Properties</span> <span class="trend">+1</span>
               </div>
             </div>
@@ -180,7 +180,7 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-calendar-check"></i></span>
               <div>
-                <b>4</b>
+                <b>{{ $bookingsThisMonth }}</b>
                 <span>Bookings this month</span>
               </div>
             </div>
@@ -189,57 +189,40 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-cash-stack"></i></span>
               <div>
-                <b>55 JOD</b>
-                <span>Subscription revenue</span>
+                <b>{{ number_format($totalCommissionRevenue, 2) }} JOD</b>
+                <span>Total Commission Revenue</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 3. Subscription revenue + awaiting verification -->
+        <!-- 3. Commission revenue + awaiting verification -->
         <div class="row g-4 mb-4 align-items-start">
           <div class="col-lg-8">
             <section class="panel" aria-labelledby="revTitle">
               <div class="panel-head">
-                <h2 id="revTitle">Subscription revenue · last 6 months</h2>
+                <h2 id="revTitle">Commission Revenue · Last 6 Months</h2>
                 <span class="small text-muted">In JOD</span>
               </div>
+              @php
+                $maxCommissionRevenue = max(array_column($monthlyCommissionRevenue, 'amount'));
+              @endphp
               <div
                 class="bar-chart rev-chart"
                 id="revenueChart"
                 role="img"
-                aria-label="Subscription revenue in JOD: May 10, June 10, July 20, August 35, September 45, October 55"
+                aria-label="Commission revenue in JOD: {{ collect($monthlyCommissionRevenue)->map(fn ($month) => $month['label'].' '.number_format($month['amount'], 2))->implode('; ') }}"
               >
-                <div class="bar-col">
-                  <span>10</span>
-                  <div class="bar" style="height: 29px"></div>
-                  <span>May</span>
-                </div>
-                <div class="bar-col">
-                  <span>10</span>
-                  <div class="bar" style="height: 29px"></div>
-                  <span>Jun</span>
-                </div>
-                <div class="bar-col">
-                  <span>20</span>
-                  <div class="bar" style="height: 58px"></div>
-                  <span>Jul</span>
-                </div>
-                <div class="bar-col">
-                  <span>35</span>
-                  <div class="bar" style="height: 102px"></div>
-                  <span>Aug</span>
-                </div>
-                <div class="bar-col">
-                  <span>45</span>
-                  <div class="bar" style="height: 131px"></div>
-                  <span>Sep</span>
-                </div>
-                <div class="bar-col">
-                  <span>55</span>
-                  <div class="bar is-hi" style="height: 160px"></div>
-                  <span>Oct</span>
-                </div>
+                @foreach ($monthlyCommissionRevenue as $month)
+                  @php
+                    $height = $maxCommissionRevenue > 0 ? round(160 * $month['amount'] / $maxCommissionRevenue) : 0;
+                  @endphp
+                  <div class="bar-col">
+                    <span>{{ number_format($month['amount'], 2) }}</span>
+                    <div @class(['bar', 'is-hi' => $loop->last]) style="height: {{ $height }}px"></div>
+                    <span>{{ $month['label'] }}</span>
+                  </div>
+                @endforeach
               </div>
             </section>
           </div>
@@ -251,11 +234,11 @@
                 <a href="{{ route('admin.verifications') }}">View all</a>
               </div>
               <ul class="list-clean" id="pendingList">
+                @foreach ($pendingVerificationPreview as $property)
                 <li class="list-row">
-                  <span class="avatar">A</span>
+                  <span class="avatar">{{ Str::substr($property->title, 0, 1) }}</span>
                   <div class="grow">
-                    <b class="d-block small">Abu Ahmad</b
-                    ><small>Owner · 2 documents · Today 9:12 AM</small>
+                    <b class="d-block small">{{ $property->title }}</b>
                   </div>
                   <a
                     href="{{ route('admin.verifications') }}"
@@ -263,80 +246,36 @@
                     >Review</a
                   >
                 </li>
-                <li class="list-row">
-                  <span class="avatar">R</span>
-                  <div class="grow">
-                    <b class="d-block small">Al Riyada Real Estate Office</b
-                    ><small>Office · 3 documents · Today 8:40 AM</small>
-                  </div>
-                  <a
-                    href="{{ route('admin.verifications') }}"
-                    class="small fw-semibold text-decoration-none"
-                    >Review</a
-                  >
-                </li>
-                <li class="list-row">
-                  <span class="avatar">Y</span>
-                  <div class="grow">
-                    <b class="d-block small">Umm Yazan</b
-                    ><small>Owner · 2 documents · Yesterday</small>
-                  </div>
-                  <a
-                    href="{{ route('admin.verifications') }}"
-                    class="small fw-semibold text-decoration-none"
-                    >Review</a
-                  >
-                </li>
-                <li class="list-row">
-                  <span class="avatar">S</span>
-                  <div class="grow">
-                    <b class="d-block small">Sami Haddad</b
-                    ><small>Owner · 1 document · Yesterday</small>
-                  </div>
-                  <a
-                    href="{{ route('admin.verifications') }}"
-                    class="small fw-semibold text-decoration-none"
-                    >Review</a
-                  >
-                </li>
+                @endforeach
               </ul>
             </section>
           </div>
         </div>
 
-        <!-- 4. Active subscriptions -->
+        <!-- 4. Recent paid commissions -->
         <div class="row g-4">
           <div class="col-lg-8">
-        <!-- Active subscriptions -->
         <section class="panel" aria-labelledby="subsTitle">
           <div class="panel-head">
-            <h2 id="subsTitle">Active subscriptions</h2>
+            <h2 id="subsTitle">Recent Paid Commissions</h2>
           </div>
           <ul class="list-clean" id="subsList">
-            <li class="list-row">
-              <span class="avatar">A</span>
-              <div class="grow">
-                <b class="d-block small">Abu Ahmad</b
-                ><small>Featured · 1 property</small>
-              </div>
-              <span class="small fw-semibold">10 JOD/month</span>
-            </li>
-            <li class="list-row">
-              <span class="avatar">R</span>
-              <div class="grow">
-                <b class="d-block small">Al Riyada Real Estate Office</b
-                ><small>Agency</small>
-              </div>
-              <span class="small fw-semibold">35 JOD/month</span>
-            </li>
-            <li class="list-row">
-              <span class="avatar">U</span>
-              <div class="grow">
-                <b class="d-block small">Umm Yazan</b
-                ><small>Featured · 1 property</small>
-              </div>
-              <span class="small fw-semibold">10 JOD/month</span>
-            </li>
+            @forelse ($recentPaidCommissions as $commission)
+              @php
+                $profile = $commission->agent?->agentProfile;
+                $agent = trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')) ?: 'Agent #'.$commission->agent_id;
+              @endphp
+              <li class="list-row">
+                <span class="avatar">{{ Str::upper(Str::substr($agent, 0, 1)) }}</span>
+                <div class="grow">
+                  <b class="d-block small">{{ $agent }}</b>
+                  <small>Booking #{{ $commission->booking_id }}@if ($commission->paid_at) · {{ $commission->paid_at->format('M j, Y') }}@endif</small>
+                </div>
+                <span class="small fw-semibold">{{ number_format($commission->commission_amount, 2) }} JOD</span>
+              </li>
+            @empty
+              <li class="list-row text-muted">No paid commissions yet.</li>
+            @endforelse
           </ul>
         </section>
           </div>
