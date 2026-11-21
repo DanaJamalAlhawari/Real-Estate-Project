@@ -154,27 +154,50 @@
         </div>
 
         <div class="row g-4 align-items-start">
-            <!-- ===== Home details ===== -->
-            <div class="col-lg-8 d-flex flex-column gap-3">
-                <!-- 3. Title and quick facts -->
-                <div class="prop-head">
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <h1>{{ $property->title ?? 'Studio — Al Jubeiha' }}</h1>
-                        <span class="status status--info"><i class="bi bi-patch-check-fill"></i>Verified</span>
-                    </div>
-                    <p class="d-flex align-items-center gap-2 small text-muted mt-2 mb-3">
-                        <i class="bi bi-arrow-repeat ic-ok"></i>The owner confirmed it's
-                        available 2 days ago
-                    </p>
-                    <div class="facts">
-                        <span class="fact"><i class="bi bi-arrows-angle-expand"></i>45 m²</span>
-                        <span class="fact"><i class="bi bi-house-door"></i>Studio</span>
-                        <span class="fact"><i class="bi bi-lamp"></i>Furnished</span>
-                        <span class="fact"><i class="bi bi-layers"></i>Floor 2</span>
-                        <span class="fact"><i class="bi bi-universal-access"></i>Elevator</span>
-                        <span class="fact"><i class="bi bi-calendar3"></i>Minimum stay 3 months</span>
-                    </div>
-                </div>
+          <!-- ===== Home details ===== -->
+          <div class="col-lg-8 d-flex flex-column gap-3">
+            <!-- 3. Title and quick facts -->
+            <div class="prop-head">
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                @isset($property)
+    <h1>{{ $property->title }}</h1>
+
+    <a
+        href="{{ route('seeker.reviews.index', ['property' => $property->id]) }}"
+        class="btn btn-outline-primary"
+    >
+        Reviews
+    </a>
+@else
+    <h1>Studio — Al Jubeiha</h1>
+@endisset
+                <span class="status status--info"
+                  ><i class="bi bi-patch-check-fill"></i>Verified</span
+                >
+              </div>
+              <p
+                class="d-flex align-items-center gap-2 small text-muted mt-2 mb-3"
+              >
+                <i class="bi bi-arrow-repeat ic-ok"></i>The owner confirmed it's
+                available 2 days ago
+              </p>
+              <div class="facts">
+                <span class="fact"
+                  ><i class="bi bi-arrows-angle-expand"></i>45 m²</span
+                >
+                <span class="fact"
+                  ><i class="bi bi-house-door"></i>Studio</span
+                >
+                <span class="fact"><i class="bi bi-lamp"></i>Furnished</span>
+                <span class="fact"><i class="bi bi-layers"></i>Floor 2</span>
+                <span class="fact"
+                  ><i class="bi bi-universal-access"></i>Elevator</span
+                >
+                <span class="fact"
+                  ><i class="bi bi-calendar3"></i>Minimum stay 3 months</span
+                >
+              </div>
+            </div>
 
                 <!-- 4. Monthly cost -->
                 @isset($property)

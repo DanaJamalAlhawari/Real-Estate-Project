@@ -1,3 +1,6 @@
+
+
+
 @extends('layouts.app')
 
 @section('title', "Makan — Discover")
@@ -5,13 +8,6 @@
 @section('bodyAttributes') data-role="seeker" data-page="search"@endsection
 
 @section('content')
-    <!-- ===== Navbar ===== -->
-    <header class="site-header app-nav">
-      <nav class="navbar navbar-expand-lg" aria-label="Main">
-        <div class="container">
-          <a class="brand" href="{{ route('seeker.search') }}"
-            ><span class="brand-mark">M</span><span>Makan</span></a
-          >
 
           <!-- Messages, notifications + user menu (stay visible on phones) -->
           <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
@@ -104,44 +100,41 @@
             </button>
           </div>
 
-          <!-- Page links + search, grouped in one capsule -->
-          <div class="collapse navbar-collapse" id="appNav">
-            <div class="nav-group">
-              <ul class="navbar-nav">
-                <li class="nav-item">
-                  <a class="nav-link active" aria-current="page" href="{{ route('seeker.search') }}"
-                    ><i class="bi bi-stars"></i><span>Discover</span></a
-                  >
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ route('seeker.bookings') }}"
-                    ><i class="bi bi-calendar-check"></i><span>My bookings</span
-                    ><span class="side-badge">1</span></a
-                  >
-                </li>
-              </ul>
-              <span class="nav-group-divider" aria-hidden="true"></span>
-              <!-- Search: plain GET form, opens the Discover page -->
-              <form
-                class="nav-search"
-                action="{{ route('seeker.search') }}"
-                method="get"
-                role="search"
-              >
-                <i class="bi bi-search" aria-hidden="true"></i>
-                <input
-                  type="search"
-                  class="form-control"
-                  name="q"
-                  placeholder="Search by area..."
-                  aria-label="Search homes by neighborhood"
-                />
-              </form>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
+<style>
+    #databasePropertiesGrid .property-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        padding: 3px 0;
+        color: #303a2d;
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    #databasePropertiesGrid .property-rating i {
+        font-size: 12px;
+    }
+
+    #databasePropertiesGrid .property-rating span {
+        color: #73766e;
+    }
+
+    #databasePropertiesGrid .property-rating:hover {
+        text-decoration: underline;
+    }
+
+    #databasePropertiesGrid .property-rating:focus-visible {
+        outline: 2px solid #52634e;
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+</style>
+
+
+
+    <x-seeker-navbar />
 
     <!-- ===== Content ===== -->
     <main class="app-page container">
@@ -159,6 +152,14 @@
           <span>Edit my priorities</span>
         </a>
       </div>
+
+
+
+
+
+
+
+
 
       <div class="seeker-results-layout">
         <aside class="panel seeker-filters" aria-labelledby="filterHeading">
@@ -260,7 +261,9 @@
               <b>Favorites</b>
               <small>Homes you saved</small>
             </span>
-            <span class="count">2</span>
+            {{-- dana added code  --}}
+           <span class="count">{{ $favoritesCount }}</span>
+           
           </button>
         </li>
       </ul>
@@ -629,11 +632,21 @@
           </p>
 
           <!-- Cards: every listing; featured (paid) ones first -->
-          <div class="row g-4" id="allHomesGrid">
-            @foreach ($featuredHomes as $home)
-              <x-property-card :home="$home" :layout="'seeker'" />
-            @endforeach
+          {{-- dana added code  --}}
+          <div class="row g-4" id="databasePropertiesGrid">
+            @forelse ($properties as $property)
+                <x-database-property-card
+                    :property="$property"
+                    :saved="in_array($property->id, $favoriteIds)"
+                />
+            @empty
+                <p>No properties available yet.</p>
+            @endforelse
           </div>
+
+
+
+
         </section>
 
         <!-- ===== Favorites ===== -->
@@ -644,13 +657,26 @@
           aria-labelledby="favorites-tab"
           tabindex="0"
         >
-          <p class="small text-muted mb-3">2 saved homes</p>
+
+        {{-- dana edit code --}}
+          <p class="small text-muted mb-3">{{ $favoritesCount }} saved homes</p>
 
           <!-- Cards: homes the seeker saved with the heart button -->
-          <div class="row g-4" id="favoritesGrid">
+          {{-- <div class="row g-4" id="favoritesGrid">
             @foreach ($defaultFavorites as $home)
               <x-property-card :home="$home" :layout="'seeker'" />
             @endforeach
+          </div> --}}
+          {{-- dana edit this code --}}
+          <div class="row g-4" id="databaseFavoritesGrid">
+            @forelse ($favorites as $property)
+                <x-database-property-card
+                    :property="$property"
+                    :saved="true"
+                />
+            @empty
+                <p>No saved properties yet.</p>
+            @endforelse
           </div>
         </section>
       </div>
