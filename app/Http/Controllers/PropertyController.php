@@ -65,8 +65,14 @@ class PropertyController extends Controller
             'services.*'  => 'integer|distinct|exists:services,id',
             'photos'      => 'sometimes|array|max:10',
             'photos.*'    => 'image|mimes:jpg,jpeg,png|max:5120',
+            'document'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'action'      => 'required|in:draft,publish',
         ]);
+
+        $document = $validated['document'] ?? null;
+        $agent = $request->user();
+        abort_if($document && $agent?->role !== 'agent', 403);
+        $agentId = $agent?->role === 'agent' ? $agent->id : 1;
 
         // 2. Get selected services and uploaded photos.
         $services = $validated['services'] ?? [];
@@ -74,6 +80,7 @@ class PropertyController extends Controller
 
         // 3. Keep track of uploaded files for cleanup.
         $uploadedPaths = [];
+        $ownershipPath = null;
 
         try {
 
@@ -83,15 +90,18 @@ class PropertyController extends Controller
             }
 
             // 5. Save property, services, and image records together.
-            DB::transaction(function () use (
+            $property = DB::transaction(function () use (
                 $validated,
                 $services,
-                $uploadedPaths
+                $uploadedPaths,
+                $agentId,
+                $document,
+                &$ownershipPath
             ) {
 
                 // Create property.
                 $property = Property::create([
-                    'agent_id'    => 1,
+                    'agent_id'    => $agentId,
                     'title'       => $validated['title'],
                     'description' => $validated['description'],
                     'category'    => $validated['category'],
@@ -106,12 +116,6 @@ class PropertyController extends Controller
                     'ownership_deed_url' => 'NULL',
                 ]);
 
-                // Temporary agent until authentication is connected.
-                $property->agent_id = 1;
-
-
-                $property->save();
-
                 $property->services()->sync($services);
 
                 // Save uploaded images.
@@ -122,13 +126,32 @@ class PropertyController extends Controller
                         'is_primary' => $index === 0,
                     ]);
                 }
+
+                if ($document) {
+                    $path = $document->store('verifications', 'local');
+                    abort_if($path === false, 500, 'Could not store the ownership document.');
+                    $ownershipPath = $path;
+                    $property->ownership_deed_url = $path;
+                    $property->verification_status = 'pending';
+                    abort_unless($property->save(), 500, 'Could not save the ownership document.');
+                }
+
+                return $property;
             });
         } catch (\Throwable $e) {
 
             // Delete uploaded files if database saving fails.
             Storage::disk('public')->delete($uploadedPaths);
+            if ($ownershipPath !== null) {
+                Storage::disk('local')->delete($ownershipPath);
+            }
 
             throw $e;
+        }
+
+        if ($document) {
+            return redirect()->route('owner.properties.edit', $property)
+                ->with('success', 'Property created and ownership document uploaded.');
         }
 
         // 6. Redirect after successful creation.
