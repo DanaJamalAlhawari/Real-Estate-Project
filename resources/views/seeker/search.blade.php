@@ -62,12 +62,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, Sara Khaled">
-            <span class="avatar">S</span>
+            aria-label="Account menu, {{ auth()->user()->display_name }}">
+            <span class="avatar">{{ auth()->user()->display_initial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             <li>
-              <h6 class="dropdown-header">Sara Khaled</h6>
+              <h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6>
             </li>
             <li><a class="dropdown-item" href="{{ route('seeker.profile') }}">My profile</a></li>
             <li>
@@ -130,17 +130,10 @@
         See the homes picked for your priorities, or browse everything
         owners have listed.
       </p>
-    </div>
-    <a href="{{ route('seeker.profile') }}" class="btn btn-outline-primary">
-      <i class="bi bi-sliders"></i>
-      <span>Edit my priorities</span>
-    </a>
-  </div>
-  <div class="seeker-results-layout">
+  <div class="seeker-results-layout" style="margin-top: 35px;">
     <aside class="panel seeker-filters" aria-labelledby="filterHeading">
       <h2 class="h5 mb-3" id="filterHeading"><i class="bi bi-sliders me-2" aria-hidden="true"></i>Filters</h2>
       <form id="seekerFilters" action="{{ route('seeker.search') }}" method="get">
-
         <fieldset class="mb-3">
           <legend class="form-label">Property type</legend>
           <div class="d-grid gap-2">
@@ -162,14 +155,13 @@
             </label>
           </div>
         </fieldset>
-
         <div class="mb-3">
           <label class="form-label" for="filterArea">Area</label>
           <input class="form-control" id="filterArea" name="q" type="search" value="{{ request('q') }}" placeholder="e.g. Amman, Al Jubeiha">
         </div>
         <div class="mb-3">
           <label class="form-label" for="filterBudget">Max monthly cost (JOD)</label>
-          <input class="form-control" id="filterBudget" name="max" type="number" min="0" step="1" placeholder="Any budget" />
+          <input class="form-control" id="filterBudget" name="max" type="number" min="0" step="1" value="{{ request('max') }}" placeholder="Any budget" />
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
           <button class="btn btn-accent" type="submit">Apply filters</button>
@@ -178,7 +170,7 @@
       </form>
     </aside>
     <div class="seeker-results">
-      <!-- 2. Three views: all homes / matches for you / favorites -->
+      <!-- Discover tabs: All homes and Favorites -->
       <ul class="nav discover-switch mb-4" role="tablist">
         <li class="nav-item" role="presentation">
           <button
@@ -197,24 +189,6 @@
             </span>
             <span class="count">{{ $properties->count() }}</span>
           </button>
-        </li>
-        <!-- <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="matches-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#tab-matches"
-            type="button"
-            role="tab"
-            aria-controls="tab-matches"
-            aria-selected="false">
-            <i class="bi bi-stars"></i>
-            <span class="text-start">
-              <b>Matches for you</b>
-              <small>Ranked by your priorities</small>
-            </span>
-            <span class="count">6</span>
-          </button> -->
         </li>
         <li class="nav-item" role="presentation">
           <button
@@ -236,7 +210,6 @@
         </li>
       </ul>
       <div class="tab-content">
-
         <!-- ===== All homes ===== -->
         <section
           class="tab-pane fade show active"
@@ -247,39 +220,44 @@
           <p class="small text-muted mb-3">
             {{ $properties->count() }} homes
           </p>
-          <!-- Cards: every listing; featured (paid) ones first -->
+          <!-- Property cards -->
           <div class="row g-4" id="allHomesGrid">
             @forelse ($properties as $property)
             <div class="col-sm-6 col-xxl-4">
               <article class="prop-card">
                 {{-- Property Images --}}
-
-
-
                 <div class="prop-media ph ph-1">
-                  @if ($property->images->isNotEmpty())
-                  <img class="property-slide"
-                    src="{{ $property->images->first()->image_url }}"
-                    alt="{{ $property->title }}"
-                    data-images='@json($property->images->pluck("image_url")->values())'
-                    data-index="0"
-                    style="width:100%;height:100%;object-fit:cover;">
-
-                  @if ($property->images->count() > 1)
-                  <button type="button" class="gallery-prev" aria-label="Previous image">
+    @if ($property->images->isNotEmpty())
+        <div id="propertyCarousel{{ $property->id }}"
+             class="carousel slide property-carousel"
+             data-bs-interval="false"
+             data-bs-wrap="true">
+            <div class="carousel-inner">
+                @foreach ($property->images as $image)
+                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                        <img src="{{ $image->image_url }}"
+                             alt="{{ $property->title }}"
+                             class="d-block w-100 property-carousel-image">
+                    </div>
+                @endforeach
+            </div>
+            @if ($property->images->count() > 1)
+                <button class="carousel-control-prev" type="button"
+                        data-bs-target="#propertyCarousel{{ $property->id }}"
+                        data-bs-slide="prev" aria-label="Previous image">
                     <i class="bi bi-chevron-left"></i>
-                  </button>
-                  <button type="button" class="gallery-next" aria-label="Next image">
+                </button>
+                <button class="carousel-control-next" type="button"
+                        data-bs-target="#propertyCarousel{{ $property->id }}"
+                        data-bs-slide="next" aria-label="Next image">
                     <i class="bi bi-chevron-right"></i>
-                  </button>
-                  @endif
-                  @else
-                  <span class="ph-icon"><i class="bi bi-house-door"></i></span>
-                  @endif
-                </div>
-
-
-
+                </button>
+            @endif
+        </div>
+    @else
+        <span class="ph-icon"><i class="bi bi-house-door"></i></span>
+    @endif
+</div>
                 {{-- Property Details --}}
                 <div class="prop-body">
                   <h3 class="prop-title">
@@ -339,98 +317,28 @@
     </div>
   </div>
 </main>
-
 <style>
-  #allHomesGrid .prop-media {
-    position: relative;
-    overflow: hidden;
-  }
-
-  #allHomesGrid .gallery-prev,
-  #allHomesGrid .gallery-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid #e5dac9;
-    background: #fffdf9;
-    color: #526453;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 5;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
-  }
-
-
-  #allHomesGrid .gallery-prev {
-    left: 16px;
-  }
-
-  #allHomesGrid .gallery-next {
-    right: 16px;
-  }
-
-  #allHomesGrid .gallery-prev:hover,
-  #allHomesGrid .gallery-next:hover {
-    background: #f4efe6;
-  }
+    /* Image gallery only — other page styles remain unchanged */
+    #allHomesGrid .prop-media { position: relative; overflow: hidden; }
+    #allHomesGrid .property-carousel,
+    #allHomesGrid .carousel-inner,
+    #allHomesGrid .carousel-item { width: 100%; height: 100%; }
+    #allHomesGrid .property-carousel-image { width: 100%; height: 100%; object-fit: cover; }
+    #allHomesGrid .carousel-control-prev,
+    #allHomesGrid .carousel-control-next {
+        position: absolute;
+        top: 50%; bottom: auto;
+        transform: translateY(-50%);
+        width: 38px; height: 38px;
+        border-radius: 50%; border: 1px solid #e5dac9;
+        background: #fffdf9; color: #526453;
+        opacity: 1; display: flex; align-items: center; justify-content: center;
+        font-size: 16px; z-index: 5;
+        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+    }
+    #allHomesGrid .carousel-control-prev { left: 16px; }
+    #allHomesGrid .carousel-control-next { right: 16px; }
+    #allHomesGrid .carousel-control-prev:hover,
+    #allHomesGrid .carousel-control-next:hover { background: #f4efe6; }
 </style>
-
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('#allHomesGrid .prop-media').forEach(function(media) {
-      const image = media.querySelector('.property-slide');
-      const prevBtn = media.querySelector('.gallery-prev');
-      const nextBtn = media.querySelector('.gallery-next');
-
-      if (!image) return;
-
-      let images = [];
-
-      try {
-        images = JSON.parse(image.dataset.images || '[]');
-      } catch (error) {
-        console.error('Invalid property images:', error);
-        return;
-      }
-
-      if (images.length <= 1) {
-        if (prevBtn) prevBtn.style.display = 'none';
-        if (nextBtn) nextBtn.style.display = 'none';
-        return;
-      }
-
-      let currentIndex = 0;
-
-      function changeImage(direction) {
-        currentIndex = (currentIndex + direction + images.length) % images.length;
-        image.src = images[currentIndex];
-      }
-
-      if (prevBtn) {
-        prevBtn.addEventListener('click', function(event) {
-          event.preventDefault();
-          event.stopPropagation();
-          changeImage(-1);
-        });
-      }
-
-      if (nextBtn) {
-        nextBtn.addEventListener('click', function(event) {
-          event.preventDefault();
-          event.stopPropagation();
-          changeImage(1);
-        });
-      }
-    });
-  });
-</script>
-
-
 @endsection

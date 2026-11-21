@@ -5,271 +5,288 @@
 @section('bodyAttributes') data-role="owner" data-page="properties"@endsection
 
 @section('content')
-<!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
-<input
-  type="checkbox"
-  class="sidebar-toggle"
-  id="sidebarToggle"
-  aria-label="Collapse the menu" />
+    <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
+    <input
+      type="checkbox"
+      class="sidebar-toggle"
+      id="sidebarToggle"
+      aria-label="Collapse the menu"
+    />
 
-<!-- ===== Topbar ===== -->
-<header class="app-topbar">
-  <button
-    class="icon-btn d-lg-none"
-    type="button"
-    data-bs-toggle="offcanvas"
-    data-bs-target="#appSidebar"
-    aria-label="Menu">
-    <i class="bi bi-list"></i>
-  </button>
-  <label
-    for="sidebarToggle"
-    class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-    title="Collapse or expand the menu"
-    aria-hidden="true">
-    <i class="bi bi-list"></i>
-  </label>
-  <a class="brand" href="{{ route('owner.dashboard') }}"><span class="brand-mark">M</span><span>Makan</span></a>
-  <div class="ms-auto d-flex align-items-center gap-1">
-    <!-- Messages: icon with unread count -->
-    <a
-      class="icon-btn"
-      href="{{ route('owner.chat') }}"
-      aria-label="Messages, 1 unread">
-      <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
-    </a>
-    <div class="dropdown">
+    <!-- ===== Topbar ===== -->
+    <header class="app-topbar">
       <button
-        class="icon-btn"
+        class="icon-btn d-lg-none"
         type="button"
-        data-bs-toggle="dropdown"
-        aria-label="Notifications">
-        <i class="bi bi-bell"></i><span class="dot"></span>
-      </button>
-      <div
-        class="dropdown-menu dropdown-menu-end shadow-sm p-0"
-        style="width: 320px">
-        <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
-        <div class="py-1">
-          <a
-            class="dropdown-item d-flex gap-2 py-2 text-wrap"
-            href="{{ route('owner.requests') }}">
-            <span
-              class="kpi-icon flex-shrink-0"
-              style="width: 34px; height: 34px; font-size: 1rem"><i class="bi bi-inbox"></i></span>
-            <span class="small">
-              <span class="d-block">New booking request from Sara Khaled</span>
-              <span class="text-muted" style="font-size: 0.72rem">10 minutes ago</span>
-            </span>
-          </a>
-          <a
-            class="dropdown-item d-flex gap-2 py-2 text-wrap"
-            href="{{ route('owner.properties') }}">
-            <span
-              class="kpi-icon flex-shrink-0"
-              style="width: 34px; height: 34px; font-size: 1rem"><i class="bi bi-shield-check"></i></span>
-            <span class="small">
-              <span class="d-block">Your Al Jubeiha studio has been verified</span>
-              <span class="text-muted" style="font-size: 0.72rem">1 hour ago</span>
-            </span>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="dropdown">
-      <button
-        class="app-user app-user--avatar"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        aria-label="Account menu, Abu Ahmad">
-        <span class="avatar">A</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-        <li>
-          <h6 class="dropdown-header">Abu Ahmad</h6>
-        </li>
-        <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
-        <li>
-          <hr class="dropdown-divider" />
-        </li>
-        <li>
-          <a class="dropdown-item text-danger" href="{{ route('home') }}">Log out</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</header>
-
-<div class="app-shell">
-  <!-- ===== Sidebar ===== -->
-  <aside
-    class="app-sidebar offcanvas-lg offcanvas-start"
-    tabindex="-1"
-    id="appSidebar">
-    <div class="offcanvas-header border-bottom">
-      <a class="brand" href="{{ route('home') }}"><span class="brand-mark">M</span><span>Makan</span></a>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
+        data-bs-toggle="offcanvas"
         data-bs-target="#appSidebar"
-        aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="side-label">Property owner</div>
-      <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"><i class="bi bi-grid-1x2"></i><span class="flex-grow-1">Dashboard</span></a>
-      <a class="side-link active" href="{{ route('owner.properties') }}" aria-current="page" title="My properties"><i class="bi bi-house-door"></i><span class="flex-grow-1">My properties</span></a>
-      <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"><i class="bi bi-plus-square"></i><span class="flex-grow-1">Add property</span></a>
-      <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"><i class="bi bi-inbox"></i><span class="flex-grow-1">Booking requests</span><span class="side-badge">3</span></a>
-      <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span><span class="side-badge">1</span></a>
-      <a class="side-link" href="{{ route('owner.account') }}" title="My account"><i class="bi bi-person-badge"></i><span class="flex-grow-1">My account</span></a>
-    </div>
-  </aside>
-
-  <!-- ===== Content ===== -->
-  <main class="app-main">
-    <!-- 1. Page header -->
-    <div class="page-head">
-      <div>
-        <h1>My properties</h1>
-        <p>{{ $properties->count() }} Properties</p>
-      </div>
-      <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
-        <i class="bi bi-plus-lg"></i>
-        <span>Add property</span>
-      </a>
-    </div>
-
-    <!-- 2. Property list -->
-    <div class="d-flex flex-column gap-3" id="ownerProperties">
-      <!-- Property  -->
-      @foreach($properties as $property)
-      <article class="panel prop-row" data-property="{{ $property->id }}">
-        <img src="{{ $property->images->first()?->image_url }}" class="listing-thumb" style="object-fit: cover;" alt="{{ $property->title }}">
-        <div class="flex-main">
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-            <h2 class="prop-row__title">{{ $property->title }}</h2>
-            @if($property->status == 'available')
-            <span class="status status--success">Active</span>
-
-            @elseif($property->status == 'hidden')
-            <span class="status status--pending">Hidden</span>
-
-            @else
-            <span class="status status--pending">
-              {{ ucfirst($property->status) }}
-            </span>
-            @endif
-            <span class="badge-featured mt-0"><i class="bi bi-star-fill"></i>Featured</span>
-          </div>
-          <div class="small text-muted">
-            {{ number_format($property->price, 2) }} JOD
-          </div>
-          <div class="fresh-note">
-            <i class="bi bi-arrow-repeat"></i>
-            Last updated:
-            {{ $property->updated_at?->diffForHumans() ?? 'Not available' }}
-          </div>
-        </div>
-        <div class="stat-tiles prop-row__stats">
-          <!-- <div class="stat-tile"><b>642</b><span>Views</span></div>
-          <div class="stat-tile"><b>9</b><span>Requests</span></div>
-          <div class="stat-tile"><b>92%</b><span>Match</span></div> -->
-        </div>
-
-        <div class="d-flex gap-2">
-          <a href="{{route('properties.edit', $property->id)}}"
-            class="btn btn-ghost btn-square text-primary-bt"
-            aria-label="Edit {{ $property->title }}">
-            <i class="bi bi-pencil"></i>
-          </a>
-          <form action="{{ route('properties.visibility', $property->id) }}" method="POST">
-            @csrf
-            @method('PATCH')
-
-            <button
-              type="submit"
-              class="btn btn-ghost btn-square"
-              aria-label="{{ $property->status == 'hidden' ? 'Show' : 'Hide' }} {{ $property->title }}">
-
-              <i class="bi {{ $property->status == 'hidden' ? 'bi-eye' : 'bi-eye-slash' }}"></i>
-
-            </button>
-          </form>
+        aria-label="Menu"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+      <label
+        for="sidebarToggle"
+        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
+        title="Collapse or expand the menu"
+        aria-hidden="true"
+      >
+        <i class="bi bi-list"></i>
+      </label>
+      <a class="brand" href="{{ route('owner.dashboard') }}"
+        ><span class="brand-mark">M</span><span>Makan</span></a
+      >
+      <div class="ms-auto d-flex align-items-center gap-1">
+        <!-- Messages: icon with unread count -->
+        <a
+          class="icon-btn"
+          href="{{ route('owner.chat') }}"
+          aria-label="Messages, 1 unread"
+        >
+          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
+        </a>
+        <div class="dropdown">
           <button
+            class="icon-btn"
             type="button"
-            class="btn btn-ghost btn-square"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteModal{{ $property->id }}"
-            aria-label="Delete {{ $property->title }}">
-
-            <i class="bi bi-trash"></i>
+            data-bs-toggle="dropdown"
+            aria-label="Notifications"
+          >
+            <i class="bi bi-bell"></i><span class="dot"></span>
           </button>
-          <div class="modal fade"
-            id="deleteModal{{ $property->id }}"
-            tabindex="-1"
-            aria-labelledby="deleteModalTitle{{ $property->id }}"
-            aria-hidden="true">
-
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content rounded-4">
-
-                <div class="modal-header border-0">
-                  <h5 class="modal-title fw-bold"
-                    id="deleteModalTitle{{ $property->id }}">
-                    Confirm Deletion
-                  </h5>
-
-                  <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body text-center">
-                  <i class="bi bi-exclamation-triangle text-danger"
-                    style="font-size: 3rem;"></i>
-
-                  <h5 class="mt-3">Delete this property?</h5>
-
-                  <p class="text-muted">
-                    Are you sure you want to delete
-                    <strong>{{ $property->title }}</strong>?
-                    This action cannot be undone.
-                  </p>
-                </div>
-
-                <div class="modal-footer border-0 justify-content-center">
-
-                  <button type="button"
-                    class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal">
-                    Cancel
-                  </button>
-
-                  <form action="{{ route('properties.destroy', $property->id) }}"
-                    method="POST">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit" class="btn btn-danger">
-                      <i class="bi bi-trash"></i>
-                      Yes, Delete
-                    </button>
-                  </form>
-
-                </div>
-              </div>
+          <div
+            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
+            style="width: 320px"
+          >
+            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="py-1">
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.requests') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-inbox"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block">New booking request from Sara Khaled</span>
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >10 minutes ago</span
+                  >
+                </span>
+              </a>
+              <a
+                class="dropdown-item d-flex gap-2 py-2 text-wrap"
+                href="{{ route('owner.properties') }}"
+              >
+                <span
+                  class="kpi-icon flex-shrink-0"
+                  style="width: 34px; height: 34px; font-size: 1rem"
+                  ><i class="bi bi-shield-check"></i
+                ></span>
+                <span class="small">
+                  <span class="d-block"
+                    >Your Al Jubeiha studio has been verified</span
+                  >
+                  <span class="text-muted" style="font-size: 0.72rem"
+                    >1 hour ago</span
+                  >
+                </span>
+              </a>
             </div>
           </div>
-
-
         </div>
-      </article>
-      @endforeach
+        <div class="dropdown">
+          <button
+            class="app-user app-user--avatar"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="Account menu, {{ auth()->user()->display_name }}"
+          >
+            <span class="avatar">{{ auth()->user()->display_initial }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <x-logout-form />
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
 
+    <div class="app-shell">
+      <!-- ===== Sidebar ===== -->
+      <aside
+        class="app-sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        id="appSidebar"
+      >
+        <div class="offcanvas-header border-bottom">
+          <a class="brand" href="{{ route('home') }}"
+            ><span class="brand-mark">M</span><span>Makan</span></a
+          >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            data-bs-target="#appSidebar"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="side-label">Property owner</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+            ><i class="bi bi-grid-1x2"></i
+            ><span class="flex-grow-1">Dashboard</span></a
+          >
+          <a class="side-link active" href="{{ route('owner.properties') }}" aria-current="page" title="My properties"
+            ><i class="bi bi-house-door"></i
+            ><span class="flex-grow-1">My properties</span></a
+          >
+          <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"
+            ><i class="bi bi-plus-square"></i
+            ><span class="flex-grow-1">Add property</span></a
+          >
+          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+            ><i class="bi bi-inbox"></i
+            ><span class="flex-grow-1">Booking requests</span
+            ><span class="side-badge">3</span></a
+          >
+          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+            ><i class="bi bi-chat-dots"></i
+            ><span class="flex-grow-1">Messages</span
+            ><span class="side-badge">1</span></a
+          >
+          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+            ><i class="bi bi-person-badge"></i
+            ><span class="flex-grow-1">My account</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- ===== Content ===== -->
+      <main class="app-main">
+        <!-- 1. Page header -->
+        <div class="page-head">
+          <div>
+            <h1>My properties</h1>
+            <p>{{ $properties->count() }} Properties</p>
+          </div>
+          <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add property</span>
+          </a>
+        </div>
+
+        <!-- 2. Property list -->
+        <div class="d-flex flex-column gap-3" id="ownerProperties">
+          @foreach($properties as $property)
+                <article class="panel prop-row" data-property="{{ $property->id }}">
+                  <img src="{{ $property->images->first()?->image_url }}" class="listing-thumb" style="object-fit: cover;" alt="{{ $property->title }}">
+                  <div class="flex-main">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                      <h2 class="prop-row__title">{{ $property->title }}</h2>
+                      @if($property->status == 'available')
+                      <span class="status status--success">Active</span>
+                      @elseif($property->status == 'hidden')
+                      <span class="status status--pending">Hidden</span>
+                      @else
+                      <span class="status status--pending">
+                        {{ ucfirst($property->status) }}
+                      </span>
+                      @endif
+                      <span class="badge-featured mt-0"><i class="bi bi-star-fill"></i>Featured</span>
+                    </div>
+                    <div class="small text-muted">
+                      {{ number_format($property->price, 2) }} JOD
+                    </div>
+                    <div class="fresh-note">
+                      <i class="bi bi-arrow-repeat"></i>
+                      Last updated:
+                      {{ $property->updated_at?->diffForHumans() ?? 'Not available' }}
+                    </div>
+                  </div>
+                  <div class="stat-tiles prop-row__stats">
+                    <!-- Stats are intentionally left empty until real data is available. -->
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a href="{{route('properties.edit', $property->id)}}"
+                      class="btn btn-ghost btn-square text-primary-bt"
+                      aria-label="Edit {{ $property->title }}">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <form action="{{ route('properties.visibility', $property->id) }}" method="POST">
+                      @csrf
+                      @method('PATCH')
+                      <button
+                        type="submit"
+                        class="btn btn-ghost btn-square"
+                        aria-label="{{ $property->status == 'hidden' ? 'Show' : 'Hide' }} {{ $property->title }}">
+                        <i class="bi {{ $property->status == 'hidden' ? 'bi-eye' : 'bi-eye-slash' }}"></i>
+                      </button>
+                    </form>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-square"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal{{ $property->id }}"
+                      aria-label="Delete {{ $property->title }}">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                    <div class="modal fade"
+                      id="deleteModal{{ $property->id }}"
+                      tabindex="-1"
+                      aria-labelledby="deleteModalTitle{{ $property->id }}"
+                      aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4">
+                          <div class="modal-header border-0">
+                            <h5 class="modal-title fw-bold"
+                              id="deleteModalTitle{{ $property->id }}">
+                              Confirm Deletion
+                            </h5>
+                            <button type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body text-center">
+                            <i class="bi bi-exclamation-triangle text-danger"
+                              style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Delete this property?</h5>
+                            <p class="text-muted">
+                              Are you sure you want to delete
+                              <strong>{{ $property->title }}</strong>?
+                              This action cannot be undone.
+                            </p>
+                          </div>
+                          <div class="modal-footer border-0 justify-content-center">
+                            <button type="button"
+                              class="btn btn-outline-secondary"
+                              data-bs-dismiss="modal">
+                              Cancel
+                            </button>
+                            <form action="{{ route('properties.destroy', $property->id) }}"
+                              method="POST">
+                              @csrf
+                              @method('DELETE')
+                              <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i>
+                                Yes, Delete
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+                @endforeach
+        </div>
+      </main>
     </div>
-  </main>
-</div>
 @endsection
