@@ -15,14 +15,14 @@ class SeekerPropertyController extends Controller
     public function show(Request $request): View
     {
         $propertyId = filter_var(
-            $request->query('home'),
+            $request->query('property_id', $request->query('home')),
             FILTER_VALIDATE_INT,
             ['options' => ['min_range' => 1]],
         );
 
         abort_if($propertyId === false, 404);
 
-        $property = Property::query()
+        $property = Property::discoverable()
             ->with([
                 'images' => fn($query) => $query
                     ->whereNull('room_id')
@@ -32,12 +32,11 @@ class SeekerPropertyController extends Controller
                 'agent.agentProfile',
                 'rooms',
             ])
-            ->whereIn('status', ['available', 'partially_rented'])
-            ->where('verification_status', 'verified')
             ->findOrFail($propertyId);
 
         return view('seeker.property', [
             'property' => $property,
+            'saved' => $request->user()->favoriteProperties()->whereKey($property->id)->exists(),
             'homes' => [],
         ]);
     }

@@ -13,156 +13,7 @@
   aria-label="Collapse the menu" />
 
 <!-- ===== Topbar ===== -->
-<header class="app-topbar">
-  <button
-    class="icon-btn d-lg-none"
-    type="button"
-    data-bs-toggle="offcanvas"
-    data-bs-target="#appSidebar"
-    aria-label="Menu">
-    <i class="bi bi-list"></i>
-  </button>
-  <label
-    for="sidebarToggle"
-    class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-    title="Collapse or expand the menu"
-    aria-hidden="true">
-    <i class="bi bi-list"></i>
-  </label>
-  <a class="brand" href="{{ route('owner.dashboard') }}"><span class="brand-mark">M</span><span>Makan</span></a>
-  <div class="ms-auto d-flex align-items-center gap-1">
-    <!-- Messages: icon with unread count -->
-    <a
-      class="icon-btn"
-      href="{{ route('owner.chat') }}"
-      aria-label="Messages, 1 unread">
-      <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
-    </a>
-    <div class="dropdown">
-      <button
-        class="icon-btn"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-label="Notifications">
-        <i class="bi bi-bell"></i><span class="dot"></span>
-      </button>
-      <label
-        for="sidebarToggle"
-        class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
-        aria-hidden="true"
-      >
-        <i class="bi bi-list"></i>
-      </label>
-      <a class="brand" href="{{ route('owner.dashboard') }}"
-        ><span class="brand-mark">M</span><span>Makan</span></a
-      >
-      <div class="ms-auto d-flex align-items-center gap-1">
-        <!-- Messages: icon with unread count -->
-        <a
-          class="icon-btn"
-          href="{{ route('owner.chat') }}"
-          aria-label="Messages, 1 unread"
-        >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">1</span>
-        </a>
-        <div class="dropdown">
-          <button
-            class="icon-btn"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-label="Notifications"
-          >
-            <i class="bi bi-bell"></i><span class="dot"></span>
-          </button>
-          <div
-            class="dropdown-menu dropdown-menu-end shadow-sm p-0"
-            style="width: 320px"
-          >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
-            <div class="py-1">
-              <a
-                class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                href="{{ route('owner.requests') }}"
-              >
-                <span
-                  class="kpi-icon flex-shrink-0"
-                  style="width: 34px; height: 34px; font-size: 1rem"
-                  ><i class="bi bi-inbox"></i
-                ></span>
-                <span class="small">
-                  <span class="d-block">New booking request from Sara Khaled</span>
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >10 minutes ago</span
-                  >
-                </span>
-              </a>
-              <a
-                class="dropdown-item d-flex gap-2 py-2 text-wrap"
-                href="{{ route('owner.properties') }}"
-              >
-                <span
-                  class="kpi-icon flex-shrink-0"
-                  style="width: 34px; height: 34px; font-size: 1rem"
-                  ><i class="bi bi-shield-check"></i
-                ></span>
-                <span class="small">
-                  <span class="d-block"
-                    >Your Al Jubeiha studio has been verified</span
-                  >
-                  <span class="text-muted" style="font-size: 0.72rem"
-                    >1 hour ago</span
-                  >
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="dropdown">
-          <button
-            class="app-user app-user--avatar"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            aria-label="Account menu, {{ auth()->user()->display_name }}"
-          >
-            <span class="avatar">{{ auth()->user()->display_initial }}</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
-            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <x-logout-form />
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="dropdown">
-      <button
-        class="app-user app-user--avatar"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        aria-label="Account menu, Abu Ahmad">
-        <span class="avatar">A</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-        <li>
-          <h6 class="dropdown-header">Abu Ahmad</h6>
-        </li>
-        <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
-        <li>
-          <hr class="dropdown-divider" />
-        </li>
-        <li>
-          <a class="dropdown-item text-danger" href="{{ route('home') }}">Log out</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</header>
+<x-owner-topbar />
 
 <div class="app-shell">
   <!-- ===== Sidebar ===== -->
@@ -189,7 +40,7 @@
           {{ $bookings->where('status', 'pending')->count() }}
         </span>
       </a>
-      <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span><span class="side-badge">1</span></a>
+      <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span></a>
       <a class="side-link" href="{{ route('owner.account') }}" title="My account"><i class="bi bi-person-badge"></i><span class="flex-grow-1">My account</span></a>
     </div>
   </aside>
@@ -257,12 +108,12 @@
           data-request="{{ $booking->id }}"
           data-status="{{ $booking->status }}">
           <span class="avatar avatar-lg">
-            {{ strtoupper(substr($booking->tenant?->name ?? 'U', 0, 1)) }}
+            {{ strtoupper(substr($booking->tenant?->display_name ?? 'U', 0, 1)) }}
           </span>
           <div class="flex-main">
             <div class="d-flex flex-wrap align-items-center gap-2">
               <h2 class="request-row__name">
-                {{ $booking->tenant->name ?? 'Unknown Customer' }}
+                {{ $booking->tenant?->display_name ?? 'Unknown Customer' }}
               </h2>
             </div>
             <div class="small text-muted">
@@ -312,8 +163,8 @@
             <a
               href="{{ route('owner.chat') }}"
               class="btn btn-ghost btn-square text-primary-bt"
-              aria-label="Message {{ $booking->tenant?->name ?? 'customer' }}"
-              title="Message {{ $booking->tenant?->name ?? 'customer' }}">
+              aria-label="Message {{ $booking->tenant?->display_name ?? 'customer' }}"
+              title="Message {{ $booking->tenant?->display_name ?? 'customer' }}">
               <i class="bi bi-chat-dots"></i>
             </a>
 
@@ -339,7 +190,7 @@
 
               <div class="modal-body">
                 Are you sure you want to accept the booking request from
-                <strong>{{ $booking->tenant?->name ?? 'this customer' }}</strong>?
+                <strong>{{ $booking->tenant?->display_name ?? 'this customer' }}</strong>?
               </div>
 
               <div class="modal-footer">
@@ -383,7 +234,7 @@
 
               <div class="modal-body">
                 Are you sure you want to reject the booking request from
-                <strong>{{ $booking->tenant?->name ?? 'this customer' }}</strong>?
+                <strong>{{ $booking->tenant?->display_name ?? 'this customer' }}</strong>?
               </div>
 
               <div class="modal-footer">

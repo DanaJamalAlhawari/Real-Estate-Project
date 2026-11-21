@@ -47,26 +47,12 @@
               <input class="form-check-input" type="radio" name="category" value="" {{ !request('category') ? 'checked' : '' }}>
               <span class="form-check-label">All</span>
             </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="studio" {{ request('category') == 'studio' ? 'checked' : '' }}>
-              <span class="form-check-label">Studio</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="student_apartment" {{ request('category') == 'student_apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Student Apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="apartment" {{ request('category') == 'apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="shared-apartment" {{ request('category') == 'shared-apartment' ? 'checked' : '' }}>
-              <span class="form-check-label">Shared apartment</span>
-            </label>
-            <label class="form-check">
-              <input class="form-check-input" type="radio" name="category" value="vacation" {{ request('category') == 'vacation' ? 'checked' : '' }}>
-              <span class="form-check-label">Vacation</span>
-            </label>
+            @foreach (\App\Models\Property::CATEGORIES as $value => $label)
+              <label class="form-check">
+                <input class="form-check-input" type="radio" name="category" value="{{ $value }}" @checked(request('category') === $value)>
+                <span class="form-check-label">{{ $label }}</span>
+              </label>
+            @endforeach
           </div>
         </fieldset>
         <div class="mb-3">

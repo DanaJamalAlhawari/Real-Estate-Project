@@ -30,7 +30,8 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'admin', 403);
 
-        $properties = Property::whereNotNull('ownership_deed_url')->get();
+        $properties = Property::where('ownership_deed_url', 'like', 'verifications/%')->get()
+            ->filter(fn (Property $property) => Storage::disk('local')->exists($property->ownership_deed_url));
 
         $queues = $properties->groupBy('verification_status');
         $selectedProperty = $properties->find($request->integer('property'))
@@ -44,10 +45,11 @@ class VerificationController extends Controller
         abort_unless($request->user()?->role === 'agent', 403);
 
         $request->validate([
+            'property_id' => 'required|integer',
             'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        $property = Property::findOrFail($request->property_id);
+        $property = $request->user()->properties()->findOrFail($request->integer('property_id'));
 
         $path = $request->file('document')->store('verifications', 'local');
         abort_if($path === false, 500, 'Could not store the ownership document.');
@@ -85,11 +87,11 @@ class VerificationController extends Controller
 
         $property = Property::findOrFail($verification);
 
+        abort_unless($property->verification_status === 'pending', 403);
         abort_unless(
-            $property->verification_status === 'pending'
-            && $property->ownership_deed_url
-            && Storage::disk('local')->exists($property->ownership_deed_url),
-            403
+            str_starts_with($property->ownership_deed_url ?? '', 'verifications/')
+                && Storage::disk('local')->exists($property->ownership_deed_url),
+            403,
         );
 
         $approved = $request->decision === 'approve';

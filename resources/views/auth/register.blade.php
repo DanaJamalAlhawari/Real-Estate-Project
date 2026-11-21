@@ -62,7 +62,7 @@
                 name="role"
                 id="roleTenant"
                 value="tenant"
-                @checked(old('role', 'tenant') === 'tenant')
+                @checked(old('role', request('role', 'tenant')) !== 'agent')
               />
               <label class="choice-card" for="roleTenant">
                 <span class="ci"><i class="bi bi-search-heart"></i></span>
@@ -79,7 +79,7 @@
                 name="role"
                 id="roleAgent"
                 value="agent"
-                @checked(old('role') === 'agent')
+                @checked(old('role', request('role')) === 'agent')
               />
               <label class="choice-card" for="roleAgent">
                 <span class="ci"><i class="bi bi-house-door"></i></span>
@@ -134,18 +134,14 @@
             />
           </div>
 
-          <div class="mb-3">
-            <label class="form-label" for="name">Full name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="name"
-              name="full_name"
-                value="{{ old('full_name') }}"
-              autocomplete="name"
-              required
-              placeholder="e.g. Sara Khaled"
-            />
+          <div class="row g-3 mb-3">
+            @foreach (['first_name' => 'First name', 'last_name' => 'Last name', 'license_number' => 'License number (agents)', 'emergency_contact' => 'Emergency contact (tenants)', 'student_id' => 'Student ID (tenants)'] as $field => $label)
+              <div class="col-sm-6">
+                <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                <input class="form-control" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}"
+                       @required(in_array($field, ['first_name', 'last_name'], true))>
+              </div>
+            @endforeach
           </div>
           <div class="row g-3 mb-3">
             <div class="col-sm-6">

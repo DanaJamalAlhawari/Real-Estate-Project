@@ -54,8 +54,8 @@ Route::delete('/seeker/reviews/{review}', [ReviewController::class, 'destroy'])
 
 
 
-    Route::get('/seeker/bookings', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.bookings')->name('seeker.bookings');
+    Route::get('/seeker/bookings', [BookingRequestController::class, 'tenantBookings'])
+        ->name('seeker.bookings');
     Route::get('/seeker/bookings.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.bookings');
 
@@ -77,12 +77,13 @@ Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
     Route::get('/seeker/profile.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.profile');
 
-    Route::get('/seeker/property', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.property')->name('seeker.property');
+    Route::get('/seeker/property', [SeekerPropertyController::class, 'show'])->name('seeker.property');
     Route::get('/seeker/property.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.property');
     Route::get('/seeker/property/details', [SeekerPropertyController::class, 'show'])
         ->name('seeker.property.details');
+    Route::post('/seeker/property/{property}/bookings', [BookingRequestController::class, 'store'])
+        ->whereNumber('property')->name('seeker.bookings.store');
     Route::post('/seeker/property/{property}/conversation', [SeekerPropertyController::class, 'startConversation'])
         ->middleware('auth')
         ->whereNumber('property')
@@ -101,8 +102,8 @@ Route::get('/seeker/profile', [TenantProfileController::class, 'show'])
 
 // Agent pages
 Route::middleware(['auth', 'role:agent'])->group(function () {
-    Route::get('/owner/account', [PageController::class, 'show'])
-        ->defaults('page', 'owner.account')->name('owner.account');
+    Route::get('/owner/account', [TenantProfileController::class, 'show'])->name('owner.account');
+    Route::put('/owner/account', [TenantProfileController::class, 'update'])->name('owner.account.update');
     Route::get('/owner/account.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.account');
     Route::get('/owner/chat', [ConversationMessageController::class, 'index'])
@@ -115,23 +116,28 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
     Route::get('/owner/dashboard.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.dashboard');
 
-    Route::get('/owner/properties', [VerificationController::class, 'ownerProperties'])
+    Route::get('/owner/properties', [PropertyController::class, 'index'])
         ->name('owner.properties');
     Route::get('/owner/properties.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.properties');
 
-    Route::get('/owner/property-form', [PageController::class, 'show'])
-        ->defaults('page', 'owner.property-form')->name('owner.property-form');
+    Route::get('/owner/property-form', [PropertyController::class, 'create'])->name('owner.property-form');
     Route::get('/owner/property-form.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.property-form');
 
-    Route::get('/owner/properties/{property}/edit', [VerificationController::class, 'ownerEdit'])
+    Route::get('/owner/properties/{property}/edit', [PropertyController::class, 'edit'])
         ->whereNumber('property')->name('owner.properties.edit');
+    Route::post('/owner/properties', [PropertyController::class, 'store'])->name('properties.store');
+    Route::put('/owner/properties/{id}', [PropertyController::class, 'update'])->whereNumber('id')->name('properties.update');
+    Route::patch('/owner/properties/{id}/visibility', [PropertyController::class, 'toggleVisibility'])
+        ->whereNumber('id')->name('properties.visibility');
+    Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])->whereNumber('id')->name('properties.destroy');
     Route::post('/properties/verification', [VerificationController::class, 'store'])
         ->name('properties.verification.store');
 
-    Route::get('/owner/requests', [PageController::class, 'show'])
-        ->defaults('page', 'owner.requests')->name('owner.requests');
+    Route::get('/owner/requests', [BookingRequestController::class, 'index'])->name('owner.requests');
+    Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])->name('owner.requests.accept');
+    Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])->name('owner.requests.reject');
     Route::get('/owner/requests.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.requests');
 
@@ -141,8 +147,10 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
 
 // Admin pages and commission management
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/chat', [PageController::class, 'show'])
-        ->defaults('page', 'admin.chat')->name('admin.chat');
+    Route::get('/admin/account', [TenantProfileController::class, 'show'])->name('admin.account');
+    Route::put('/admin/account', [TenantProfileController::class, 'update'])->name('admin.account.update');
+    Route::get('/admin/chat', [ConversationMessageController::class, 'index'])->name('admin.chat');
+    Route::post('/admin/chat', [ConversationMessageController::class, 'startSupport'])->name('admin.chat.start');
     Route::get('/admin/chat.html', [PageController::class, 'legacy'])
         ->defaults('target', 'admin.chat');
 
@@ -150,11 +158,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.dashboard');
     Route::get('/admin/dashboard.html', [PageController::class, 'legacy'])
         ->defaults('target', 'admin.dashboard');
-
-    Route::get('/admin/places', [PageController::class, 'show'])
-        ->defaults('page', 'admin.places')->name('admin.places');
-    Route::get('/admin/places.html', [PageController::class, 'legacy'])
-        ->defaults('target', 'admin.places');
 
     Route::get('/admin/users', [AdminUserController::class, 'index'])
         ->name('admin.users');
@@ -222,31 +225,6 @@ Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])
 
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
 
-
-// properties 
-Route::get('/owner/properties', [PropertyController::class, 'index'])
-    ->name('owner.properties');
-Route::patch('/owner/properties/{id}/visibility', [PropertyController::class, 'toggleVisibility'])
-    ->name('properties.visibility');
-Route::get('/owner/properties/{id}/edit', [PropertyController::class, 'edit'])
-    ->name('properties.edit');
-Route::get('/owner/property-form', [PropertyController::class, 'create'])
-    ->name('owner.property-form');
-Route::post('/owner/properties', [PropertyController::class, 'store'])
-    ->name('properties.store');
-Route::put('/owner/properties/{id}', [PropertyController::class, 'update'])
-    ->name('properties.update');
-Route::delete('/properties/{id}', [PropertyController::class, 'destroy'])
-    ->name('properties.destroy');
-
-
-//Booking Request
-Route::get('/owner/requests',[BookingRequestController::class,'index'])
-    ->name('owner.requests'); 
-Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])
-    ->name('owner.requests.accept'); 
-Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])
-    ->name('owner.requests.reject');
 
 // Discover Page
     

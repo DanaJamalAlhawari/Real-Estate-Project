@@ -4,10 +4,12 @@
 @section('roleStyle', 'admin')
 
 @section('content')
-<main class="container py-4">
+@include('partials.admin-topbar')
+<div class="app-shell">
+@include('partials.admin-sidebar')
+<main class="app-main">
     <h1>Commission management</h1>
     <p class="text-muted">Set a separate active rate for each agent and review commissions from successful payments.</p>
-    <x-logout-form buttonClass="btn btn-outline-danger btn-sm mb-3" />
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -110,4 +112,5 @@
         {{ $commissions->links() }}
     @endif
 </main>
+</div>
 @endsection

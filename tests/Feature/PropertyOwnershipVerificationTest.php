@@ -15,13 +15,14 @@ class PropertyOwnershipVerificationTest extends TestCase
 
     public function test_agent_uploads_their_document_and_admin_can_approve_or_reject_it(): void
     {
+        $this->withoutVite();
         Storage::fake('local');
         $agent = $this->account('agent');
         $property = $this->property($agent, 'Owned listing');
         $otherProperty = $this->property($this->account('agent'), 'Another agent’s listing');
         $document = UploadedFile::fake()->createWithContent('deed.pdf', "%PDF-1.4\n%%EOF");
 
-        $this->get(route('admin.verifications'))->assertUnauthorized();
+        $this->get(route('admin.verifications'))->assertRedirect(route('auth.login'));
         $this->actingAs($this->account('tenant'))->get(route('admin.verifications'))->assertForbidden();
         $this->actingAs($agent)->get(route('owner.properties'))->assertOk()
             ->assertSee($property->title)->assertDontSee($otherProperty->title);
@@ -31,7 +32,7 @@ class PropertyOwnershipVerificationTest extends TestCase
         $this->post(route('properties.verification.store'), [
             'property_id' => $otherProperty->id,
             'document' => $document,
-        ])->assertForbidden();
+        ])->assertNotFound();
 
         $admin = $this->account('admin');
         foreach (['approve' => 'verified', 'reject' => 'rejected'] as $decision => $status) {

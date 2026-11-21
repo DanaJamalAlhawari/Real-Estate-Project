@@ -45,9 +45,10 @@
         <a
           class="icon-btn"
           href="{{ route('owner.chat') }}"
+          data-inbox-messages-link
           aria-label="Messages, {{ $unreadMessageCount }} unread"
         >
-          <i class="bi bi-chat-dots"></i><span class="icon-badge">{{ $unreadMessageCount }}</span>
+          <i class="bi bi-chat-dots"></i><span class="icon-badge" data-inbox-unread @if (!$unreadMessageCount) hidden @endif>{{ $unreadMessageCount }}</span>
         </a>
         <div class="dropdown">
           <button
@@ -268,8 +269,16 @@
                       </small>
                     </div>
                     <div class="d-flex gap-2">
-                      <button type="button" class="btn btn-primary btn-sm" disabled>Accept</button>
-                      <button type="button" class="btn btn-ghost btn-sm" disabled>Decline</button>
+                      <form method="post" action="{{ route('owner.requests.accept', $booking) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                      </form>
+                      <form method="post" action="{{ route('owner.requests.reject', $booking) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-ghost btn-sm">Decline</button>
+                      </form>
                     </div>
                   </li>
                 @empty

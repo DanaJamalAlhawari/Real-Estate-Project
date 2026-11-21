@@ -16,6 +16,7 @@
     @endif
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}" />
     @if (auth()->user() instanceof \App\Models\RealEstateUser)
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="makan-user-id" content="{{ auth()->id() }}">
         @vite('resources/js/app.js')
     @endif
@@ -23,10 +24,7 @@
 
 <body @yield('bodyAttributes')>
     @yield('content')
-    <script type="application/json" id="makanHomes">@json($homes ?? [])</script>
     <script src="{{ asset('assets/vendor/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/models/homes.js') }}" defer></script>
-    <script src="{{ asset('assets/js/views/bayti.js') }}" defer></script>
     <script src="{{ asset('assets/js/controllers/bayti.js') }}" defer></script>
 
 </body>

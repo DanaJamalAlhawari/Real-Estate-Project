@@ -144,14 +144,15 @@ class ConversationMessageController extends Controller
 
         abort_unless($user instanceof RealEstateUser, 403);
 
-        [$view, $query] = match ($user->role) {
-            'tenant' => ['seeker.chat', $user->tenantConversations()],
-            'agent' => ['owner.chat', $user->agentConversations()],
+        $view = match ($user->role) {
+            'tenant' => 'seeker.chat',
+            'agent' => 'owner.chat',
+            'admin' => 'admin.chat',
             default => abort(403),
         };
 
-        $conversations = $query
-            ->when($user->role === 'agent', fn($query) => $query->whereHas('messages'))
+        $conversations = $user->inboxConversations()
+            ->with(['agent.agentProfile', 'tenant.agentProfile', 'tenant.tenantProfile'])
             ->withCount([
                 'messages as unread_count' => fn($messages) => $messages
                     ->where('sender_id', '!=', $user->getKey())
@@ -163,9 +164,33 @@ class ConversationMessageController extends Controller
 
         return view($view, [
             'conversations' => $conversations,
+            'contacts' => $user->role === 'admin'
+                ? RealEstateUser::whereIn('role', ['tenant', 'agent'])->orderBy('email')->get(['id', 'email', 'role'])
+                : collect(),
             'homes' => [],
         ]);
     }
+
+    public function startSupport(Request $request)
+    {
+        $admin = $request->user();
+        abort_unless($admin instanceof RealEstateUser && $admin->role === 'admin', 403);
+        $data = $request->validate(['contact_id' => 'required|integer']);
+        $contact = RealEstateUser::whereIn('role', ['tenant', 'agent'])->findOrFail($data['contact_id']);
+
+        $conversation = DB::transaction(function () use ($admin, $contact) {
+            RealEstateUser::whereKey($admin->id)->lockForUpdate()->firstOrFail();
+
+            return Conversation::unguarded(fn () => Conversation::firstOrCreate([
+                'property_id' => null,
+                'agent_id' => $admin->id,
+                'tenant_id' => $contact->id,
+            ]));
+        });
+
+        return redirect()->route('conversations.show', $conversation);
+    }
+
     public function show(Request $request, Conversation $conversation): View
     {
         $user = $request->user();
@@ -176,7 +201,12 @@ class ConversationMessageController extends Controller
         );
 
         $isTenant = (int) $user->getKey() === (int) $conversation->tenant_id;
-        $view = $isTenant ? 'seeker.chat' : 'owner.chat';
+        $view = match ($user->role) {
+            'tenant' => 'seeker.chat',
+            'agent' => 'owner.chat',
+            'admin' => 'admin.chat',
+            default => abort(403),
+        };
 
         $messages = $conversation->messages()
             ->with(['replyTo', 'reactions'])
@@ -198,11 +228,8 @@ class ConversationMessageController extends Controller
                 ]);
         }
 
-        $query = $isTenant
-            ? $user->tenantConversations()
-            : $user->agentConversations();
-        $conversations = $query
-            ->when($user->role === 'agent', fn($query) => $query->whereHas('messages'))
+        $conversations = $user->inboxConversations()
+            ->with(['agent.agentProfile', 'tenant.agentProfile', 'tenant.tenantProfile'])
             ->withCount([
                 'messages as unread_count' => fn($messages) => $messages
                     ->where('sender_id', '!=', $user->getKey())
@@ -218,33 +245,19 @@ class ConversationMessageController extends Controller
             ->where('verification_status', 'verified')
             ->whereIn('status', ['available', 'partially_rented'])
             ->find($conversation->property_id, ['id', 'title', 'price']);
-        $ownerName = '';
+        $partner = $isTenant ? $conversation->agent : $conversation->tenant;
 
-        if ($isTenant) {
-            $profile = RealEstateUser::query()
-                ->with('agentProfile')
-                ->find($conversation->agent_id)
-                ?->agentProfile;
-
-            $ownerName = trim(($profile?->first_name ?? '') . ' ' . ($profile?->last_name ?? ''));
-        }
-        $tenantName = '';
-
-        if (! $isTenant) {
-            $profile = RealEstateUser::query()
-                ->with('tenantProfile')
-                ->find($conversation->tenant_id)
-                ?->tenantProfile;
-
-            $tenantName = trim(($profile?->first_name ?? '') . ' ' . ($profile?->last_name ?? ''));
-        }
         return view($view, [
-            'tenantName' => $tenantName,
-            'ownerName' => $ownerName,
+            'tenantName' => $partner?->display_name ?? '',
+            'ownerName' => $partner?->display_name ?? '',
+            'partnerRole' => $partner?->role,
             'conversation' => $conversation,
             'chatProperty' => $chatProperty,
             'messages' => $messages,
             'conversations' => $conversations,
+            'contacts' => $user->role === 'admin'
+                ? RealEstateUser::whereIn('role', ['tenant', 'agent'])->orderBy('email')->get(['id', 'email', 'role'])
+                : collect(),
             'currentUserId' => (int) $user->getKey(),
             'homes' => [],
         ]);

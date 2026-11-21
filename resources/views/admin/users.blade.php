@@ -4,10 +4,12 @@
 @section('roleStyle', 'admin')
 
 @section('content')
-<main class="container py-4">
+@include('partials.admin-topbar')
+<div class="app-shell">
+@include('partials.admin-sidebar')
+<main class="app-main">
     <h1>Users</h1>
     <p class="text-muted">Registered customers and agents.</p>
-    <x-logout-form buttonClass="btn btn-outline-danger btn-sm mb-3" />
 
     <form method="GET" action="{{ route('admin.users') }}" class="mb-3">
         <label for="q" class="form-label">Search by email</label>
@@ -66,4 +68,5 @@
         {{ $users->withQueryString()->links() }}
     @endif
 </main>
+</div>
 @endsection

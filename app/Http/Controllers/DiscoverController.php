@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use Illuminate\Validation\Rule;
 
 class DiscoverController extends Controller
 {
@@ -14,12 +15,12 @@ class DiscoverController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'category' => 'nullable|in:student_apartment,apartment,vacation',
+            'category' => ['nullable', Rule::in(array_keys(Property::CATEGORIES))],
             'q' => 'nullable|string|max:255',
             'max' => 'nullable|numeric|min:0',
         ]);
 
-        $query = Property::with(['images' => function ($q) {
+        $query = Property::discoverable()->with(['images' => function ($q) {
             $q->orderByDesc('is_primary');
         }, 'rooms', 'services'])
             ->withAvg('reviews', 'rating')
@@ -31,10 +32,12 @@ class DiscoverController extends Controller
         }
 
         if ($request->filled('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('area', 'like', '%' . $request->q . '%')
-                    ->orWhere('city', 'like', '%' . $request->q . '%');
-            });
+            foreach (preg_split('/[\s,]+/u', trim($request->q), -1, PREG_SPLIT_NO_EMPTY) as $term) {
+                $query->where(function ($q) use ($term) {
+                    $q->where('area', 'like', '%'.$term.'%')
+                        ->orWhere('city', 'like', '%'.$term.'%');
+                });
+            }
         }
 
         if ($request->filled('max')) {
@@ -44,6 +47,7 @@ class DiscoverController extends Controller
         $properties = $query->get();
 
         $favorites = $request->user()->favoriteProperties()
+            ->discoverable()
             ->with(['images' => function ($q) {
                 $q->orderByDesc('is_primary');
             }])

@@ -24,7 +24,8 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'role' => ['required', 'in:tenant,agent'],
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:real_estate_users,email'],
             'phone' => [
                 'required',
@@ -33,15 +34,14 @@ class AuthController extends Controller
                 'unique:agent_profiles,phone',
             ],
             'agency_name' => ['nullable', 'string', 'max:255'],
+            'license_number' => ['nullable', 'string', 'max:255'],
+            'emergency_contact' => ['nullable', 'string', 'max:30'],
+            'student_id' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'terms' => ['accepted'],
         ]);
 
-        $nameParts = explode(' ', trim($data['full_name']), 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
-
-        $user = DB::transaction(function () use ($data, $firstName, $lastName) {
+        $user = DB::transaction(function () use ($data) {
             $user = RealEstateUser::create([
                 'email' => $data['email'],
                 'password' => $data['password'],
@@ -49,15 +49,18 @@ class AuthController extends Controller
             ]);
 
             $profileData = [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
                 'phone' => $data['phone'],
             ];
 
             if ($data['role'] === 'agent') {
                 $profileData['agency_name'] = $data['agency_name'] ?? null;
+                $profileData['license_number'] = $data['license_number'] ?? null;
                 $user->agentProfile()->create($profileData);
             } else {
+                $profileData['emergency_contact'] = $data['emergency_contact'] ?? null;
+                $profileData['student_id'] = $data['student_id'] ?? null;
                 $user->tenantProfile()->create($profileData);
             }
 

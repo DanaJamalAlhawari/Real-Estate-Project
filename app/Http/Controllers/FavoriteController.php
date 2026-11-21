@@ -13,7 +13,7 @@ class FavoriteController extends Controller
 
     abort_unless($request->user()->role === 'tenant', 403);
 
-        $favorites = $request->user()->favoriteProperties()->get([
+        $favorites = $request->user()->favoriteProperties()->discoverable()->get([
                 'properties.id',
                 'properties.title',
                 'properties.price',
@@ -32,8 +32,7 @@ public function store(Request $request, Property $property)
     abort_unless($user->role === 'tenant', 403);
 
     abort_unless(
-        $property->status !== 'hidden'
-        && $property->verification_status === 'verified',
+        Property::discoverable()->whereKey($property->id)->exists(),
         404
     );
 
