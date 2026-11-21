@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ConversationMessageController;
+use App\Http\Controllers\SeekerPropertyController;
 use App\Http\Controllers\VerificationController;
 
 
@@ -22,8 +24,8 @@ Route::middleware(['auth', 'role:tenant'])->group(function () {
     Route::get('/seeker/bookings.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.bookings');
 
-    Route::get('/seeker/chat', [PageController::class, 'show'])
-        ->defaults('page', 'seeker.chat')->name('seeker.chat');
+    Route::get('/seeker/chat', [ConversationMessageController::class, 'index'])
+        ->name('seeker.chat');
     Route::get('/seeker/chat.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.chat');
 
@@ -36,6 +38,13 @@ Route::middleware(['auth', 'role:tenant'])->group(function () {
         ->defaults('page', 'seeker.property')->name('seeker.property');
     Route::get('/seeker/property.html', [PageController::class, 'legacy'])
         ->defaults('target', 'seeker.property');
+    Route::get('/seeker/property/details', [SeekerPropertyController::class, 'show'])
+        ->name('seeker.property.details');
+    Route::post('/seeker/property/{property}/conversation', [SeekerPropertyController::class, 'startConversation'])
+        ->middleware('auth')
+        ->whereNumber('property')
+        ->name('seeker.property.conversation');
+   
 
     Route::get('/seeker/search', [PageController::class, 'show'])
         ->defaults('page', 'seeker.search')->name('seeker.search');
@@ -53,9 +62,8 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
         ->defaults('page', 'owner.account')->name('owner.account');
     Route::get('/owner/account.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.account');
-
-    Route::get('/owner/chat', [PageController::class, 'show'])
-        ->defaults('page', 'owner.chat')->name('owner.chat');
+    Route::get('/owner/chat', [ConversationMessageController::class, 'index'])
+        ->name('owner.chat');
     Route::get('/owner/chat.html', [PageController::class, 'legacy'])
         ->defaults('target', 'owner.chat');
 
@@ -147,7 +155,6 @@ Route::middleware('guest')->group(function () {
         ->name('auth.register');
     Route::post('/auth/register', [AuthController::class, 'register'])
         ->middleware('throttle:3,1')->name('auth.register.store');
-
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -171,3 +178,28 @@ Route::get('/auth/verify-email.html', [PageController::class, 'legacy'])
     ->defaults('target', 'auth.verify-email');
 
 Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.notice');
+
+
+
+
+
+
+// ---------------------------------------------------------------
+
+
+
+
+Route::post('/conversations/{conversation}/messages', [ConversationMessageController::class, 'store'])
+    ->middleware('auth')
+    ->name('conversations.messages.store');
+
+Route::get('/conversations/{conversation}', [ConversationMessageController::class, 'show'])
+    ->middleware('auth')
+    ->name('conversations.show');
+Route::post('/conversations/{conversation}/read', [ConversationMessageController::class, 'markRead'])
+    ->middleware('auth')
+    ->name('conversations.read');
+Route::post('/conversations/{conversation}/messages/{messageId}/reaction', [ConversationMessageController::class, 'toggleReaction'])
+    ->middleware('auth')
+    ->whereNumber('messageId')
+    ->name('conversations.messages.reaction');

@@ -16,13 +16,7 @@
           <!-- Messages, notifications + user menu (stay visible on phones) -->
           <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
             <!-- Messages: icon with unread count -->
-            <a
-              class="icon-btn"
-              href="{{ route('seeker.chat') }}"
-              aria-label="Messages, 2 unread"
-            >
-              <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
-            </a>
+                @include('partials.seeker-messages-link')
             <div class="dropdown">
               <button
                 class="icon-btn"
