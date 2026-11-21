@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use App\Models\RealEstateUser;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Property;
 
-use App\Models\RealEstateUser;
 final class PageController extends Controller
 {
     public function show(Request $request, string $page): View
@@ -54,7 +52,7 @@ final class PageController extends Controller
             $data['favoritesCount'] = $data['favorites']->count();
         }
 
-//dana added code 
+//dana added code
         if ($page === 'seeker.property' && $request->filled('property_id')) {
     $property = Property::where('verification_status', 'verified')
         ->where('status', '!=', 'hidden')
