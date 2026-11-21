@@ -7,8 +7,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PropertyController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingRequestController;
+use App\Http\Controllers\DiscoverController;
+use Illuminate\Support\Facades\Route;
+
 
 
 Route::get('/', [PageController::class, 'show'])
@@ -186,7 +188,13 @@ Route::get('/owner/requests',[BookingRequestController::class,'index'])
 Route::patch('/owner/requests/{booking}/accept', [BookingRequestController::class, 'accept'])
     ->name('owner.requests.accept'); 
 Route::patch('/owner/requests/{booking}/reject', [BookingRequestController::class, 'reject'])
-    ->name('owner.requests.reject');       
+    ->name('owner.requests.reject');
 
+// Discover Page
+Route::get('seeker/search', [DiscoverController::class, 'index'])
+    ->name('seeker.search');
+    
+
+ 
 
 
