@@ -37,6 +37,26 @@ class RealEstateUser extends Authenticatable
         return $this->hasOne(AgentProfile::class, 'user_id');
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        $profile = $this->role === 'agent'
+            ? $this->agentProfile
+            : ($this->role === 'tenant' ? $this->tenantProfile : null);
+
+        $name = trim(($profile?->first_name ?? '') . ' ' . ($profile?->last_name ?? ''));
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        return $this->role === 'admin' ? 'Admin' : $this->email;
+    }
+
+    public function getDisplayInitialAttribute(): string
+    {
+        return mb_strtoupper(mb_substr($this->display_name, 0, 1));
+    }
+
     public function tenantProfile(): HasOne
     {
         return $this->hasOne(TenantProfile::class, 'user_id');

@@ -102,12 +102,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, Abu Ahmad"
+            aria-label="Account menu, {{ auth()->user()->display_name }}"
           >
-            <span class="avatar">A</span>
+            <span class="avatar">{{ auth()->user()->display_initial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">Abu Ahmad</h6></li>
+            <li><h6 class="dropdown-header">{{ auth()->user()->display_name }}</h6></li>
             <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
@@ -197,7 +197,7 @@
                     class="form-control"
                     id="aName"
                     name="name"
-                    value="Abu Ahmad"
+                    value="{{ auth()->user()->display_name }}"
                     autocomplete="name"
                   />
                 </div>
@@ -215,7 +215,7 @@
                     class="form-control"
                     id="aEmail"
                     name="email"
-                    value="abuahmad@example.com"
+                    value="{{ auth()->user()->email }}"
                     autocomplete="email"
                   />
                 </div>
@@ -226,7 +226,7 @@
                     class="form-control text-start"
                     id="aPhone"
                     name="phone"
-                    value="079 ••• ••21"
+                    value="{{ auth()->user()->agentProfile?->phone }}"
                     autocomplete="tel"
                   />
                 </div>

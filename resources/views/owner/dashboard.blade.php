@@ -5,6 +5,11 @@
 @section('bodyAttributes') data-role="owner" data-page="dashboard"@endsection
 
 @section('content')
+    @php
+      $account = auth()->user();
+      $displayName = $account?->display_name ?? $agentName;
+      $displayInitial = $account?->display_initial ?? Str::upper(Str::substr($displayName ?? 'Agent', 0, 1));
+    @endphp
     <!-- Desktop: collapses the sidebar to an icon rail (CSS only) -->
     <input
       type="checkbox"
@@ -99,12 +104,12 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, {{ $agentName ?? 'Agent' }}"
+            aria-label="Account menu, {{ $displayName ?? 'Agent' }}"
           >
-            <span class="avatar">{{ Str::upper(Str::substr($agentName ?? 'Agent', 0, 1)) }}</span>
+            <span class="avatar">{{ $displayInitial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">{{ $agentName ?? 'Agent' }}</h6></li>
+            <li><h6 class="dropdown-header">{{ $displayName ?? 'Agent' }}</h6></li>
             <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
@@ -170,7 +175,7 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Welcome back{{ $agentName ? ', '.$agentName : '' }}</h1>
+            <h1>Welcome back{{ $displayName ? ', '.$displayName : '' }}</h1>
             <p>Overview of your properties and recent activity.</p>
           </div>
           <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
