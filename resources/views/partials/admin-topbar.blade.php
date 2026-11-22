@@ -2,5 +2,5 @@
     <button class="icon-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-label="Menu">
         <i class="bi bi-list"></i>
     </button>
-    <a class="brand" href="{{ route('admin.dashboard') }}"><span class="brand-mark">M</span><span>Makan</span></a>
+    <a class="brand" href="{{ route('admin.dashboard') }}"><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a>
 </header>

@@ -13,7 +13,7 @@
     <label for="sidebarToggle" class="icon-btn sidebar-burger d-none d-lg-inline-flex" title="Collapse or expand the menu">
         <i class="bi bi-list"></i>
     </label>
-    <a class="brand" href="{{ route('owner.dashboard') }}"><span class="brand-mark">M</span><span>Makan</span></a>
+    <a class="brand" href="{{ route('owner.dashboard') }}"><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a>
     <div class="ms-auto d-flex align-items-center gap-1">
         <a class="icon-btn" href="{{ route('owner.chat') }}" data-inbox-messages-link aria-label="Messages, {{ $unread }} unread">
             <i class="bi bi-chat-dots"></i><span class="icon-badge" data-inbox-unread @if (!$unread) hidden @endif>{{ $unread }}</span>

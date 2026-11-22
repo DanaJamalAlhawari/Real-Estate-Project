@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use App\Http\Middleware\EnsureUserHasRole;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,23 +15,24 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-    $middleware->alias([
-        'role' => EnsureUserHasRole::class,
-    ]);
+        $middleware->alias([
+            'role' => EnsureUserHasRole::class,
+        ]);
 
-    $middleware->redirectGuestsTo('/auth/login');
+        $middleware->redirectGuestsTo('/auth/login');
 
-    $middleware->redirectUsersTo(function (Request $request) {
-        return match ($request->user()?->role) {
-            'tenant' => route('seeker.search'),
-            'agent' => route('owner.dashboard'),
-            'admin' => route('admin.dashboard'),
-            default => route('home'),
-        };
-    });
+        $middleware->redirectUsersTo(function (Request $request) {
+            return match ($request->user()?->role) {
+                'tenant' => route('seeker.search'),
+                'agent' => route('owner.dashboard'),
+                'admin' => route('admin.dashboard'),
+                default => route('home'),
+            };
+        });
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['card_number', 'card_expiry', 'card_cvv']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

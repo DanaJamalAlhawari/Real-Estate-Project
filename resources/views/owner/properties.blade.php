@@ -25,7 +25,7 @@
       >
         <div class="offcanvas-header border-bottom">
           <a class="brand" href="{{ route('home') }}"
-            ><span class="brand-mark">M</span><span>Makan</span></a
+            ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a
           >
           <button
             type="button"
@@ -81,6 +81,10 @@
           </a>
         </div>
 
+        @if (session('success'))
+          <p class="alert alert-success" role="status">{{ session('success') }}</p>
+        @endif
+
         <!-- 2. Property list -->
         <div class="d-flex flex-column gap-3" id="ownerProperties">
           @if(isset($ownedProperties) || isset($properties))
@@ -122,32 +126,32 @@
                 {{ $property->updated_at?->diffForHumans() ?? 'Not available' }}
               </div>
             </div>
-            <div class="stat-tiles prop-row__stats">
-              <!-- Stats are intentionally left empty until real data is available. -->
-            </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2">
               <a href="{{ route('owner.properties.edit', $property) }}"
-                class="btn btn-ghost btn-square text-primary-bt"
+                class="btn btn-outline-primary btn-sm"
                 aria-label="Edit {{ $property->title }}">
-                <i class="bi bi-pencil"></i>
+                <i class="bi bi-pencil" aria-hidden="true"></i> Edit
               </a>
-              <form action="{{ route('properties.visibility', $property->id) }}" method="POST">
+              @if (in_array($property->status, ['available', 'hidden'], true))
+                <form action="{{ route('properties.visibility', $property->id) }}" method="POST">
                 @csrf
                 @method('PATCH')
                 <button
                   type="submit"
-                  class="btn btn-ghost btn-square"
+                  class="btn btn-outline-secondary btn-sm"
                   aria-label="{{ $property->status == 'hidden' ? 'Show' : 'Hide' }} {{ $property->title }}">
-                  <i class="bi {{ $property->status == 'hidden' ? 'bi-eye' : 'bi-eye-slash' }}"></i>
+                  <i class="bi {{ $property->status == 'hidden' ? 'bi-eye' : 'bi-eye-slash' }}" aria-hidden="true"></i>
+                  {{ $property->status == 'hidden' ? 'Show' : 'Hide' }}
                 </button>
-              </form>
+                </form>
+              @endif
               <button
                 type="button"
-                class="btn btn-ghost btn-square"
+                class="btn btn-outline-danger btn-sm"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteModal{{ $property->id }}"
                 aria-label="Delete {{ $property->title }}">
-                <i class="bi bi-trash"></i>
+                <i class="bi bi-trash" aria-hidden="true"></i> Delete
               </button>
               <div class="modal fade"
                 id="deleteModal{{ $property->id }}"
@@ -173,7 +177,7 @@
                       <p class="text-muted">
                         Are you sure you want to delete
                         <strong>{{ $property->title }}</strong>?
-                        This action cannot be undone.
+                        It will be removed from active listings and its pending requests will be cancelled.
                       </p>
                     </div>
                     <div class="modal-footer border-0 justify-content-center">
@@ -188,7 +192,7 @@
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">
                           <i class="bi bi-trash"></i>
-                          Yes, Delete
+                          Delete property
                         </button>
                       </form>
                     </div>

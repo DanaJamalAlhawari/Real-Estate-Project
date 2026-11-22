@@ -15,7 +15,7 @@
         <!-- ===== Sidebar ===== -->
         <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar">
             <div class="offcanvas-header border-bottom">
-                <a class="brand" href="{{ route('home') }}"><span class="brand-mark">M</span><span>Makan</span></a>
+                <a class="brand" href="{{ route('home') }}"><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar"
                     aria-label="Close"></button>
             </div>

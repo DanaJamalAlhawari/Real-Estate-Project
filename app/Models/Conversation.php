@@ -24,7 +24,7 @@ class Conversation extends Model
         return $this->belongsTo(
             Property::class,
             'property_id'
-        );
+        )->withTrashed();
     }
 
     public function tenant(): BelongsTo
@@ -43,7 +43,6 @@ class Conversation extends Model
         );
     }
 
-   
     public function messages(): HasMany
     {
         return $this->hasMany(
@@ -53,10 +52,10 @@ class Conversation extends Model
     }
 
     public function hasParticipant(RealEstateUser $user): bool
-{
-    return in_array((int) $user->getKey(), [
-        (int) $this->tenant_id,
-        (int) $this->agent_id,
-    ], true);
-}
+    {
+        return in_array((int) $user->getKey(), [
+            (int) $this->tenant_id,
+            (int) $this->agent_id,
+        ], true);
+    }
 }

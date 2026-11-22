@@ -33,7 +33,7 @@
         <i class="bi bi-list"></i>
       </label>
       <a class="brand" href="{{ route('admin.dashboard') }}"
-        ><span class="brand-mark">M</span><span>Makan</span></a
+        ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a
       >
       <div class="ms-auto d-flex align-items-center gap-1">
         <!-- Messages: icon with unread count -->
