@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Property;
 use App\Models\Service;
-use App\Models\PropertyImage;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class PropertyController extends Controller
 {
@@ -18,6 +19,7 @@ class PropertyController extends Controller
     public function index()
     {
         $properties = Property::with('images')->where('agent_id', request()->user()->id)->get();
+
         return view('owner.properties', ['properties' => $properties]);
     }
 
@@ -32,6 +34,7 @@ class PropertyController extends Controller
             $property->status = 'available';
             $property->save();
         }
+
         return redirect()->route('owner.properties');
     }
 
@@ -42,6 +45,7 @@ class PropertyController extends Controller
     {
         $this->ensureCanSubmitProperty(request());
         $services = Service::all();
+
         return view('owner.property-form', ['services' => $services]);
     }
 
@@ -52,23 +56,23 @@ class PropertyController extends Controller
     {
         $this->ensureCanSubmitProperty($request);
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'category'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Property::CATEGORIES))],
-            'price'       => 'required|numeric|min:0',
-            'city'        => 'required|string|max:255',
-            'area'        => 'nullable|string|max:255',
-            'address'     => 'required|string|max:255',
-            'latitude'    => 'nullable|numeric|between:-90,90',
-            'longitude'   => 'nullable|numeric|between:-180,180',
-            'bedrooms'    => 'required|integer|min:0',
-            'bathrooms'   => 'required|integer|min:0',
-            'services'    => 'sometimes|array',
-            'services.*'  => 'integer|distinct|exists:services,id',
-            'photos'      => 'sometimes|array|max:10',
-            'photos.*'    => 'image|mimes:jpg,jpeg,png|max:5120',
-            'document'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'action'      => 'required|in:publish',
+            'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
+            'price' => 'required|numeric|min:0',
+            'city' => 'required|string|max:255',
+            'area' => 'nullable|string|max:255',
+            'address' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'bedrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'services' => 'sometimes|array',
+            'services.*' => 'integer|distinct|exists:services,id',
+            'photos' => 'sometimes|array|max:10',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'action' => 'required|in:publish',
         ]);
 
         $document = $validated['document'] ?? null;
@@ -103,18 +107,18 @@ class PropertyController extends Controller
 
                 // Create property.
                 $property = Property::create([
-                    'agent_id'    => $agentId,
-                    'title'       => $validated['title'],
+                    'agent_id' => $agentId,
+                    'title' => $validated['title'],
                     'description' => $validated['description'],
-                    'category'    => $validated['category'],
-                    'price'       => $validated['price'],
-                    'city'        => $validated['city'],
-                    'area'        => $validated['area'] ?? null,
-                    'address'     => $validated['address'],
-                    'latitude'    => $validated['latitude'] ?? null,
-                    'longitude'   => $validated['longitude'] ?? null,
-                    'bedrooms'    => $validated['bedrooms'],
-                    'bathrooms'   => $validated['bathrooms'],
+                    'category' => $validated['category'],
+                    'price' => $validated['price'],
+                    'city' => $validated['city'],
+                    'area' => $validated['area'] ?? null,
+                    'address' => $validated['address'],
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
+                    'bedrooms' => $validated['bedrooms'],
+                    'bathrooms' => $validated['bathrooms'],
                     'ownership_deed_url' => 'NULL',
                 ]);
 
@@ -177,6 +181,7 @@ class PropertyController extends Controller
     {
         $property = Property::with(['services', 'images'])->where('agent_id', request()->user()->id)->findOrFail($id);
         $services = Service::all();
+
         return view('owner.property-form', ['property' => $property, 'services' => $services]);
     }
 
@@ -190,26 +195,26 @@ class PropertyController extends Controller
 
         // 2. Validate property details and selected services.
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'category'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Property::CATEGORIES))],
-            'price'       => 'required|numeric|min:0',
-            'city'        => 'required|string|max:255',
-            'area'        => 'nullable|string|max:255',
-            'address'     => 'required|string|max:255',
-            'latitude'    => 'nullable|numeric|between:-90,90',
-            'longitude'   => 'nullable|numeric|between:-180,180',
-            'bedrooms'    => 'nullable|integer|min:0',
-            'bathrooms'   => 'nullable|integer|min:0',
+            'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
+            'price' => 'required|numeric|min:0',
+            'city' => 'required|string|max:255',
+            'area' => 'nullable|string|max:255',
+            'address' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'bedrooms' => 'nullable|integer|min:0',
+            'bathrooms' => 'nullable|integer|min:0',
             // Validate selected services.
-            'services'    => 'sometimes|array',
-            'services.*'  => 'integer|distinct|exists:services,id',
+            'services' => 'sometimes|array',
+            'services.*' => 'integer|distinct|exists:services,id',
             // Validate newly uploaded photos.
-            'photos'          => 'sometimes|array',
-            'photos.*'        => 'image|mimes:jpg,jpeg,png|max:5120',
+            'photos' => 'sometimes|array',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
 
             // Validate existing images selected for deletion.
-            'deleted_images'   => 'sometimes|array',
+            'deleted_images' => 'sometimes|array',
             'deleted_images.*' => 'integer|distinct|exists:property_images,id',
         ]);
 
@@ -240,7 +245,7 @@ class PropertyController extends Controller
             ->get();
 
         if ($imagesToDelete->count() !== count($deletedImageIds)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'deleted_images' => 'One or more selected images do not belong to this property.',
             ]);
         }
@@ -250,7 +255,7 @@ class PropertyController extends Controller
         $newPhotos = $request->file('photos', []);
 
         if ($remainingPhotos + count($newPhotos) > 10) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'photos' => 'A property can have a maximum of 10 photos.',
             ]);
         }
@@ -265,7 +270,7 @@ class PropertyController extends Controller
                 $uploadedPaths[] = $path;
             }
 
-            \Illuminate\Support\Facades\DB::transaction(function () use (
+            DB::transaction(function () use (
                 $property,
                 $validated,
                 $imagesToDelete,
@@ -327,7 +332,7 @@ class PropertyController extends Controller
         // Delete old image files only after the database update succeeds.
         foreach ($imagesToDelete as $image) {
             Storage::disk('public')->delete($image->image_url);
-        };
+        }
 
         // 7. Redirect after successful update.
         return redirect()
@@ -338,12 +343,14 @@ class PropertyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id): RedirectResponse
     {
-        //Find the property belonging to this owner
-        $property = Property::where('agent_id', request()->user()->id)
-            ->findOrFail($id);
-        $property->delete();
+        DB::transaction(function () use ($request, $id) {
+            $property = $request->user()->properties()->lockForUpdate()->findOrFail($id);
+            $property->bookings()->where('status', 'pending')->update(['status' => 'cancelled']);
+            $property->delete();
+        });
+
         return redirect()
             ->route('owner.properties')
             ->with('success', 'Property deleted successfully.');
@@ -352,7 +359,7 @@ class PropertyController extends Controller
     private function ensureCanSubmitProperty(Request $request): void
     {
         $properties = $request->user()->properties();
-        abort_if((clone $properties)->exists() && !$properties->where('verification_status', 'verified')->exists(),
+        abort_if((clone $properties)->exists() && ! $properties->where('verification_status', 'verified')->exists(),
             403, 'An admin must approve your first property before you add another.');
     }
 }

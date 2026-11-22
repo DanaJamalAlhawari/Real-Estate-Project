@@ -7,7 +7,7 @@
       <!-- Colored side panel (desktop only) -->
       <aside class="auth-side">
         <a class="brand" href="{{ route('home') }}"
-          ><span class="brand-mark">M</span><span>Makan</span
+          ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
         ></a>
         <div>
           <h2>Your next home is waiting</h2>
@@ -33,7 +33,7 @@
       <section class="auth-main">
         <div class="auth-top">
           <a class="brand" href="{{ route('home') }}"
-            ><span class="brand-mark">M</span><span>Makan</span
+            ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
           ></a>
         </div>
 

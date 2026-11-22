@@ -8,6 +8,7 @@ use App\Models\Property;
 use App\Models\RealEstateUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -60,8 +61,7 @@ class BookingCheckoutTest extends TestCase
         $this->actingAs($agent)->patch(route('owner.requests.accept', $booking))
             ->assertRedirect(route('owner.requests'))->assertSessionHas('success');
         $this->assertEquals(6.5, $booking->fresh()->approved_commission_rate);
-        Event::assertDispatched(BookingActivity::class, fn ($event) =>
-            $event->broadcastOn()->name === 'private-inbox.'.$tenant->id
+        Event::assertDispatched(BookingActivity::class, fn ($event) => $event->broadcastOn()->name === 'private-inbox.'.$tenant->id
             && str_contains($event->broadcastWith()['preview'], 'You can now pay.')
             && $event->broadcastWith()['url'] === route('payments.mock.show', $booking, false)
         );
@@ -75,29 +75,34 @@ class BookingCheckoutTest extends TestCase
         $this->assertNull($property->fresh()->approved_commission_rate);
 
         $this->actingAs($otherTenant)->get($checkout)->assertNotFound();
-        $this->post($pay, ['payment_method' => 'cash', 'outcome' => 'success'])->assertNotFound();
+        $this->post($pay, $this->demoCard())->assertNotFound();
         $this->actingAs($tenant)->get(route('seeker.bookings'))->assertSee($checkout)
             ->assertSee('You can now pay.');
-        $this->get($checkout)->assertOk()->assertSee('Mock payment')->assertSee('310.00 JOD');
-        $this->from($checkout)->post($pay, ['payment_method' => 'cash', 'outcome' => 'failure'])
-            ->assertRedirect($checkout)->assertSessionHasErrors(['payment' => 'Mock payment failed. You can try again.']);
+        $this->get($checkout)->assertOk()->assertSee('Mock payment')->assertSee('310.00 JOD')
+            ->assertSee('name="card_number"', false)->assertSee('name="card_expiry"', false)->assertSee('name="card_cvv"', false);
+        $this->from($checkout)->post($pay, ['payment_method' => 'cash', 'outcome' => 'success'])
+            ->assertRedirect($checkout)->assertSessionHasErrors(['card_number', 'card_expiry', 'card_cvv']);
+        $this->from($checkout)->post($pay, [
+            'card_number' => '4000 0000 0000 0002', 'card_expiry' => '01/20', 'card_cvv' => '999',
+        ])->assertRedirect($checkout)->assertSessionHasErrors(['card_number', 'card_expiry', 'card_cvv'])
+            ->assertSessionMissing('_old_input.card_number')
+            ->assertSessionMissing('_old_input.card_expiry')
+            ->assertSessionMissing('_old_input.card_cvv');
         $this->withCookie(config('session.cookie'), session()->getId())
-            ->get($checkout)->assertSee('Mock payment failed');
+            ->get($checkout)->assertSee('Enter the demo expiration date 12/30.')->assertDontSee('4000 0000 0000 0002');
         $this->assertDatabaseCount('payments', 0);
         $this->assertDatabaseCount('commissions', 0);
-        $this->from($checkout)->post($pay, ['payment_method' => 'invalid', 'outcome' => 'success'])
-            ->assertSessionHasErrors('payment_method');
-
-        $form = ['payment_method' => 'cash', 'outcome' => 'success', 'amount' => 1, 'commission_rate' => 0];
+        $form = $this->demoCard() + ['amount' => 1, 'commission_rate' => 0];
         $this->post($pay, $form)->assertRedirect($checkout);
         $this->post($pay, $form)->assertRedirect($checkout);
         $payment = $booking->payments()->firstOrFail();
-        $this->post(route('payments.mock.confirm', $payment))->assertRedirect($checkout);
+        $this->from($checkout)->post(route('payments.mock.confirm', $payment))->assertSessionHasErrors('card_number');
+        $this->post(route('payments.mock.confirm', $payment), $this->demoCard())->assertRedirect($checkout);
         $this->assertDatabaseCount('payments', 1);
         $this->assertDatabaseCount('commissions', 1);
         $this->assertDatabaseHas('payments', [
             'id' => $payment->id, 'booking_id' => $booking->id, 'tenant_id' => $tenant->id,
-            'amount' => 310, 'status' => 'successful', 'payment_method' => 'cash',
+            'amount' => 310, 'status' => 'successful', 'payment_method' => 'credit_card',
         ]);
         $this->assertDatabaseHas('commissions', [
             'booking_id' => $booking->id, 'payment_id' => $payment->id, 'agent_id' => $agent->id,
@@ -105,7 +110,7 @@ class BookingCheckoutTest extends TestCase
             'status' => 'pending', 'paid_at' => null,
         ]);
         $this->get($checkout)->assertSee('Payment recorded successfully')
-            ->assertSee('20.15 JOD')->assertSee('289.85 JOD');
+            ->assertSee('20.15 JOD')->assertSee('289.85 JOD')->assertDontSee('name="card_number"', false);
         $this->actingAs($agent)->get(route('owner.earnings'))->assertOk()->assertSee('289.85');
     }
 
@@ -173,7 +178,7 @@ class BookingCheckoutTest extends TestCase
         ]);
     }
 
-    public function test_assistant_offers_real_city_and_type_options_and_keeps_bookings_private(): void
+    public function test_assistant_uses_verified_locations_and_only_the_current_tenants_bookings(): void
     {
         $agent = $this->account('agent');
         $tenant = $this->account('tenant');
@@ -192,6 +197,121 @@ class BookingCheckoutTest extends TestCase
         $this->get(route('seeker.search', ['city' => 'Irbid', 'category' => 'studio']))
             ->assertOk()->assertSee('Visible studio');
         $this->get(route('seeker.search', ['city' => 'Other city']))->assertOk()->assertSee('0 homes');
+
+        $url = rtrim(config('services.ollama.url'), '/').'/api/chat';
+        Http::preventStrayRequests();
+        Http::fake([$url => Http::response(['message' => ['content' => 'Your studio request is pending.']])]);
+
+        $this->postJson(route('assistant.chat'), ['message' => 'How is my booking?'])
+            ->assertOk()->assertExactJson(['reply' => 'Your studio request is pending.']);
+        Http::assertSent(function ($request) use ($url) {
+            $context = $request['messages'][0]['content'];
+
+            return $request->url() === $url && $request['model'] === config('services.ollama.model')
+                && str_contains($context, 'Irbid') && str_contains($context, 'Visible studio')
+                && ! str_contains($context, 'Hidden city') && ! str_contains($context, 'Private booking title');
+        });
+    }
+
+    public function test_only_the_tenant_can_cancel_pending_or_accepted_unpaid_bookings(): void
+    {
+        Event::fake([BookingActivity::class]);
+        $agent = $this->account('agent');
+        $tenant = $this->account('tenant');
+        $otherTenant = $this->account('tenant');
+        $property = $this->listing($agent);
+        $pending = $this->booking($tenant, $property, 'pending');
+        $unpaid = $this->booking($tenant, $property, 'confirmed');
+        $paid = $this->booking($tenant, $property, 'confirmed');
+        $paid->payments()->create([
+            'tenant_id' => $tenant->id, 'amount' => 20, 'payment_method' => 'credit_card', 'status' => 'successful',
+        ]);
+
+        $cancel = fn (Booking $booking) => route('seeker.bookings.cancel', $booking);
+        $this->actingAs($otherTenant)->patch($cancel($pending))->assertNotFound();
+        $this->actingAs($tenant)->get(route('seeker.bookings'))->assertOk()->assertSee($cancel($pending))
+            ->assertSee($cancel($unpaid))->assertDontSee($cancel($paid));
+        $this->patch($cancel($pending))->assertRedirect(route('seeker.bookings'))->assertSessionHas('success');
+        $this->patch($cancel($unpaid))->assertSessionHas('success');
+        $this->patch($cancel($paid))->assertSessionHas('error');
+
+        $this->assertSame('cancelled', $pending->fresh()->status);
+        $this->assertSame('cancelled', $unpaid->fresh()->status);
+        $this->assertSame('confirmed', $paid->fresh()->status);
+        $this->get(route('payments.mock.show', $unpaid))->assertForbidden();
+        Event::assertDispatchedTimes(BookingActivity::class, 2);
+    }
+
+    public function test_cart_pays_approved_bookings_once_and_rolls_back_when_an_item_changes(): void
+    {
+        $agent = $this->account('agent');
+        $tenant = $this->account('tenant');
+        $otherTenant = $this->account('tenant');
+        $property = $this->listing($agent);
+        $first = $this->booking($tenant, $property, 'confirmed');
+        $second = $this->booking($tenant, $property, 'confirmed');
+        $cancelled = $this->booking($tenant, $property, 'cancelled');
+        $private = $this->booking($otherTenant, $property, 'confirmed');
+        $cart = route('payments.mock.cart');
+        $pay = route('payments.mock.cart.pay');
+
+        $this->actingAs($tenant)->get($cart)->assertOk()->assertSee('40.00 JOD')
+            ->assertSee('name="card_number"', false)->assertSee('name="card_expiry"', false)->assertSee('name="card_cvv"', false);
+        $this->from($cart)->post($pay, ['bookings' => [$first->id, $second->id]])
+            ->assertRedirect($cart)->assertSessionHasErrors(['card_number', 'card_expiry', 'card_cvv']);
+        $this->post($pay, $this->demoCard() + ['bookings' => [$first->id, $private->id]])->assertNotFound();
+        $this->from($cart)->post($pay, $this->demoCard() + ['bookings' => [$first->id, $cancelled->id]])
+            ->assertRedirect($cart)->assertSessionHasErrors('payment');
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('commissions', 0);
+
+        $payload = $this->demoCard() + ['bookings' => [$first->id, $second->id], 'amount' => 1];
+        $this->post($pay, $payload)->assertRedirect(route('seeker.bookings'));
+        $this->post($pay, $payload)->assertRedirect(route('seeker.bookings'));
+
+        $this->assertDatabaseCount('payments', 2);
+        $this->assertDatabaseCount('commissions', 2);
+        foreach ([$first, $second] as $booking) {
+            $this->assertDatabaseHas('payments', ['booking_id' => $booking->id, 'amount' => 20, 'status' => 'successful']);
+        }
+        $this->get($cart)->assertOk()->assertSee('Your cart is empty');
+        $this->get(route('payments.mock.show', $first))->assertOk()->assertSee('Payment recorded successfully');
+    }
+
+    public function test_agent_can_delete_a_listing_with_bookings_and_preserve_checkout_history(): void
+    {
+        $agent = $this->account('agent');
+        $tenant = $this->account('tenant');
+        $property = $this->listing($agent);
+        $pending = $this->booking($tenant, $property, 'pending');
+        $approved = $this->booking($tenant, $property, 'confirmed');
+        $delete = route('properties.destroy', $property);
+
+        $this->actingAs($this->account('agent'))->delete($delete)->assertNotFound();
+        $this->actingAs($agent)->delete($delete)->assertRedirect(route('owner.properties'))->assertSessionHas('success');
+
+        $this->assertSoftDeleted($property);
+        $this->assertSame('cancelled', $pending->fresh()->status);
+        $this->assertSame('confirmed', $approved->fresh()->status);
+        $this->get(route('owner.properties'))->assertOk()->assertDontSee($property->title);
+        $this->get(route('owner.requests'))->assertOk()->assertSee($property->title);
+        $this->actingAs($tenant)->get(route('seeker.property.details', ['property_id' => $property->id]))->assertNotFound();
+        $this->get(route('payments.mock.show', $approved))->assertOk()->assertSee($property->title);
+        $this->post(route('payments.mock.pay', $approved), $this->demoCard())
+            ->assertRedirect(route('payments.mock.show', $approved));
+    }
+
+    private function demoCard(): array
+    {
+        return ['card_number' => '4242 4242 4242 4242', 'card_expiry' => '12/30', 'card_cvv' => '123'];
+    }
+
+    private function booking(RealEstateUser $tenant, Property $property, string $status): Booking
+    {
+        return Booking::forceCreate([
+            'tenant_id' => $tenant->id, 'property_id' => $property->id, 'status' => $status,
+            'start_date' => '2027-02-05', 'end_date' => '2027-02-07', 'duration' => 2, 'total_price' => 20,
+        ]);
     }
 
     private function account(string $role): RealEstateUser

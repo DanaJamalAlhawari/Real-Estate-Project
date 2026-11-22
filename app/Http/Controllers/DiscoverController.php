@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Property;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class DiscoverController extends Controller
@@ -11,7 +11,6 @@ class DiscoverController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
     {
         $request->validate([
@@ -26,7 +25,7 @@ class DiscoverController extends Controller
         }, 'rooms', 'services'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
-        
+
         // Apply filters Button
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -51,34 +50,12 @@ class DiscoverController extends Controller
 
         $properties = $query->get();
 
-        $favorites = $request->user()->favoriteProperties()
-            ->discoverable()
-            ->with(['images' => function ($q) {
-                $q->orderByDesc('is_primary');
-            }])
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->get();
+        $favoriteIds = $request->user()->favoriteProperties()
+            ->whereKey($properties->modelKeys())
+            ->pluck('properties.id')->all();
 
-        $favoriteIds = $favorites->pluck('id')->all();
-        $favoritesCount = $favorites->count();
-
-        $assistantListings = Property::discoverable()->distinct()->get(['city', 'category']);
-        $assistantCities = $assistantListings->pluck('city')->filter()->unique()->sort();
-        $assistantTypes = $assistantListings->pluck('category')->unique();
-        $assistantBookings = $request->user()->bookings()->with('property')->latest('id')->limit(3)->get();
-
-        return view('seeker.search', compact(
-            'properties',
-            'favorites',
-            'favoriteIds',
-            'favoritesCount',
-            'assistantCities',
-            'assistantTypes',
-            'assistantBookings',
-        ));
+        return view('seeker.search', compact('properties', 'favoriteIds'));
     }
-
 
     /**
      * Show the form for creating a new resource.

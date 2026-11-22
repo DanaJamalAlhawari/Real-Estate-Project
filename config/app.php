@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'home_excluded_property_id' => (int) env('HOME_EXCLUDED_PROPERTY_ID', 0),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

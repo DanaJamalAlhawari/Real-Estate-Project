@@ -38,6 +38,35 @@ class ExampleTest extends TestCase
             ->assertRedirect(route('seeker.property', ['home' => 2]));
     }
 
+    public function test_discover_links_to_a_favorites_page_that_shows_only_saved_homes(): void
+    {
+        $this->withoutVite();
+        $agent = $this->account('agent');
+        $tenant = $this->account('tenant');
+        $listing = [
+            'agent_id' => $agent->id, 'description' => 'Test listing', 'category' => 'studio',
+            'city' => 'Amman', 'address' => 'Test address', 'ownership_deed_url' => 'test.pdf',
+            'status' => 'available', 'verification_status' => 'verified',
+        ];
+        $saved = Property::forceCreate(['title' => 'Saved studio'] + $listing);
+        $unsaved = Property::forceCreate(['title' => 'Unsaved studio'] + $listing);
+        $tenant->favoriteProperties()->attach($saved);
+
+        $discover = route('seeker.search');
+        $favorites = route('seeker.favorites');
+        $this->actingAs($tenant)->get($discover)->assertOk()
+            ->assertSee('href="'.$favorites.'"', false)
+            ->assertSee($saved->title)->assertSee($unsaved->title)
+            ->assertDontSee('id="all-tab"', false)->assertDontSee('id="favorites-tab"', false);
+
+        $this->get($favorites)->assertOk()
+            ->assertSee('aria-current="page"', false)
+            ->assertSee($saved->title)->assertDontSee($unsaved->title)
+            ->assertSee('Remove from favorites');
+        $this->from($favorites)->delete(route('seeker.favorites.destroy', $saved))->assertRedirect($favorites);
+        $this->get($favorites)->assertOk()->assertSee('No favorites yet');
+    }
+
     public function test_landing_cards_link_to_their_own_verified_property(): void
     {
         $agent = $this->account('agent');
@@ -55,6 +84,12 @@ class ExampleTest extends TestCase
         $this->get(route('home'))->assertOk()
             ->assertSee(route('seeker.property.details', ['property_id' => $property->id]))
             ->assertSee($property->title);
+
+        config(['app.home_excluded_property_id' => $property->id]);
+
+        $this->get(route('home', ['category' => 'studio']))->assertOk()->assertDontSee($property->title);
+        $this->withoutVite()->actingAs($this->account('tenant'))
+            ->get(route('seeker.search'))->assertOk()->assertSee($property->title);
     }
 
     private function account(string $role): RealEstateUser

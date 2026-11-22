@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+@extends('layouts.app')
+@section('title', 'Makan — Upload verification document')
+
+@section('content')
+<main class="app-page container">
     <h2>Upload Verification Document</h2>
 
 @if (session('success'))
@@ -37,5 +34,5 @@
 
     <button type="submit">Upload Document</button>
 </form>
-</body>
-</html>
+</main>
+@endsection

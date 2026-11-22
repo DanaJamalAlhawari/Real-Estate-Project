@@ -14,10 +14,13 @@
     <nav class="navbar navbar-expand-lg" aria-label="Main">
         <div class="container">
             <a class="brand" href="{{ route('seeker.search') }}">
-                <span class="brand-mark">M</span><span>Makan</span>
+                <img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span>
             </a>
 
             <div class="d-flex align-items-center gap-1 ms-auto order-lg-last">
+                <a class="icon-btn {{ request()->routeIs('payments.mock.cart') ? 'is-current' : '' }}" href="{{ route('payments.mock.cart') }}" aria-label="Payment cart" @if(request()->routeIs('payments.mock.cart')) aria-current="page" @endif>
+                    <i class="bi bi-bag" aria-hidden="true"></i>
+                </a>
                 <a class="icon-btn" href="{{ route('seeker.chat') }}" data-inbox-messages-link aria-label="Messages, {{ $unread }} unread">
                     <i class="bi bi-chat-dots"></i><span class="icon-badge" data-inbox-unread @if (!$unread) hidden @endif>{{ $unread }}</span>
                 </a>
@@ -76,12 +79,17 @@
                 <div class="nav-group">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{{ route('seeker.search') }}">
+                            <a class="nav-link {{ request()->routeIs('seeker.search') ? 'active' : '' }}" @if(request()->routeIs('seeker.search')) aria-current="page" @endif href="{{ route('seeker.search') }}">
                                 <i class="bi bi-stars"></i><span>Discover</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('seeker.bookings') }}">
+                            <a class="nav-link {{ request()->routeIs('seeker.favorites') ? 'active' : '' }}" @if(request()->routeIs('seeker.favorites')) aria-current="page" @endif href="{{ route('seeker.favorites') }}">
+                                <i class="bi bi-heart" aria-hidden="true"></i><span>Favorites</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('seeker.bookings') ? 'active' : '' }}" @if(request()->routeIs('seeker.bookings')) aria-current="page" @endif href="{{ route('seeker.bookings') }}">
                                 <i class="bi bi-calendar-check"></i><span>My bookings</span>
                                 @if ($pendingBookings)<span class="side-badge">{{ $pendingBookings }}</span>@endif
                             </a>

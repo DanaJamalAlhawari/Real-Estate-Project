@@ -7,7 +7,7 @@
       <nav class="navbar navbar-expand-xl">
         <div class="container">
           <a class="brand" href="{{ route('home') }}">
-            <span class="brand-mark">M</span><span>Makan</span>
+            <img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span>
           </a>
           <button
             class="navbar-toggler border-0"
@@ -164,38 +164,4 @@
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="container">
-        <div class="row g-4">
-          <div class="col-lg-5">
-            <a class="brand mb-3" href="{{ route('home') }}">
-              <span class="brand-mark">M</span><span>Makan</span>
-            </a>
-            <p class="mb-0">Smart matching for temporary housing in Jordan.</p>
-          </div>
-          <div class="col-6 col-lg-3 offset-lg-1">
-            <h6>Platform</h6>
-            <ul class="list-unstyled d-grid gap-2 mb-0">
-              <li><a href="{{ route('home') }}#how">How it works</a></li>
-              <li><a href="{{ route('home') }}#features">Features</a></li>
-              <li><a href="{{ route('home') }}#owners">For owners</a></li>
-            </ul>
-          </div>
-          <div class="col-6 col-lg-3">
-            <h6>Company</h6>
-            <ul class="list-unstyled d-grid gap-2 mb-0">
-              <li><a href="#">About us</a></li>
-              <li><a href="#">Contact</a></li>
-              <li><a href="#">Terms of service</a></li>
-              <li><a href="#">Privacy policy</a></li>
-            </ul>
-          </div>
-        </div>
-        <div
-          class="footer-bottom d-flex flex-wrap justify-content-between gap-2"
-        >
-          <span>© 2026 Makan. All rights reserved.</span>
-        </div>
-      </div>
-    </footer>
 @endsection

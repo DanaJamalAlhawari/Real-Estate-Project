@@ -6,6 +6,7 @@ use App\Events\BookingActivity;
 use App\Models\Booking;
 use App\Models\Property;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -55,7 +56,7 @@ class BookingRequestController extends Controller
                 throw ValidationException::withMessages(['moveOut' => 'Choose a shorter stay.']);
             }
 
-            $booking = new Booking();
+            $booking = new Booking;
             $booking->property()->associate($property);
             $booking->tenant()->associate($request->user());
             $booking->start_date = $start;
@@ -80,6 +81,34 @@ class BookingRequestController extends Controller
     public function accept(Request $request, Booking $booking)
     {
         return $this->decide($request, $booking, 'confirmed', 'Booking accepted successfully.');
+    }
+
+    public function cancel(Request $request, Booking $booking): RedirectResponse
+    {
+        $cancelled = DB::transaction(function () use ($request, $booking) {
+            $booking = $request->user()->bookings()->lockForUpdate()->findOrFail($booking->id);
+
+            if (! in_array($booking->status, ['pending', 'confirmed'], true)
+                || $booking->payments()->whereIn('status', ['successful', 'refunded'])->exists()) {
+                return false;
+            }
+
+            $booking->status = 'cancelled';
+
+            return $booking->save();
+        });
+
+        if (! $cancelled) {
+            return to_route('seeker.bookings')->with('error', 'Only unpaid booking requests can be cancelled online.');
+        }
+
+        rescue(fn () => BookingActivity::dispatch(
+            (int) $booking->property->agent_id,
+            'A booking for '.$booking->property->title.' was cancelled by the tenant.',
+            route('owner.requests', [], false),
+        ));
+
+        return to_route('seeker.bookings')->with('success', 'Booking cancelled.');
     }
 
     public function reject(Request $request, Booking $booking)

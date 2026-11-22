@@ -27,13 +27,12 @@ class Booking extends Model
         ];
     }
 
-  
     public function property(): BelongsTo
     {
         return $this->belongsTo(
             Property::class,
             'property_id'
-        );
+        )->withTrashed();
     }
 
     public function room(): BelongsTo

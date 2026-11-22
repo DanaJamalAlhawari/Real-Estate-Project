@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Commission;
 use App\Models\Property;
+use App\Models\RealEstateUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use App\Models\RealEstateUser;
 
 final class PageController extends Controller
 {
@@ -21,8 +21,10 @@ final class PageController extends Controller
 
         if ($page === 'home.index') {
             $category = $request->query('category');
+            $excludedPropertyId = config('app.home_excluded_property_id');
             $properties = Property::discoverable()->with('images')->withAvg('reviews', 'rating')
                 ->withCount('reviews')
+                ->when($excludedPropertyId > 0, fn ($query) => $query->whereKeyNot($excludedPropertyId))
                 ->when(is_string($category) && isset(Property::CATEGORIES[$category]),
                     fn ($query) => $query->where('category', $category))
                 ->latest()->limit(6)->get();
@@ -35,6 +37,7 @@ final class PageController extends Controller
 
         return view($page);
     }
+
     public function showProperty(Request $request): View
     {
         $propertyId = filter_var(
@@ -73,7 +76,7 @@ final class PageController extends Controller
             'latestVerifiedProperty' => null,
         ];
 
-        if (!$agent instanceof RealEstateUser || $agent->role !== 'agent') {
+        if (! $agent instanceof RealEstateUser || $agent->role !== 'agent') {
             return view('owner.dashboard', $data);
         }
 
@@ -108,6 +111,7 @@ final class PageController extends Controller
     {
         return back();
     }
+
     public function adminDashboard(): View
     {
         $totalUsers = RealEstateUser::count();
