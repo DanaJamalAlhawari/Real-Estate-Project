@@ -24,10 +24,22 @@ class PropertyImage extends Model
     public function getPublicUrlAttribute(): string
     {
         $path = ltrim($this->image_url, '/');
+        if (str_starts_with($path, 'assets/images/properties/Data/')) {
+            $path = 'assets/properties/Data/'.substr($path, strlen('assets/images/properties/Data/'));
+        }
 
-        return asset(str_starts_with($path, 'assets/') || str_starts_with($path, 'storage/')
+        $publicPath = str_starts_with($path, 'assets/') || str_starts_with($path, 'storage/')
             ? $path
-            : 'storage/'.$path);
+            : 'storage/'.$path;
+
+        return asset(implode('/', array_map('rawurlencode', explode('/', $publicPath))));
+    }
+
+    public function isDemoDefaultImage(): bool
+    {
+        return (str_starts_with($this->image_url, 'assets/properties/Data/')
+            || str_starts_with($this->image_url, 'assets/images/properties/Data/'))
+            && strtolower(pathinfo($this->image_url, PATHINFO_FILENAME)) === 'default';
     }
 
     // العقار المرتبطة فيه الصورة

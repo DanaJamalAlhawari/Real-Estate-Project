@@ -16,7 +16,7 @@
     <button
         type="submit"
         class="btn btn-outline-primary"
-        aria-label="{{ $saved ? 'Remove from favorites' : 'Add to favorites' }}"
+        aria-label="{{ $saved ? __('Remove from favorites') : __('Add to favorites') }}"
     >
         <i class="{{ $saved ? 'bi bi-heart-fill' : 'bi bi-heart' }}" aria-hidden="true"></i>
     </button>

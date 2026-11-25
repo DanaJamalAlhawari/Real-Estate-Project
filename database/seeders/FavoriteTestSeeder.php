@@ -37,19 +37,25 @@ class FavoriteTestSeeder extends Seeder
         $properties = [
             [
                 'title' => 'شقة للتجربة في عمّان',
+                'title_en' => 'Demo apartment in Amman',
                 'category' => 'apartment',
                 'price' => 350,
                 'area' => 'الجبيهة',
+                'area_en' => 'Al Jubeiha',
                 'address' => 'شارع الجامعة، عمّان',
+                'address_en' => 'University Street, Amman',
                 'bedrooms' => 2,
                 'bathrooms' => 1,
             ],
             [
                 'title' => 'استوديو للتجربة في عمّان',
+                'title_en' => 'Demo studio in Amman',
                 'category' => 'studio',
                 'price' => 220,
                 'area' => 'صويلح',
+                'area_en' => 'Sweileh',
                 'address' => 'وسط صويلح، عمّان',
+                'address_en' => 'Central Sweileh, Amman',
                 'bedrooms' => 1,
                 'bathrooms' => 1,
             ],
@@ -66,44 +72,43 @@ class FavoriteTestSeeder extends Seeder
             $property->forceFill(array_merge($data, [
                 'agent_id' => $agent->id,
                 'description' => 'عقار تجريبي لاختبار خاصية المفضلة.',
+                'description_en' => 'Demo listing for testing favorites.',
                 'city' => 'عمّان',
+                'city_en' => 'Amman',
                 'status' => 'available',
                 'ownership_deed_url' => 'demo/deed.pdf',
                 'verification_status' => 'verified',
                 'verified_at' => now(),
             ]))->save();
 
-
-
             if ($data['category'] === 'studio') {
-    $photos = [
-        'assets/images/studio.jpg',
-        'assets/images/interior.jpg',
-    ];
-} else {
-    $photos = [
-        'assets/images/apartment.jpg',
-        'assets/images/living.jpg',
-    ];
-}
+                $photos = [
+                    'assets/images/studio.jpg',
+                    'assets/images/interior.jpg',
+                ];
+            } else {
+                $photos = [
+                    'assets/images/apartment.jpg',
+                    'assets/images/living.jpg',
+                ];
+            }
 
-foreach ($photos as $index => $photo) {
-    $image = $property->images()->firstOrNew([
-        'image_url' => $photo,
-    ]);
+            foreach ($photos as $index => $photo) {
+                $image = $property->images()->firstOrNew([
+                    'image_url' => $photo,
+                ]);
 
-    $image->image_url = $photo;
-    $image->is_primary = ($index === 0);
+                $image->image_url = $photo;
+                $image->is_primary = ($index === 0);
 
-    $image->save();
-}
+                $image->save();
+            }
 
             $savedProperties[] = $property;
         }
 
         $tenant->favoriteProperties()->syncWithoutDetaching([
             $savedProperties[0]->id,
-                        
 
         ]);
     }

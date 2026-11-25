@@ -1,7 +1,7 @@
             <div class="chat">
                 <!-- Conversation list -->
                 <div class="chat-list" id="conversationList">
-                    <div class="chat-list-head"><h2 class="h6 mb-0">Conversations</h2></div>
+                    <div class="chat-list-head"><h2 class="h6 mb-0">{{ __('Conversations') }}</h2></div>
 
                     @forelse ($conversations as $chat)
                         @php($isActive = isset($conversation) && $conversation->is($chat))
@@ -13,23 +13,24 @@
                             </span>
 
                             <span class="meta">
-                                <b>{{ ((int) $chat->tenant_id === (int) auth()->id() ? $chat->agent : $chat->tenant)?->display_name ?? 'Conversation #'.$chat->id }}</b>
+                                <b>{{ ((int) $chat->tenant_id === (int) auth()->id() ? $chat->agent : $chat->tenant)?->display_name ?? __('Conversation #:id', ['id' => $chat->id]) }}</b>
 
                                 @if ($chat->last_message_at)
-                                    <time>{{ \Illuminate\Support\Carbon::parse($chat->last_message_at)->format('d M, g:i A') }}</time>
+                                    <time>{{ \Illuminate\Support\Carbon::parse($chat->last_message_at)->translatedFormat('d M, g:i A') }}</time>
                                 @endif
                             </span>
                             <span class="unread" data-unread-for="{{ $chat->id }}"
-                                aria-label="{{ $chat->unread_count }} unread messages"
+                                aria-label="{{ __(':count unread messages', ['count' => $chat->unread_count]) }}"
                                 @if ($chat->unread_count == 0) hidden @endif>
                                 {{ $chat->unread_count }}
                             </span>
                         </a>
                     @empty
-                        <p class="text-muted px-3 py-2 mb-0">No conversations yet.</p>
+                        <p class="text-muted px-3 py-2 mb-0">{{ __('No conversations yet.') }}</p>
                     @endforelse
                 </div>
 
+        <x-pagination :items="$conversations" />
                 @isset($conversation)
                     <div class="chat-thread" id="chatThread">
                         <div class="chat-head">
@@ -39,11 +40,11 @@
 
                             <div class="flex-grow-1 lh-sm">
                                 <b>
-                                    {{ $tenantName !== '' ? $tenantName : 'Tenant' }}
-                                    <span class="role-tag role-tag--user">{{ ucfirst($partnerRole ?? 'tenant') }}</span>
+                                    {{ $tenantName !== '' ? $tenantName : __('Tenant') }}
+                                    <span class="role-tag role-tag--user">{{ __(\Illuminate\Support\Str::headline($partnerRole ?? 'tenant')) }}</span>
                                 </b>
                             </div>
-                            <button type="button" class="btn btn-link btn-square text-muted" aria-label="Options">
+                            <button type="button" class="btn btn-link btn-square text-muted" aria-label="{{ __('Options') }}">
                                 <i class="bi bi-three-dots-vertical fs-5"></i>
                             </button>
                         </div>
@@ -51,14 +52,15 @@
                         @isset($chatProperty)
                             <div class="chat-context">
                                 <span class="flex-grow-1 text-muted">
-                                    About <b class="text-body">{{ $chatProperty->title }}</b>
+                                    {{ __('About') }} <b class="text-body">{{ $chatProperty->localized('title') }}</b>
 
                                     @if ($chatProperty->price !== null)
-                                        · {{ number_format((float) $chatProperty->price, 2) }} JOD
+                                        · {{ number_format((float) $chatProperty->price, 2) }} {{ __('JOD') }}
                                     @endif
                                 </span>
                             </div>
                         @endisset
+                    <x-pagination :items="$messages" />
 
                         <div class="chat-body" id="chatBody" aria-live="polite">
                             @foreach ($messages as $message)
@@ -82,11 +84,11 @@
                                     </div>
 
                                     <button type="button" class="chat-reply-button" data-reply-button
-                                        aria-label="Reply to message" title="Reply">
+                                        aria-label="{{ __('Reply to message') }}" title="{{ __('Reply') }}">
                                         <i class="bi bi-reply" aria-hidden="true"></i>
                                     </button>
                                     <button type="button" class="chat-reply-button" data-reaction-button
-                                        aria-label="React to message" title="React">
+                                        aria-label="{{ __('React to message') }}" title="{{ __('React') }}">
                                         <i class="bi bi-emoji-smile" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -94,16 +96,19 @@
                         </div>
 
                         <div data-reply-preview class="px-3 py-2 border-top small" hidden>
-                            <span>Replying to: </span>
+                            <span>{{ __('Replying to:') }} </span>
                             <span data-reply-text></span>
                             <button type="button" class="btn btn-sm btn-link" data-cancel-reply>
-                                Cancel
+                                {{ __('Cancel') }}
                             </button>
                         </div>
 
                         <form class="chat-input" id="chatForm" method="post"
                             action="{{ route('conversations.messages.store', ['conversation' => $conversation]) }}"
                             data-chat-form data-conversation-id="{{ $conversation->id }}"
+                            @unless ($messages->onFirstPage())
+                                data-latest-page="{{ $messages->url(1) }}"
+                            @endunless
                             data-current-user-id="{{ $currentUserId }}"
                             data-read-url="{{ route('conversations.read', ['conversation' => $conversation]) }}"
                             data-reaction-url="{{ route('conversations.messages.reaction', [
@@ -114,19 +119,19 @@
                             @csrf
                             <input type="hidden" name="reply_to_id" value="">
 
-                            <label for="chatMessage" class="visually-hidden">Your message</label>
+                            <label for="chatMessage" class="visually-hidden">{{ __('Your message') }}</label>
                             <input type="text" class="form-control" id="chatMessage" name="body"
-                                placeholder="Type your message..." autocomplete="off" required />
+                                placeholder="{{ __('Type your message...') }}" autocomplete="off" required />
 
                             <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                                 <i class="bi bi-send"></i>
-                                <span>Send</span>
+                                <span>{{ __('Send') }}</span>
                             </button>
                         </form>
                     </div>
                 @else
                     <div class="chat-thread p-4 text-muted">
-                        Select a conversation to view its messages.
+                        {{ __('Select a conversation to view its messages.') }}
                     </div>
                 @endisset
             </div>

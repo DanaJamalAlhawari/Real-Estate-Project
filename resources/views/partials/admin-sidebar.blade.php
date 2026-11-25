@@ -1,10 +1,10 @@
-<aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="Admin menu">
+<aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-label="{{ __('Admin menu') }}">
     <div class="offcanvas-header border-bottom">
         <a class="brand" href="{{ route('admin.dashboard') }}"><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span></a>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="{{ __('Close') }}"></button>
     </div>
     <nav class="offcanvas-body">
-        <div class="side-label">Admin</div>
+        <div class="side-label">{{ __('Admin') }}</div>
         @foreach ([
             'admin.dashboard' => ['Dashboard', 'bi-grid-1x2'],
             'admin.verifications' => ['Verifications', 'bi-patch-check'],
@@ -14,7 +14,7 @@
             'admin.account' => ['My account', 'bi-person-badge'],
         ] as $routeName => [$label, $icon])
             <a @class(['side-link', 'active' => request()->routeIs($routeName, $routeName.'.*')]) href="{{ route($routeName) }}">
-                <i class="bi {{ $icon }}"></i><span class="flex-grow-1">{{ $label }}</span>
+                <i class="bi {{ $icon }}"></i><span class="flex-grow-1">{{ __($label) }}</span>
                 @if ($routeName === 'admin.verifications' && isset($pendingVerificationCount))
                     <span class="side-badge">{{ $pendingVerificationCount }}</span>
                 @endif

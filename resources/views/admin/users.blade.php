@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Users')
+@section('title', __('Users'))
 @section('roleStyle', 'admin')
 
 @section('content')
@@ -8,11 +8,11 @@
 <div class="app-shell">
 @include('partials.admin-sidebar')
 <main class="app-main">
-    <h1>Users</h1>
-    <p class="text-muted">Registered customers and agents.</p>
+    <h1>{{ __('Users') }}</h1>
+    <p class="text-muted">{{ __('Registered customers and agents.') }}</p>
 
     <form method="GET" action="{{ route('admin.users') }}" class="mb-3">
-        <label for="q" class="form-label">Search by email</label>
+        <label for="q" class="form-label">{{ __('Search by email') }}</label>
         <div class="input-group">
             <input
                 id="q"
@@ -22,22 +22,22 @@
                 value="{{ request('q') }}"
                 placeholder="name@example.com"
             >
-            <button class="btn btn-primary" type="submit">Search</button>
+            <button class="btn btn-primary" type="submit">{{ __('Search') }}</button>
         </div>
     </form>
 
     @if ($users->isEmpty())
-        <div class="alert alert-info">No customers or agents found.</div>
+        <div class="alert alert-info">{{ __('No customers or agents found.') }}</div>
     @else
         <div class="table-responsive">
             <table class="table table-striped align-middle">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Phone</th>
-                        <th>Joined</th>
+                        <th>{{ __('Name') }}</th>
+                        <th>{{ __('Email') }}</th>
+                        <th>{{ __('Role') }}</th>
+                        <th>{{ __('Phone') }}</th>
+                        <th>{{ __('Joined') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -50,14 +50,14 @@
                         @endphp
                         <tr>
                             <td>
-                                {{ trim(($profile->first_name ?? '') . ' ' . ($profile->last_name ?? '')) ?: 'Name not provided' }}
+                                {{ trim(($profile->first_name ?? '') . ' ' . ($profile->last_name ?? '')) ?: __('Name not provided') }}
                             </td>
                             <td>{{ $user->email }}</td>
-                            <td>{{ $user->role === 'agent' ? 'Agent' : 'Customer' }}</td>
+                            <td>{{ $user->role === 'agent' ? __('Agent') : __('Customer') }}</td>
                             <td>{{ $profile->phone ?? '—' }}</td>
                             <td>{{ $user->created_at?->format('Y-m-d') ?? '—' }}</td>
                             <td>
-                                <a href="{{ route('admin.users.show', $user->id) }}">Details</a>
+                                <a href="{{ route('admin.users.show', $user->id) }}">{{ __('Details') }}</a>
                             </td>
                         </tr>
                     @endforeach
@@ -65,7 +65,7 @@
             </table>
         </div>
 
-        {{ $users->withQueryString()->links() }}
+        <x-pagination :items="$users" />
     @endif
 </main>
 </div>

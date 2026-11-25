@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Forgot password")
+@section('title', __('Makan — Forgot password'))
 
 @section('content')
     <main class="auth-wrap">
@@ -9,10 +9,10 @@
           ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
         ></a>
         <div>
-          <h2>It happens to everyone</h2>
-          <p class="mb-0">We’ll email you a code so you can choose a new password.</p>
+          <h2>{{ __('It happens to everyone') }}</h2>
+          <p class="mb-0">{{ __('We’ll email you a code so you can choose a new password.') }}</p>
         </div>
-        <small class="opacity-75">Verified homes across Jordan</small>
+        <small class="opacity-75">{{ __('Verified homes across Jordan') }}</small>
       </aside>
 
       <section class="auth-main">
@@ -28,15 +28,15 @@
           id="forgotForm"
          method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('auth.reset-password') }}">
               @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+              <p class="small text-muted" role="note">{{ __('Demo form. Use sample details only.') }}</p>
           <span class="feature-icon"><i class="bi bi-key"></i></span>
-          <h1>Forgot your password?</h1>
+          <h1>{{ __('Forgot your password?') }}</h1>
           <p class="text-muted mb-4">
-            Enter the email on your account and we’ll send you a 6-digit code.
+            {{ __('Enter the email on your account and we’ll send you a 6-digit code.') }}
           </p>
 
           <div class="mb-4">
-            <label class="form-label" for="email">Email</label>
+            <label class="form-label" for="email">{{ __('Email') }}</label>
             <div class="input-icon">
               <i class="bi bi-envelope"></i>
               <input
@@ -52,12 +52,12 @@
           </div>
 
           <button type="submit" class="btn btn-accent btn-lg w-100">
-            Send code
+            {{ __('Send code') }}
           </button>
 
           <p class="text-center small mt-4 mb-0">
             <a href="{{ route('auth.login') }}" class="fw-semibold"
-              ><i class="bi bi-arrow-left"></i> Back to log in</a
+              ><i class="bi bi-arrow-left"></i> {{ __('Back to log in') }}</a
             >
           </p>
         </form>

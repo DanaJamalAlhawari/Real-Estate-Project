@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Makan — '.$property->title)
+@section('title', __('Makan — :property', ['property' => $property->localized('title')]))
 @section('roleStyle', 'seeker')
 @section('bodyAttributes') data-role="seeker" data-page="property"@endsection
 @section('content')
@@ -7,60 +7,85 @@
 <x-seeker-navbar />
 
 <main class="app-page container">
-    <a href="{{ route('seeker.search') }}" class="back-link"><i class="bi bi-arrow-left"></i>Back to results</a>
+    <a href="{{ route('seeker.search') }}" class="back-link"><i class="bi bi-arrow-left"></i>{{ __('Back to results') }}</a>
 
-    <div class="gallery mt-2 mb-4" aria-label="Property photos">
+    <div class="gallery mt-2 mb-4" aria-label="{{ __('Property photos') }}">
         @forelse ($property->images as $image)
             <a @class(['g-main' => $loop->first]) href="{{ $image->public_url }}" target="_blank" rel="noopener">
-                <img src="{{ $image->public_url }}" alt="{{ $property->title }} — photo {{ $loop->iteration }}"
+                <img src="{{ $image->public_url }}" alt="{{ __(':property — photo :number', ['property' => $property->localized('title'), 'number' => $loop->iteration]) }}"
                      class="w-100 h-100 object-fit-cover" @unless($loop->first) loading="lazy" @endunless>
             </a>
         @empty
-            <div class="g-main ph"><i class="bi bi-house-door"></i> No property photos yet.</div>
+            <div class="g-main ph"><i class="bi bi-house-door"></i> {{ __('No property photos yet.') }}</div>
         @endforelse
     </div>
 
     <div class="row g-4 align-items-start">
         <div class="col-lg-8 d-flex flex-column gap-3">
             <div class="prop-head">
-                <h1>{{ $property->title }}</h1>
-                <p class="text-muted">{{ implode(', ', array_filter([$property->area, $property->city])) }}</p>
+                <h1>{{ $property->localized('title') }}</h1>
+                <p class="text-muted">{{ implode(app()->isLocale('ar') ? '، ' : ', ', array_filter([$property->localized('area'), $property->localized('city')])) }}</p>
                 <div class="facts">
-                    <span class="fact">{{ \App\Models\Property::CATEGORIES[$property->category] ?? $property->category }}</span>
-                    <span class="fact">{{ $property->bedrooms }} bedrooms</span>
-                    <span class="fact">{{ $property->bathrooms }} bathrooms</span>
-                    <span class="status status--info"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                    <span class="fact">{{ __(\App\Models\Property::CATEGORIES[$property->category] ?? $property->category) }}</span>
+                    <span class="fact">{{ $property->bedrooms }} {{ __('bedrooms') }}</span>
+                    <span class="fact">{{ $property->bathrooms }} {{ __('bathrooms') }}</span>
+                    <span class="status status--info"><i class="bi bi-patch-check-fill"></i> {{ __('Verified') }}</span>
                 </div>
             </div>
             <section class="panel">
-                <h2 class="h5">About the home</h2>
-                <p>{{ $property->description }}</p>
+                <h2 class="h5">{{ __('About the home') }}</h2>
+                <p>{{ $property->localized('description') }}</p>
                 <ul class="amenities list-unstyled mb-0">
                     @forelse ($property->services as $service)
-                        <li class="amenity">{{ $service->name }}</li>
+                        <li class="amenity">{{ __($service->name) }}</li>
                     @empty
-                        <li class="text-muted">No amenities listed.</li>
+                        <li class="text-muted">{{ __('No amenities listed.') }}</li>
                     @endforelse
                 </ul>
-                <a class="btn btn-outline-primary mt-3" href="{{ route('seeker.reviews.index', $property) }}">Reviews</a>
+                <a class="btn btn-outline-primary mt-3" href="{{ route('seeker.reviews.index', $property) }}">{{ __('Reviews') }}</a>
             </section>
             <section class="panel">
-                <h2 class="h5">Property owner</h2>
-                <p>{{ $property->agent?->display_name ?? 'Name not listed' }}</p>
+                <h2 class="h5">{{ __('Location') }}</h2>
+                <p>{{ $property->localized('address') }}</p>
+                @if ($property->latitude !== null && $property->longitude !== null)
+                    @php
+                        $latitude = (float) $property->latitude;
+                        $longitude = (float) $property->longitude;
+                        $mapQuery = http_build_query([
+                            'bbox' => implode(',', [$longitude - 0.006, $latitude - 0.004, $longitude + 0.006, $latitude + 0.004]),
+                            'layer' => 'mapnik',
+                            'marker' => "$latitude,$longitude",
+                        ]);
+                    @endphp
+                    @if ($property->location_is_approximate)
+                        <p class="small text-muted">{{ __('Approximate location') }}</p>
+                    @endif
+                    <iframe class="property-detail-map" title="{{ __('Property location map') }}"
+                            src="https://www.openstreetmap.org/export/embed.html?{{ $mapQuery }}"
+                            loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                    <a class="small" href="https://www.openstreetmap.org/?mlat={{ $latitude }}&amp;mlon={{ $longitude }}#map=16/{{ $latitude }}/{{ $longitude }}"
+                       target="_blank" rel="noopener">{{ __('Open map') }}</a>
+                @else
+                    <p class="small text-muted mb-0">{{ __('A map pin is not available for this address.') }}</p>
+                @endif
+            </section>
+            <section class="panel">
+                <h2 class="h5">{{ __('Property owner') }}</h2>
+                <p>{{ $property->agent?->display_name ?? __('Name not listed') }}</p>
                 @if ($property->agent?->agentProfile?->agency_name)
                     <p class="text-muted">{{ $property->agent->agentProfile->agency_name }}</p>
                 @endif
                 <form method="post" action="{{ route('seeker.property.conversation', $property) }}">
                     @csrf
-                    <button class="btn btn-outline-primary" type="submit">Message owner</button>
+                    <button class="btn btn-outline-primary" type="submit">{{ __('Message owner') }}</button>
                 </form>
             </section>
         </div>
 
         <div class="col-lg-4">
-            <aside class="panel sticky-box" aria-label="Booking">
+            <aside class="panel sticky-box" aria-label="{{ __('Booking') }}">
                 @if ($property->price !== null)
-                    <p><b class="fs-3">{{ number_format((float) $property->price, 2) }} JOD</b> per month</p>
+                    <p><b class="fs-3">{{ number_format((float) $property->price, 2) }} {{ __('JOD') }}</b> {{ __('per month') }}</p>
                     @if ($errors->any())
                         <p class="text-danger" role="alert">{{ $errors->first() }}</p>
                     @endif
@@ -68,41 +93,41 @@
                           data-booking-calendar data-reserved="{{ $reservedDates->toJson() }}">
                         @csrf
                         <div class="mb-3">
-                            <label for="moveIn" class="form-label">Start date</label>
+                            <label for="moveIn" class="form-label">{{ __('Start date') }}</label>
                             <input type="date" id="moveIn" name="moveIn" class="form-control"
                                    min="{{ today()->toDateString() }}" value="{{ old('moveIn') }}" required>
                         </div>
                         <div class="mb-3">
-                            <label for="moveOut" class="form-label">End date (checkout)</label>
+                            <label for="moveOut" class="form-label">{{ __('End date (checkout)') }}</label>
                             <input type="date" id="moveOut" name="moveOut" class="form-control"
                                    min="{{ today()->addDay()->toDateString() }}" value="{{ old('moveOut') }}" required>
                         </div>
                         <div class="mb-3" data-calendar hidden>
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-previous aria-label="Previous month">‹</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-previous aria-label="{{ __('Previous month') }}">‹</button>
                                 <strong class="small" data-calendar-month aria-live="polite"></strong>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-next aria-label="Next month">›</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-calendar-next aria-label="{{ __('Next month') }}">›</button>
                             </div>
                             <div class="d-grid gap-1 text-center" style="grid-template-columns: repeat(7, minmax(0, 1fr))" data-calendar-days></div>
                             <p class="small text-muted mt-2 mb-0" data-calendar-help aria-live="polite"></p>
                         </div>
-                        <button type="submit" class="btn btn-accent btn-lg w-100">Request booking</button>
+                        <button type="submit" class="btn btn-accent btn-lg w-100">{{ __('Request booking') }}</button>
                     </form>
                 @else
-                    <p>Contact the owner for a price before booking.</p>
+                    <p>{{ __('Contact the owner for a price before booking.') }}</p>
                 @endif
                 <div class="d-flex gap-2 mt-3">
                     <form action="{{ route($saved ? 'seeker.favorites.destroy' : 'seeker.favorites.store', $property) }}" method="post">
                         @csrf
                         @if ($saved) @method('DELETE') @endif
-                        <button class="btn btn-outline-secondary" type="submit">{{ $saved ? 'Unsave' : 'Save' }}</button>
+                        <button class="btn btn-outline-secondary" type="submit">{{ $saved ? 'Unsave' : __('Save') }}</button>
                     </form>
                     <button type="button" id="sharePropertyBtn" class="btn btn-outline-secondary"
                             data-share-url="{{ route('seeker.property.details', ['property_id' => $property->id]) }}"
-                            data-share-title="{{ $property->title }}">Share</button>
+                            data-share-title="{{ $property->localized('title') }}">{{ __('Share') }}</button>
                 </div>
                 <p id="sharePropertyStatus" class="small mt-2" aria-live="polite"></p>
-                <input id="sharePropertyLink" class="form-control" aria-label="Property link" readonly hidden>
+                <input id="sharePropertyLink" class="form-control" aria-label="{{ __('Property link') }}" readonly hidden>
             </aside>
         </div>
     </div>
@@ -133,13 +158,13 @@
 
                     try {
                         await navigator.clipboard.writeText(url);
-                        status.textContent = "Link copied.";
+                        status.textContent = window.makanTranslate("Link copied.");
                     } catch {
                         link.value = url;
                         link.hidden = false;
                         link.focus();
                         link.select();
-                        status.textContent = "Copy the property link below.";
+                        status.textContent = window.makanTranslate("Copy the property link below.");
                     }
                 });
             })();

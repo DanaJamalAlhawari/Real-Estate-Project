@@ -15,14 +15,19 @@ class BookingRequestController extends Controller
 {
     public function index(Request $request)
     {
-        $bookings = $this->forAgent($request)->with(['property', 'tenant.tenantProfile'])->latest()->get();
+        $filters = $request->validate(['status' => 'nullable|in:pending,confirmed,cancelled']);
+        $query = $this->forAgent($request);
+        $pendingCount = (clone $query)->where('status', 'pending')->count();
+        $bookings = $query->with(['property', 'tenant.tenantProfile'])
+            ->when(isset($filters['status']), fn ($query) => $query->where('status', $filters['status']))
+            ->latest()->orderByDesc('id')->paginate(config('app.pagination_per_page'))->withQueryString();
 
-        return view('owner.requests', compact('bookings'));
+        return view('owner.requests', compact('bookings', 'pendingCount'));
     }
 
     public function tenantBookings(Request $request)
     {
-        $bookings = $request->user()->bookings()->with(['property', 'payments'])->latest()->get();
+        $bookings = $request->user()->bookings()->with(['property', 'payments'])->latest()->orderByDesc('id')->paginate(config('app.pagination_per_page'))->withQueryString();
 
         return view('seeker.bookings', compact('bookings'));
     }
@@ -39,10 +44,10 @@ class BookingRequestController extends Controller
 
         $property = DB::transaction(function () use ($request, $property, $start, $end) {
             $property = Property::discoverable()->lockForUpdate()->findOrFail($property->id);
-            abort_if($property->price === null, 422, 'This listing has no monthly price.');
+            abort_if($property->price === null, 422, __('This listing has no monthly price.'));
 
             if ($property->bookings()->reserved()->overlapping($start->toDateString(), $end->toDateString())->exists()) {
-                throw ValidationException::withMessages(['moveIn' => 'These dates overlap an existing booking.']);
+                throw ValidationException::withMessages(['moveIn' => __('These dates overlap an existing booking.')]);
             }
 
             $total = 0;
@@ -53,7 +58,7 @@ class BookingRequestController extends Controller
             }
 
             if ($total > 9999999999.99) {
-                throw ValidationException::withMessages(['moveOut' => 'Choose a shorter stay.']);
+                throw ValidationException::withMessages(['moveOut' => __('Choose a shorter stay.')]);
             }
 
             $booking = new Booking;
@@ -75,12 +80,12 @@ class BookingRequestController extends Controller
             route('owner.requests', [], false),
         ));
 
-        return redirect()->route('seeker.bookings')->with('success', 'Booking request sent to the property owner.');
+        return redirect()->route('seeker.bookings')->with('success', __('Booking request sent to the property owner.'));
     }
 
     public function accept(Request $request, Booking $booking)
     {
-        return $this->decide($request, $booking, 'confirmed', 'Booking accepted successfully.');
+        return $this->decide($request, $booking, 'confirmed', __('Booking accepted successfully.'));
     }
 
     public function cancel(Request $request, Booking $booking): RedirectResponse
@@ -99,7 +104,7 @@ class BookingRequestController extends Controller
         });
 
         if (! $cancelled) {
-            return to_route('seeker.bookings')->with('error', 'Only unpaid booking requests can be cancelled online.');
+            return to_route('seeker.bookings')->with('error', __('Only unpaid booking requests can be cancelled online.'));
         }
 
         rescue(fn () => BookingActivity::dispatch(
@@ -108,12 +113,12 @@ class BookingRequestController extends Controller
             route('owner.requests', [], false),
         ));
 
-        return to_route('seeker.bookings')->with('success', 'Booking cancelled.');
+        return to_route('seeker.bookings')->with('success', __('Booking cancelled.'));
     }
 
     public function reject(Request $request, Booking $booking)
     {
-        return $this->decide($request, $booking, 'cancelled', 'Booking rejected successfully.');
+        return $this->decide($request, $booking, 'cancelled', __('Booking rejected successfully.'));
     }
 
     private function decide(Request $request, Booking $booking, string $status, string $message)
@@ -123,16 +128,16 @@ class BookingRequestController extends Controller
             $booking = $property->bookings()->lockForUpdate()->findOrFail($booking->id);
 
             if ($booking->status !== 'pending') {
-                return 'This booking is no longer pending.';
+                return __('This booking is no longer pending.');
             }
             if ($status === 'confirmed') {
                 if ($property->verification_status !== 'verified') {
-                    return 'This property needs admin approval before accepting bookings.';
+                    return __('This property needs admin approval before accepting bookings.');
                 }
                 if ($property->bookings()->reserved()->overlapping(
                     $booking->start_date->toDateString(), $booking->end_date->toDateString()
                 )->exists()) {
-                    return 'These dates overlap an existing booking.';
+                    return __('These dates overlap an existing booking.');
                 }
                 $booking->approved_commission_rate = $property->approved_commission_rate
                     ?? config('commissions.category_rates.'.$property->category);

@@ -10,12 +10,11 @@
     const form = widget.querySelector("[data-assistant-form]");
     const input = form.elements.message;
     const send = form.querySelector("button[type=submit]");
-    let history = [];
 
     function setOpen(open) {
         panel.hidden = !open;
         launcher.setAttribute("aria-expanded", String(open));
-        launcher.setAttribute("aria-label", open ? "Close Makan Assistant" : "Open Makan Assistant");
+        launcher.setAttribute("aria-label", open ? window.makanTranslate("Close Makan Assistant") : window.makanTranslate("Open Makan Assistant"));
         const focusTarget = open ? input : launcher;
         focusTarget.focus({ preventScroll: true });
         if (open) log.scrollTop = log.scrollHeight;
@@ -47,7 +46,7 @@
         input.readOnly = true;
         send.disabled = true;
         status.hidden = false;
-        status.textContent = "Makan Assistant is replying…";
+        status.textContent = window.makanTranslate("Makan Assistant is replying…");
 
         try {
             const response = await fetch(form.action, {
@@ -57,28 +56,26 @@
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": form.elements._token.value,
                 },
-                body: JSON.stringify({ message, history }),
+                body: JSON.stringify({ message }),
             });
             const data = await response.json();
             if (!response.ok || typeof data.reply !== "string") {
                 status.textContent = response.status === 429
-                    ? "Too many messages. Wait a minute and try again."
+                    ? window.makanTranslate("Too many messages. Wait a minute and try again.")
                     : response.status === 401 || response.status === 419
-                        ? "Your session expired. Refresh the page and sign in again."
-                        : data.message || "The assistant is temporarily unavailable.";
+                        ? window.makanTranslate("Your session expired. Refresh the page and sign in again.")
+                        : data.message || window.makanTranslate("The assistant is temporarily unavailable.");
                 userMessage.remove();
                 input.value = message;
                 return;
             }
 
-            history = [...history, { role: "user", content: message },
-                { role: "assistant", content: data.reply.slice(0, 3500) }].slice(-8);
             showMessage(data.reply);
             status.hidden = true;
         } catch {
             userMessage.remove();
             input.value = message;
-            status.textContent = "The assistant could not connect. Try again.";
+            status.textContent = window.makanTranslate("The assistant could not connect. Try again.");
         } finally {
             input.readOnly = false;
             send.disabled = false;

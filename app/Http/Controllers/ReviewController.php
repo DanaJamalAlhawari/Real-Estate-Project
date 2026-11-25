@@ -7,123 +7,98 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
-
-
-
-
 class ReviewController extends Controller
 {
+    public function index(Property $property)
+    {
 
-public function index(Property $property)
-{
+        $reviews = $property->reviews()->with('tenant.tenantProfile')->latest('id')->paginate(config('app.pagination_per_page'))->withQueryString();
+        $averageRating = $property->reviews()->avg('rating');
 
+        $myReview = $property->reviews()
+            ->where('tenant_id', Auth::id())
+            ->first();
 
-//    another way :     $reviews = Review::where('property_id', $property->id)->get();
-    $reviews = $property->reviews()->get();
-
-    $myReview = $property->reviews()
-        ->where('tenant_id', Auth::id())
-        ->first();
-
-    return view('seeker.reviews', [
-        'property' => $property,
-        'reviews' => $reviews,
-        'myReview' => $myReview,
-    ]);
-}
-
-
-public function store(Request $request, Property $property)
-{
-    $request->validate([
-        'rating' => 'required|integer|min:1|max:5',
-        'comment' => 'nullable|string|max:2000',
-    ]);
-
-     if ($property->reviews()
-        ->where('tenant_id', $request->user()->id)
-        ->exists()) {
-        return back()->with(
-            'reviewError',
-            'You have already reviewed this property.'
-        );
+        return view('seeker.reviews', [
+            'property' => $property,
+            'reviews' => $reviews,
+            'averageRating' => $averageRating,
+            'myReview' => $myReview,
+        ]);
     }
 
-    $review = new Review();
+    public function store(Request $request, Property $property)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+        ]);
 
-    $review->property_id = $property->id;
-    $review->tenant_id = $request->user()->id;
-    $review->rating = $request->input('rating');
-    $review->comment = $request->input('comment');
+        if ($property->reviews()
+            ->where('tenant_id', $request->user()->id)
+            ->exists()) {
+            return back()->with(
+                'reviewError',
+                __('You have already reviewed this property.')
+            );
+        }
 
+        $review = new Review;
 
-    $review->save();
+        $review->property_id = $property->id;
+        $review->tenant_id = $request->user()->id;
+        $review->rating = $request->input('rating');
+        $review->comment = $request->input('comment');
 
-    
+        $review->save();
 
-    return back();
-}
-
-
-public function edit(Request $request, Review $review)
-{
-    if ($review->tenant_id != $request->user()->id) {
-        abort(403);
+        return back();
     }
 
-    return view('seeker.edit-review', [
-        'review' => $review,
-    ]);
-}
+    public function edit(Request $request, Review $review)
+    {
+        if ($review->tenant_id != $request->user()->id) {
+            abort(403);
+        }
 
-
-
-
-
-public function update(Request $request, Review $review)
-{
-    if ($review->tenant_id != $request->user()->id) {
-        abort(403);
+        return view('seeker.edit-review', [
+            'review' => $review,
+        ]);
     }
 
-    $request->validate([
-        'rating' => 'required|integer|min:1|max:5',
-        'comment' => 'nullable|string|max:2000',
-    ]);
+    public function update(Request $request, Review $review)
+    {
+        if ($review->tenant_id != $request->user()->id) {
+            abort(403);
+        }
 
-    $review->rating = $request->input('rating');
-    $review->comment = $request->input('comment');
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+        ]);
 
-    $review->save();
+        $review->rating = $request->input('rating');
+        $review->comment = $request->input('comment');
 
-    return redirect()->route('seeker.reviews.index', [
-        'property' => $review->property_id,
-    ]);
-}
-public function destroy(Request $request, Review $review)
-{
-    if ($review->tenant_id != $request->user()->id) {
-        abort(403);
+        $review->save();
+
+        return redirect()->route('seeker.reviews.index', [
+            'property' => $review->property_id,
+        ]);
     }
 
-    $propertyId = $review->property_id;
+    public function destroy(Request $request, Review $review)
+    {
+        if ($review->tenant_id != $request->user()->id) {
+            abort(403);
+        }
 
-    $review->delete();
+        $propertyId = $review->property_id;
 
-    return redirect()->route('seeker.reviews.index', [
-        'property' => $propertyId,
-    ]);
-}
+        $review->delete();
 
-
-
-
-
-
-
-
-
-
-
+        return redirect()->route('seeker.reviews.index', [
+            'property' => $propertyId,
+        ]);
+    }
 }

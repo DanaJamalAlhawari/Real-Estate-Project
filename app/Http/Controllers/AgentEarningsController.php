@@ -17,7 +17,7 @@ class AgentEarningsController extends Controller
                 $query->where('status', 'successful');
             })
             ->orderByDesc('created_at')
-            ->paginate(15);
+            ->orderByDesc('id')->paginate(config('app.pagination_per_page'))->withQueryString();
 
         $totalEarnings = Commission::where('agent_id', $request->user()->id)
             ->whereHas('payment', function ($query) {

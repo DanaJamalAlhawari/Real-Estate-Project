@@ -52,7 +52,7 @@ class TenantProfileController extends Controller
         $data = $request->validate($rules);
         DB::transaction(function () use ($data, $user) {
             $user->email = $data['email'];
-            if (!empty($data['password'])) {
+            if (! empty($data['password'])) {
                 $user->password = $data['password'];
             }
             $user->save();
@@ -70,6 +70,6 @@ class TenantProfileController extends Controller
             }
         });
 
-        return back()->with('success', 'Profile updated successfully.');
+        return back()->with('success', __('Profile updated successfully.'));
     }
 }

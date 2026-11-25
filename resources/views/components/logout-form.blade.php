@@ -3,6 +3,6 @@
 <form method="POST" action="{{ route('logout') }}">
     @csrf
     <button type="submit" class="{{ $buttonClass }}">
-        Log out
+        {{ __('Log out') }}
     </button>
 </form>

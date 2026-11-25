@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Verify your email")
+@section('title', __('Makan — Verify your email'))
 
 @section('content')
     <main class="auth-wrap">
@@ -9,13 +9,12 @@
           ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
         ></a>
         <div>
-          <h2>One last step</h2>
+          <h2>{{ __('One last step') }}</h2>
           <p class="mb-0">
-            We check every email so owners and home seekers know they're
-            talking to real people.
+            {{ __('We check every email so owners and home seekers know they\'re talking to real people.') }}
           </p>
         </div>
-        <small class="opacity-75">Verified homes across Jordan</small>
+        <small class="opacity-75">{{ __('Verified homes across Jordan') }}</small>
       </aside>
 
       <section class="auth-main">
@@ -32,17 +31,16 @@
           id="verifyForm"
          method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('auth.onboarding') }}">
               @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+              <p class="small text-muted" role="note">{{ __('Demo form. Use sample details only.') }}</p>
           <span class="feature-icon"><i class="bi bi-envelope-check"></i></span>
-          <h1>Check your email</h1>
+          <h1>{{ __('Check your email') }}</h1>
           <p class="text-muted mb-4">
-            We sent a 6-digit code to
-            <b class="text-body" id="verifyEmail">name@example.com</b>. Enter it
-            below to verify your account.
+            {{ __('We sent a 6-digit code to') }}
+            <b class="text-body" id="verifyEmail">{{ __('name') }}@example.com</b>{{ __('. Enter it below to verify your account.') }}
           </p>
 
           <div class="mb-2">
-            <label class="form-label" for="otp">Verification code</label>
+            <label class="form-label" for="otp">{{ __('Verification code') }}</label>
             <input
               type="text"
               class="form-control form-control-lg otp-input"
@@ -58,27 +56,27 @@
             />
           </div>
           <p class="small text-muted mb-4" id="otpHint">
-            The code expires in 10 minutes.
+            {{ __('The code expires in 10 minutes.') }}
           </p>
 
           <button type="submit" class="btn btn-accent btn-lg w-100">
-            Verify email
+            {{ __('Verify email') }}
           </button>
 
           <div
             class="d-flex flex-wrap justify-content-between gap-2 small mt-4"
           >
             <span>
-              <span class="text-muted">Didn't get it?</span>
+              <span class="text-muted">{{ __('Didn\'t get it?') }}</span>
               <button
                 type="button"
                 class="btn btn-link btn-sm p-0 fw-semibold align-baseline"
                 id="resendCode"
               >
-                Resend code
+                {{ __('Resend code') }}
               </button>
             </span>
-            <a href="{{ route('auth.register') }}" class="fw-semibold">Change email</a>
+            <a href="{{ route('auth.register') }}" class="fw-semibold">{{ __('Change email') }}</a>
           </div>
         </form>
       </section>

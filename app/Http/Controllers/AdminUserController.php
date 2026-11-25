@@ -14,10 +14,10 @@ class AdminUserController extends Controller
         $users = RealEstateUser::with(['agentProfile', 'tenantProfile'])
             ->whereIn('role', ['tenant', 'agent'])
             ->when($request->filled('q'), function ($query) use ($request) {
-                $query->where('email', 'like', '%' . $request->q . '%');
+                $query->where('email', 'like', '%'.$request->q.'%');
             })
             ->orderByDesc('created_at')
-            ->paginate(15);
+            ->orderByDesc('id')->paginate(config('app.pagination_per_page'))->withQueryString();
 
         return view('admin.users', ['users' => $users]);
     }

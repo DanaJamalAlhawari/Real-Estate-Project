@@ -77,7 +77,7 @@ class AuthController extends Controller
 
         if (! Auth::attempt($credentials)) {
             return back()
-                ->withErrors(['email' => 'Email or password are wrong'])
+                ->withErrors(['email' => __('Email or password are wrong')])
                 ->onlyInput('email');
         }
 
@@ -89,9 +89,14 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $locale = $request->session()->get('locale');
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($locale !== null) {
+            $request->session()->put('locale', $locale);
+        }
 
         return redirect()->route('auth.login');
     }

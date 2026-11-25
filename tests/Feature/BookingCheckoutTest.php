@@ -112,6 +112,9 @@ class BookingCheckoutTest extends TestCase
         $this->get($checkout)->assertSee('Payment recorded successfully')
             ->assertSee('20.15 JOD')->assertSee('289.85 JOD')->assertDontSee('name="card_number"', false);
         $this->actingAs($agent)->get(route('owner.earnings'))->assertOk()->assertSee('289.85');
+        $this->actingAs(RealEstateUser::where('role', 'admin')->firstOrFail())
+            ->get(route('admin.dashboard'))->assertOk()
+            ->assertViewHas('monthlyCommissionRevenue', fn (array $months) => (float) $months[5]['amount'] === 20.15);
     }
 
     public function test_reserved_periods_block_overlapping_requests_and_acceptance_but_allow_checkout_day(): void
@@ -200,16 +203,24 @@ class BookingCheckoutTest extends TestCase
 
         $url = rtrim(config('services.ollama.url'), '/').'/api/chat';
         Http::preventStrayRequests();
-        Http::fake([$url => Http::response(['message' => ['content' => 'Your studio request is pending.']])]);
+        Http::fake([$url => Http::sequence()
+            ->push(['message' => ['content' => '{"intent":"bookings","reply":"Untrusted model text"}']])
+            ->push(['message' => ['content' => '{"intent":"listings","search":"Irbid"}']])
+            ->push(['error' => 'model not found'], 404)]);
 
         $this->postJson(route('assistant.chat'), ['message' => 'How is my booking?'])
-            ->assertOk()->assertExactJson(['reply' => 'Your studio request is pending.']);
+            ->assertOk()->assertExactJson(['reply' => 'Visible studio — Pending (2027-02-05 to 2027-02-06)']);
+        $this->postJson(route('assistant.chat'), ['message' => 'Find listings in Irbid'])
+            ->assertOk()->assertSee('Visible studio')->assertDontSee('Private booking title');
+        $this->postJson(route('assistant.chat'), ['message' => 'Find listings in Irbid'])
+            ->assertServiceUnavailable()
+            ->assertJsonFragment(['message' => 'Ollama could not find '.config('services.ollama.model').'. Install it with ollama pull '.config('services.ollama.model').' and check OLLAMA_MODEL.']);
         Http::assertSent(function ($request) use ($url) {
-            $context = $request['messages'][0]['content'];
-
             return $request->url() === $url && $request['model'] === config('services.ollama.model')
-                && str_contains($context, 'Irbid') && str_contains($context, 'Visible studio')
-                && ! str_contains($context, 'Hidden city') && ! str_contains($context, 'Private booking title');
+                && $request['format'] === 'json'
+                && $request['messages'][1]['content'] === 'How is my booking?'
+                && ! str_contains($request->body(), 'Visible studio')
+                && ! str_contains($request->body(), 'Private booking title');
         });
     }
 

@@ -73,7 +73,7 @@ if (chatForm) {
         replyButton.type = "button";
         replyButton.className = "chat-reply-button";
         replyButton.setAttribute("data-reply-button", "");
-        replyButton.setAttribute("aria-label", "Reply to message");
+        replyButton.setAttribute("aria-label", window.makanTranslate("Reply to message"));
         replyButton.title = "Reply";
 
         const replyIcon = document.createElement("i");
@@ -89,7 +89,7 @@ if (chatForm) {
         reactionButton.type = "button";
         reactionButton.className = "chat-reply-button";
         reactionButton.setAttribute("data-reaction-button", "");
-        reactionButton.setAttribute("aria-label", "React to message");
+        reactionButton.setAttribute("aria-label", window.makanTranslate("React to message"));
         reactionButton.title = "React";
 
         const reactionIcon = document.createElement("i");
@@ -104,7 +104,7 @@ if (chatForm) {
     }
     const reactionPicker = document.createElement("dialog");
     reactionPicker.className = "chat-reaction-picker";
-    reactionPicker.setAttribute("aria-label", "Choose a reaction");
+    reactionPicker.setAttribute("aria-label", window.makanTranslate("Choose a reaction"));
 
     reactionPicker.innerHTML = `
     <form method="dialog" class="d-flex flex-wrap gap-1">
@@ -222,7 +222,7 @@ if (chatForm) {
                 const error = await response.json().catch(() => ({}));
                 throw new Error(
                     error.errors?.emoji?.[0] ??
-                        `Could not save reaction (${response.status}).`,
+                        window.makanTranslate("Could not save the reaction."),
                 );
             }
 
@@ -233,7 +233,7 @@ if (chatForm) {
         }
     });
 
-    const conversationId = chatForm.dataset.conversationId;
+    const { conversationId, latestPage } = chatForm.dataset;
     window.Echo.private(`conversations.${conversationId}`).listen(
         "MessageReactionChanged",
         updateReaction,
@@ -242,6 +242,7 @@ if (chatForm) {
     window.Echo.private(`conversations.${conversationId}`).listen(
         "MessageSent",
         async (message) => {
+            if (latestPage) return;
             appendMessage(message);
 
             const isMine =
@@ -293,8 +294,13 @@ if (chatForm) {
                 throw new Error(
                     error.errors?.body?.[0] ??
                         error.errors?.reply_to_id?.[0] ??
-                        "Could not send the message.",
+                        window.makanTranslate("Could not send the message."),
                 );
+            }
+
+            if (latestPage) {
+                window.location.assign(latestPage);
+                return;
             }
 
             const message = await response.json();

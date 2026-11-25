@@ -20,7 +20,7 @@
                 type="submit"
                 class="fav-btn {{ $saved ? 'is-on' : '' }}"
                 style="position:absolute; top:8px; inset-inline-end:8px; z-index:2;"
-                aria-label="{{ $saved ? 'Remove from favorites' : 'Add to favorites' }}"
+                aria-label="{{ $saved ? __('Remove from favorites') : __('Add to favorites') }}"
             >
                 <i class="{{ $saved ? 'bi bi-heart-fill' : 'bi bi-heart' }}"></i>
             </button>
@@ -28,12 +28,15 @@
         @endif
 
         <div class="prop-media">
-            @php($primaryImage = $property->images->firstWhere('is_primary', true) ?? $property->images->first())
+            @php
+                $cardImages = $property->images->filter(fn ($image) => ! $image->isDemoDefaultImage());
+                $primaryImage = $cardImages->firstWhere('is_primary', true) ?? $cardImages->first();
+            @endphp
 
             @if ($primaryImage)
                 <img
                     src="{{ $primaryImage->public_url }}"
-                    alt="{{ $property->title }}"
+                    alt="{{ $property->localized('title') }}"
                     class="w-100 h-100"
                     style="object-fit:cover;"
                 >
@@ -45,7 +48,7 @@
 
             @if ($property->verification_status === 'verified')
                 <span class="badge-verified">
-                    <i class="bi bi-patch-check-fill"></i>Verified
+                    <i class="bi bi-patch-check-fill"></i>{{ __('Verified') }}
                 </span>
             @endif
         </div>
@@ -56,7 +59,7 @@
                     href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}"
                     class="prop-title"
                 >
-                    {{ $property->title }}
+                    {{ $property->localized('title') }}
                 </a>
 
                 <a
@@ -68,7 +71,7 @@
                         {{ number_format($property->reviews_avg_rating, 1) }}
                         ({{ $property->reviews_count }})
                     @else
-                        No reviews
+                        {{ __('No reviews') }}
                     @endif
                 </a>
             </div>
@@ -76,15 +79,15 @@
             <div class="prop-meta">
                 <span>
                     <i class="bi bi-geo-alt"></i>
-                    {{ $property->area }}, {{ $property->city }}
+                    {{ implode(app()->isLocale('ar') ? '، ' : ', ', array_filter([$property->localized('area'), $property->localized('city')])) }}
                 </span>
                 <span>
                     <i class="bi bi-house-door"></i>
-                    {{ $property->bedrooms }} bedrooms
+                    {{ $property->bedrooms }} {{ __('bedrooms') }}
                 </span>
                 <span>
                     <i class="bi bi-droplet"></i>
-                    {{ $property->bathrooms }} bathrooms
+                    {{ $property->bathrooms }} {{ __('bathrooms') }}
                 </span>
             </div>
 
@@ -92,14 +95,14 @@
                 <div>
                     <b>
                         {{ $property->price !== null
-                            ? number_format((float) $property->price, 2) . ' JOD'
-                            : 'Contact for price' }}
+                            ? number_format((float) $property->price, 2) . ' ' . __('JOD')
+                            : __('Contact for price') }}
                     </b>
-                    <span>per month</span>
+                    <span>{{ __('per month') }}</span>
                 </div>
 
                 <a href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}">
-                    View details <i class="bi bi-arrow-right"></i>
+                    {{ __('View details') }} <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>

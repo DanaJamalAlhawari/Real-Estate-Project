@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Booking requests")
+@section('title', __('Makan — Booking requests'))
 @section('roleStyle', 'owner')
 @section('bodyAttributes') data-role="owner" data-page="requests"@endsection
 
@@ -10,7 +10,7 @@
   type="checkbox"
   class="sidebar-toggle"
   id="sidebarToggle"
-  aria-label="Collapse the menu" />
+  aria-label="{{ __('Collapse the menu') }}" />
 
 <!-- ===== Topbar ===== -->
 <x-owner-topbar />
@@ -28,20 +28,20 @@
         class="btn-close"
         data-bs-dismiss="offcanvas"
         data-bs-target="#appSidebar"
-        aria-label="Close"></button>
+        aria-label="{{ __('Close') }}"></button>
     </div>
     <div class="offcanvas-body">
-      <div class="side-label">Property owner</div>
-      <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"><i class="bi bi-grid-1x2"></i><span class="flex-grow-1">Dashboard</span></a>
-      <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"><i class="bi bi-house-door"></i><span class="flex-grow-1">My properties</span></a>
-      <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"><i class="bi bi-plus-square"></i><span class="flex-grow-1">Add property</span></a>
-      <a class="side-link active" href="{{ route('owner.requests') }}" aria-current="page" title="Booking requests"><i class="bi bi-inbox"></i><span class="flex-grow-1">Booking requests</span>
+      <div class="side-label">{{ __('Property owner') }}</div>
+      <a class="side-link" href="{{ route('owner.dashboard') }}" title="{{ __('Dashboard') }}"><i class="bi bi-grid-1x2"></i><span class="flex-grow-1">{{ __('Dashboard') }}</span></a>
+      <a class="side-link" href="{{ route('owner.properties') }}" title="{{ __('My properties') }}"><i class="bi bi-house-door"></i><span class="flex-grow-1">{{ __('My properties') }}</span></a>
+      <a class="side-link" href="{{ route('owner.property-form') }}" title="{{ __('Add property') }}"><i class="bi bi-plus-square"></i><span class="flex-grow-1">{{ __('Add property') }}</span></a>
+      <a class="side-link active" href="{{ route('owner.requests') }}" aria-current="page" title="{{ __('Booking requests') }}"><i class="bi bi-inbox"></i><span class="flex-grow-1">{{ __('Booking requests') }}</span>
         <span class="side-badge">
           {{ $bookings->where('status', 'pending')->count() }}
         </span>
       </a>
-      <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">Messages</span></a>
-      <a class="side-link" href="{{ route('owner.account') }}" title="My account"><i class="bi bi-person-badge"></i><span class="flex-grow-1">My account</span></a>
+      <a class="side-link" href="{{ route('owner.chat') }}" title="{{ __('Messages') }}"><i class="bi bi-chat-dots"></i><span class="flex-grow-1">{{ __('Messages') }}</span></a>
+      <a class="side-link" href="{{ route('owner.account') }}" title="{{ __('My account') }}"><i class="bi bi-person-badge"></i><span class="flex-grow-1">{{ __('My account') }}</span></a>
     </div>
   </aside>
 
@@ -50,59 +50,29 @@
     <!-- 1. Page header -->
     <div class="page-head">
       <div>
-        <h1>Booking requests</h1>
+        <h1>{{ __('Booking requests') }}</h1>
         <p>
-          Reply to requests quickly — seekers prefer owners who respond
-          within hours.
+          {{ __('Reply to requests quickly — seekers prefer owners who respond within hours.') }}
         </p>
       </div>
     </div>
 
     <!-- ===== 2. Booking requests ===== -->
     @if (session('error'))
-      <p class="alert alert-danger" role="alert">{{ session('error') }}</p>
+      <p class="alert alert-danger" role="alert">{{ __(session('error')) }}</p>
     @elseif (session('success'))
-      <p class="alert alert-success" role="status">{{ session('success') }}</p>
+      <p class="alert alert-success" role="status">{{ __(session('success')) }}</p>
     @endif
-    <section aria-label="Booking requests">
+    <section aria-label="{{ __('Booking requests') }}">
       <!-- Filters -->
-      <div
-        class="d-flex flex-wrap gap-2 mb-3"
-        role="radiogroup"
-        aria-label="Filter requests"
-        id="requestFilters">
-        <input
-          type="radio"
-          class="btn-check"
-          name="status"
-          id="rfAll"
-          value="all"
-          checked />
-        <label class="chip-select py-2" for="rfAll">All</label>
-        <input
-          type="radio"
-          class="btn-check"
-          name="status"
-          id="rfPending"
-          value="pending" />
-        <label class="chip-select py-2" for="rfPending">
-          Awaiting your reply ({{ $bookings->where('status', 'pending')->count() }})
-        </label>
-        <input
-          type="radio"
-          class="btn-check"
-          name="status"
-          id="rfAccepted"
-          value="confirmed" />
-        <label class="chip-select py-2" for="rfAccepted">Accepted</label>
-        <input
-          type="radio"
-          class="btn-check"
-          name="status"
-          id="rfRejected"
-          value="cancelled" />
-        <label class="chip-select py-2" for="rfRejected">Cancelled</label>
-      </div>
+      <nav class="d-flex flex-wrap gap-2 mb-3" aria-label="{{ __('Filter requests') }}">
+        @foreach (['' => 'All', 'pending' => 'Awaiting your reply', 'confirmed' => 'Accepted', 'cancelled' => 'Cancelled'] as $status => $label)
+          <a @class(['btn btn-outline-primary', 'active' => request('status', '') === $status])
+             href="{{ route('owner.requests', $status === '' ? [] : ['status' => $status]) }}">
+            {{ __($label) }} @if ($status === 'pending') ({{ $pendingCount }}) @endif
+          </a>
+        @endforeach
+      </nav>
 
       <!-- Request list -->
       <div class="d-flex flex-column gap-3" id="requestsList">
@@ -118,14 +88,14 @@
           <div class="flex-main">
             <div class="d-flex flex-wrap align-items-center gap-2">
               <h2 class="request-row__name">
-                {{ $booking->tenant?->display_name ?? 'Unknown Customer' }}
+                {{ $booking->tenant?->display_name ?? __('Unknown Customer') }}
               </h2>
             </div>
             <div class="small text-muted">
-              {{ $booking->property->title ?? 'Property unavailable' }}
+              {{ $booking->property?->localized('title') ?? __('Property unavailable') }}
             </div>
             <div class="small text-muted">
-              {{ $booking->start_date->format('j M Y') }} – {{ $booking->end_date->format('j M Y') }}
+              {{ $booking->start_date->translatedFormat('j M Y') }} – {{ $booking->end_date->translatedFormat('j M Y') }}
             </div>
           </div>
           <div class="d-flex flex-wrap align-items-center gap-2">
@@ -138,7 +108,7 @@
               class="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#acceptModal{{ $booking->id }}">
-              Accept
+              {{ __('Accept') }}
             </button>
 
             <!-- Reject Button -->
@@ -147,20 +117,20 @@
               class="btn btn-outline-danger"
               data-bs-toggle="modal"
               data-bs-target="#rejectModal{{ $booking->id }}">
-              Reject
+              {{ __('Reject') }}
             </button>
 
             @elseif ($booking->status === 'confirmed')
             <span class="status status--success">
-              Accepted
+              {{ __('Accepted') }}
             </span>
             @elseif ($booking->status === 'cancelled')
             <span class="status status--danger">
-              Cancelled
+              {{ __('Cancelled') }}
             </span>
             @elseif ($booking->status === 'completed')
             <span class="status status--success">
-              Completed
+              {{ __('Completed') }}
             </span>
             @endif
 
@@ -185,7 +155,7 @@
             <div class="modal-content">
 
               <div class="modal-header">
-                <h5 class="modal-title">Confirm Acceptance</h5>
+                <h5 class="modal-title">{{ __('Confirm Acceptance') }}</h5>
                 <button type="button"
                   class="btn-close"
                   data-bs-dismiss="modal">
@@ -193,7 +163,7 @@
               </div>
 
               <div class="modal-body">
-                Are you sure you want to accept the booking request from
+                {{ __('Are you sure you want to accept the booking request from') }}
                 <strong>{{ $booking->tenant?->display_name ?? 'this customer' }}</strong>?
               </div>
 
@@ -201,7 +171,7 @@
                 <button type="button"
                   class="btn btn-ghost"
                   data-bs-dismiss="modal">
-                  Cancel
+                  {{ __('Cancel') }}
                 </button>
 
                 <form action="{{ route('owner.requests.accept', $booking->id) }}"
@@ -210,7 +180,7 @@
                   @method('PATCH')
 
                   <button type="submit" class="btn btn-primary">
-                    Yes, Accept
+                    {{ __('Yes, Accept') }}
                   </button>
                 </form>
               </div>
@@ -229,7 +199,7 @@
             <div class="modal-content">
 
               <div class="modal-header">
-                <h5 class="modal-title">Confirm Rejection</h5>
+                <h5 class="modal-title">{{ __('Confirm Rejection') }}</h5>
                 <button type="button"
                   class="btn-close"
                   data-bs-dismiss="modal">
@@ -237,7 +207,7 @@
               </div>
 
               <div class="modal-body">
-                Are you sure you want to reject the booking request from
+                {{ __('Are you sure you want to reject the booking request from') }}
                 <strong>{{ $booking->tenant?->display_name ?? 'this customer' }}</strong>?
               </div>
 
@@ -245,7 +215,7 @@
                 <button type="button"
                   class="btn btn-ghost"
                   data-bs-dismiss="modal">
-                  Cancel
+                  {{ __('Cancel') }}
                 </button>
 
                 <form action="{{ route('owner.requests.reject', $booking->id) }}"
@@ -254,7 +224,7 @@
                   @method('PATCH')
 
                   <button type="submit" class="btn btn-danger">
-                    Yes, Reject
+                    {{ __('Yes, Reject') }}
                   </button>
                 </form>
               </div>
@@ -265,51 +235,13 @@
 
         @empty
         <div class="panel text-center p-4">
-          <p class="text-muted mb-0">No booking requests found.</p>
+          <p class="text-muted mb-0">{{ __('No booking requests found.') }}</p>
         </div>
         @endforelse
       </div>
+        <x-pagination :items="$bookings" />
     </section>
   </main>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const filters = document.querySelectorAll(
-      '#requestFilters input[name="status"]'
-    );
-
-    const bookings = document.querySelectorAll(
-      '#requestsList .request-row'
-    );
-
-    filters.forEach(function(filter) {
-
-      filter.addEventListener('change', function() {
-
-        const selectedStatus = this.value;
-
-        bookings.forEach(function(booking) {
-
-          const bookingStatus = booking.dataset.status;
-
-          if (
-            selectedStatus === 'all' ||
-            bookingStatus === selectedStatus
-          ) {
-            booking.style.display = '';
-          } else {
-            booking.style.display = 'none';
-          }
-
-        });
-
-      });
-
-    });
-
-  });
-</script>
 
 @endsection
