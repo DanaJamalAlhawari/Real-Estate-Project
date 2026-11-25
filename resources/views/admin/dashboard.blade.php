@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Admin dashboard")
+@section('title', __('Makan — Admin dashboard'))
 @section('roleStyle', 'admin')
 @section('bodyAttributes') data-role="admin" data-page="dashboard"@endsection
 
@@ -10,7 +10,7 @@
       type="checkbox"
       class="sidebar-toggle"
       id="sidebarToggle"
-      aria-label="Collapse the menu"
+      aria-label="{{ __('Collapse the menu') }}"
     />
 
     <!-- ===== Topbar ===== -->
@@ -20,14 +20,14 @@
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#appSidebar"
-        aria-label="Menu"
+        aria-label="{{ __('Menu') }}"
       >
         <i class="bi bi-list"></i>
       </button>
       <label
         for="sidebarToggle"
         class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
+        title="{{ __('Collapse or expand the menu') }}"
         aria-hidden="true"
       >
         <i class="bi bi-list"></i>
@@ -37,13 +37,13 @@
       >
       <div class="ms-auto d-flex align-items-center gap-1">
         <!-- Messages: icon with unread count -->
-        <a class="icon-btn" href="{{ route('admin.chat') }}" aria-label="Messages"><i class="bi bi-chat-dots"></i></a>
+        <a class="icon-btn" href="{{ route('admin.chat') }}" aria-label="{{ __('Messages') }}"><i class="bi bi-chat-dots"></i></a>
         <div class="dropdown">
           <button
             class="icon-btn"
             type="button"
             data-bs-toggle="dropdown"
-            aria-label="Notifications"
+            aria-label="{{ __('Notifications') }}"
           >
             <i class="bi bi-bell"></i><span class="dot"></span>
           </button>
@@ -51,7 +51,7 @@
             class="dropdown-menu dropdown-menu-end shadow-sm p-0"
             style="width: 320px"
           >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="px-3 py-2 border-bottom fw-semibold">{{ __('Notifications') }}</div>
             <div class="py-1">
               <a
                 class="dropdown-item d-flex gap-2 py-2 text-wrap"
@@ -64,7 +64,7 @@
                 ></span>
                 <span class="small">
                   <span class="d-block"
-                    >{{ $pendingVerificationCount }} verification requests waiting for review</span
+                    >{{ $pendingVerificationCount }} {{ __('verification requests waiting for review') }}</span
                   >
                 </span>
               </a>
@@ -89,6 +89,7 @@
           </ul>
         </div>
       </div>
+      <x-language-switch />
     </header>
 
     <div class="app-shell">
@@ -100,8 +101,8 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Dashboard</h1>
-            <p>Platform overview · {{ now()->format('F Y') }}</p>
+            <h1>{{ __('Dashboard') }}</h1>
+            <p>{{ __('Platform overview ·') }} {{ now()->translatedFormat('F Y') }}</p>
           </div>
         </div>
 
@@ -112,7 +113,7 @@
               <span class="kpi-icon"><i class="bi bi-people"></i></span>
               <div>
                 <b>{{ $totalUsers }}</b>
-                <span>Users</span>
+                <span>{{ __('Users') }}</span>
               </div>
             </div>
           </div>
@@ -121,7 +122,7 @@
               <span class="kpi-icon"><i class="bi bi-house-door"></i></span>
               <div>
                 <b>{{ $totalProperties }}</b>
-                <span>Properties</span>
+                <span>{{ __('Properties') }}</span>
               </div>
             </div>
           </div>
@@ -130,7 +131,7 @@
               <span class="kpi-icon"><i class="bi bi-calendar-check"></i></span>
               <div>
                 <b>{{ $bookingsThisMonth }}</b>
-                <span>Bookings this month</span>
+                <span>{{ __('Bookings this month') }}</span>
               </div>
             </div>
           </div>
@@ -138,8 +139,8 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-cash-stack"></i></span>
               <div>
-                <b>{{ number_format($totalCommissionRevenue, 2) }} JOD</b>
-                <span>Total Commission Revenue</span>
+                <b>{{ number_format($totalCommissionRevenue, 2) }} {{ __('JOD') }}</b>
+                <span>{{ __('Total Commission Revenue') }}</span>
               </div>
             </div>
           </div>
@@ -150,53 +151,35 @@
           <div class="col-lg-8">
             <section class="panel" aria-labelledby="revTitle">
               <div class="panel-head">
-                <h2 id="revTitle">Commission Revenue · Last 6 Months</h2>
-                <span class="small text-muted">In JOD</span>
+                <h2 id="revTitle">{{ __('Commission Revenue · Last 6 Months') }}</h2>
+                <span class="small text-muted">{{ __('In JOD') }}</span>
               </div>
-              @php
-                $maxCommissionRevenue = max(array_column($monthlyCommissionRevenue, 'amount'));
-              @endphp
-              <div
-                class="bar-chart rev-chart"
-                id="revenueChart"
-                role="img"
-                aria-label="Commission revenue in JOD: {{ collect($monthlyCommissionRevenue)->map(fn ($month) => $month['label'].' '.number_format($month['amount'], 2))->implode('; ') }}"
-              >
-                @foreach ($monthlyCommissionRevenue as $month)
-                  @php
-                    $height = $maxCommissionRevenue > 0 ? round(160 * $month['amount'] / $maxCommissionRevenue) : 0;
-                  @endphp
-                  <div class="bar-col">
-                    <span>{{ number_format($month['amount'], 2) }}</span>
-                    <div @class(['bar', 'is-hi' => $loop->last]) style="height: {{ $height }}px"></div>
-                    <span>{{ $month['label'] }}</span>
-                  </div>
-                @endforeach
-              </div>
+              <x-dashboard-chart :series="$monthlyCommissionRevenue" :label="__('Commission Revenue · Last 6 Months')" :decimals="2" />
             </section>
           </div>
 
           <div class="col-lg-4">
             <section class="panel" aria-labelledby="pendingTitle">
               <div class="panel-head">
-                <h2 id="pendingTitle">Awaiting verification</h2>
-                <a href="{{ route('admin.verifications') }}">View all</a>
+                <h2 id="pendingTitle">{{ __('Awaiting verification') }}</h2>
+                <a href="{{ route('admin.verifications') }}">{{ __('View all') }}</a>
               </div>
               <ul class="list-clean" id="pendingList">
                 @foreach ($pendingVerificationPreview as $property)
                 <li class="list-row">
-                  <span class="avatar">{{ Str::substr($property->title, 0, 1) }}</span>
+                  <span class="avatar">{{ Str::substr($property->localized('title'), 0, 1) }}</span>
                   <div class="grow">
-                    <b class="d-block small">{{ $property->title }}</b>
+                    <b class="d-block small">{{ $property->localized('title') }}</b>
                   </div>
                   <a
                     href="{{ route('admin.verifications') }}"
                     class="small fw-semibold text-decoration-none"
-                    >Review</a
+                    >{{ __('Review') }}</a
                   >
                 </li>
                 @endforeach
-              </ul>
+                </ul>
+                <x-pagination :items="$pendingVerificationPreview" />
             </section>
           </div>
         </div>
@@ -206,7 +189,7 @@
           <div class="col-lg-8">
         <section class="panel" aria-labelledby="subsTitle">
           <div class="panel-head">
-            <h2 id="subsTitle">Recent Paid Commissions</h2>
+            <h2 id="subsTitle">{{ __('Recent Paid Commissions') }}</h2>
           </div>
           <ul class="list-clean" id="subsList">
             @forelse ($recentPaidCommissions as $commission)
@@ -218,14 +201,15 @@
                 <span class="avatar">{{ Str::upper(Str::substr($agent, 0, 1)) }}</span>
                 <div class="grow">
                   <b class="d-block small">{{ $agent }}</b>
-                  <small>Booking #{{ $commission->booking_id }}@if ($commission->paid_at) · {{ $commission->paid_at->format('M j, Y') }}@endif</small>
+                  <small>{{ __('Booking #') }}{{ $commission->booking_id }}@if ($commission->paid_at) · {{ $commission->paid_at->translatedFormat('M j, Y') }}@endif</small>
                 </div>
-                <span class="small fw-semibold">{{ number_format($commission->commission_amount, 2) }} JOD</span>
+                <span class="small fw-semibold">{{ number_format($commission->commission_amount, 2) }} {{ __('JOD') }}</span>
               </li>
             @empty
-              <li class="list-row text-muted">No paid commissions yet.</li>
+              <li class="list-row text-muted">{{ __('No paid commissions yet.') }}</li>
             @endforelse
-          </ul>
+        </ul>
+        <x-pagination :items="$recentPaidCommissions" />
         </section>
           </div>
         </div>

@@ -2,11 +2,11 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 @endpush
-@section('title', isset($property) ? 'Makan — Edit property' : 'Makan — Add property')
+@section('title', isset($property) ? __('Makan — Edit property') : __('Makan — Add property'))
 @section('roleStyle', 'owner')
 @section('bodyAttributes') data-role="owner" data-page="property-form"@endsection
 @section('content')
-<input type="checkbox" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse the menu" />
+<input type="checkbox" class="sidebar-toggle" id="sidebarToggle" aria-label="{{ __('Collapse the menu') }}" />
 <!-- ===== Topbar ===== -->
     <x-owner-topbar />
 
@@ -26,38 +26,38 @@
             class="btn-close"
             data-bs-dismiss="offcanvas"
             data-bs-target="#appSidebar"
-            aria-label="Close"
+            aria-label="{{ __('Close') }}"
           ></button>
         </div>
         <div class="offcanvas-body">
-          <div class="side-label">Property owner</div>
-          <a class="side-link" href="{{ route('owner.dashboard') }}" title="Dashboard"
+          <div class="side-label">{{ __('Property owner') }}</div>
+          <a class="side-link" href="{{ route('owner.dashboard') }}" title="{{ __('Dashboard') }}"
             ><i class="bi bi-grid-1x2"></i
-            ><span class="flex-grow-1">Dashboard</span></a
+            ><span class="flex-grow-1">{{ __('Dashboard') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+          <a class="side-link" href="{{ route('owner.properties') }}" title="{{ __('My properties') }}"
             ><i class="bi bi-house-door"></i
-            ><span class="flex-grow-1">My properties</span></a
+            ><span class="flex-grow-1">{{ __('My properties') }}</span></a
           >
           <a
             class="side-link active"
             href="{{ route('owner.property-form') }}"
             aria-current="page"
-            title="Add property"
+            title="{{ __('Add property') }}"
             ><i class="bi bi-plus-square"></i
-            ><span class="flex-grow-1">Add property</span></a
+            ><span class="flex-grow-1">{{ __('Add property') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+          <a class="side-link" href="{{ route('owner.requests') }}" title="{{ __('Booking requests') }}"
             ><i class="bi bi-inbox"></i
-            ><span class="flex-grow-1">Booking requests</span></a
+            ><span class="flex-grow-1">{{ __('Booking requests') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+          <a class="side-link" href="{{ route('owner.chat') }}" title="{{ __('Messages') }}"
             ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span></a
+            ><span class="flex-grow-1">{{ __('Messages') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+          <a class="side-link" href="{{ route('owner.account') }}" title="{{ __('My account') }}"
             ><i class="bi bi-person-badge"></i
-            ><span class="flex-grow-1">My account</span></a
+            ><span class="flex-grow-1">{{ __('My account') }}</span></a
           >
         </div>
       </aside>
@@ -67,31 +67,31 @@
         @isset($property)
           <div class="page-head">
             <div>
-              <h1>Edit property</h1>
-              <p>{{ $property->title }}</p>
+              <h1>{{ __('Edit property') }}</h1>
+              <p>{{ $property->localized('title') }}</p>
             </div>
-            <a href="{{ route('owner.properties') }}" class="btn btn-outline-secondary">My properties</a>
+            <a href="{{ route('owner.properties') }}" class="btn btn-outline-secondary">{{ __('My properties') }}</a>
           </div>
           <form class="panel form-section" action="{{ route('properties.verification.store') }}" method="post" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="property_id" value="{{ $property->id }}">
-            <h2>Ownership verification</h2>
-            <p>Status: {{ ucfirst($property->verification_status) }}</p>
+            <h2>{{ __('Ownership verification') }}</h2>
+            <p>{{ __('Status:') }} {{ __(\Illuminate\Support\Str::headline($property->verification_status)) }}</p>
             @if (session('success'))
-              <p class="text-success" role="status">{{ session('success') }}</p>
+              <p class="text-success" role="status">{{ __(session('success')) }}</p>
             @endif
             @if ($errors->any())
               <p class="text-danger" role="alert">{{ $errors->first() }}</p>
             @endif
-            <label for="ownershipDocument" class="form-label">Ownership document (PDF, JPG, or PNG, up to 5 MB)</label>
+            <label for="ownershipDocument" class="form-label">{{ __('Ownership document (PDF, JPG, or PNG, up to 5 MB)') }}</label>
             <input id="ownershipDocument" class="form-control mb-3" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
-            <button class="btn btn-accent" type="submit">Upload document</button>
+            <button class="btn btn-accent" type="submit">{{ __('Upload document') }}</button>
           </form>
         @else
           <div class="page-head">
             <div>
-              <h1>Add property</h1>
-              <p>The more details you fill in, the more accurately your property matches with seekers.</p>
+              <h1>{{ __('Add property') }}</h1>
+              <p>{{ __('The more details you fill in, the more accurately your property matches with seekers.') }}</p>
             </div>
           </div>
         @endisset
@@ -104,7 +104,7 @@
               @endif
               @if ($errors->any())
                 <div class="alert alert-danger mt-3" role="alert">
-                  <strong>Failed to save property:</strong>
+                  <strong>{{ __('Failed to save property:') }}</strong>
                   <ul class="mb-0 mt-2">
                     @foreach ($errors->all() as $error)
                       <li>{{ $error }}</li>
@@ -116,15 +116,15 @@
 
           <section class="panel form-section" aria-labelledby="secBasics">
 
-            <h2 id="secBasics">1. Basic details</h2>
+            <h2 id="secBasics">{{ __('1. Basic details') }}</h2>
 
-            <p>Property type and specs.</p>
+            <p>{{ __('Property type and specs.') }}</p>
 
             <div class="row g-3">
 
               <div class="col-12">
 
-                <label for="fTitle" class="form-label">Listing title</label>
+                <label for="fTitle" class="form-label">{{ __('Listing title') }}</label>
 
                 <input
 
@@ -146,7 +146,7 @@
 
                 <label for="fCategory" class="form-label">
 
-                  Property Category
+                  {{ __('Property Category') }}
 
                 </label>
 
@@ -160,10 +160,10 @@
 
                   required>
 
-                  <option value="">Select Category</option>
+                  <option value="">{{ __('Select Category') }}</option>
 
                   @foreach (\App\Models\Property::CATEGORIES as $value => $label)
-                    <option value="{{ $value }}" @selected(old('category', $property->category ?? '') === $value)>{{ $label }}</option>
+                    <option value="{{ $value }}" @selected(old('category', $property->category ?? '') === $value)>{{ __($label) }}</option>
                   @endforeach
                 </select>
 
@@ -177,7 +177,7 @@
 
                   <label for="fBedrooms" class="form-label">
 
-                    Bedrooms
+                    {{ __('Bedrooms') }}
 
                   </label>
 
@@ -205,7 +205,7 @@
 
                   <label for="fBathrooms" class="form-label">
 
-                    Bathrooms
+                    {{ __('Bathrooms') }}
 
                   </label>
 
@@ -235,7 +235,7 @@
 
             <fieldset class="mt-3">
 
-              <legend class="visually-hidden">Amenities</legend>
+              <legend class="visually-hidden">{{ __('Amenities') }}</legend>
 
               <div class="d-flex flex-wrap gap-2" id="amenities">
 
@@ -283,7 +283,7 @@
 
                   @endif
 
-                  {{ $service->name }}
+                  {{ __($service->name) }}
 
                 </label>
 
@@ -296,28 +296,51 @@
       </section>
 
       <section class="panel form-section" aria-labelledby="secDesc">
-        <h2 id="secDesc">2. Description</h2>
-        <label for="fDescEn" class="form-label">Property description</label>
+        <h2 id="secDesc">{{ __('2. Description') }}</h2>
+        <label for="fDescEn" class="form-label">{{ __('Property description') }}</label>
         <textarea class="form-control" id="fDescEn" name="description" rows="5" required>{{ old('description', $property->description ?? '') }}</textarea>
       </section>
+
+      <details class="panel form-section" open>
+        <summary class="h5">{{ __('Property translations') }}</summary>
+        <div class="row g-3 mt-1">
+          @foreach (['ar' => 'Arabic', 'en' => 'English'] as $language => $languageLabel)
+            <fieldset class="col-md-6">
+              <legend class="h6">{{ __($languageLabel) }}</legend>
+              @foreach (['title' => 'Property title', 'description' => 'Property description', 'city' => 'City', 'area' => 'Area', 'address' => 'Address'] as $field => $label)
+                @php($translation = $field.'_'.$language)
+                <div class="mb-3">
+                  <label class="form-label" for="{{ $translation }}">{{ __($label) }}</label>
+                  @if ($field === 'description')
+                    <textarea class="form-control" id="{{ $translation }}" name="{{ $translation }}" rows="3" dir="auto">{{ old($translation, $property?->{$translation} ?? '') }}</textarea>
+                  @else
+                    <input type="text" class="form-control" id="{{ $translation }}" name="{{ $translation }}" maxlength="255" dir="auto" value="{{ old($translation, $property?->{$translation} ?? '') }}">
+                  @endif
+                  @error($translation)<div class="text-danger small">{{ $message }}</div>@enderror
+                </div>
+              @endforeach
+            </fieldset>
+          @endforeach
+        </div>
+      </details>
 
       <!-- 3. Photos -->
 
       <section class="panel form-section" aria-labelledby="secPhotos">
 
-        <h2 id="secPhotos">3. Photos</h2>
+        <h2 id="secPhotos">{{ __('3. Photos') }}</h2>
 
-        <p>Real, recent photos. The first photo is the cover.</p>
+        <p>{{ __('Real, recent photos. The first photo is the cover.') }}</p>
 
         <label class="dropzone d-block mb-3" for="fPhotos">
 
           <i class="bi bi-cloud-arrow-up"></i>
 
-          <span class="d-block fw-semibold text-body">Drag photos here, or
+          <span class="d-block fw-semibold text-body">{{ __('Drag photos here, or') }}
 
-            <span class="text-primary-bt text-decoration-underline">choose from your device</span></span>
+            <span class="text-primary-bt text-decoration-underline">{{ __('choose from your device') }}</span></span>
 
-          <span class="d-block small">JPG or PNG · up to 10 photos</span>
+          <span class="d-block small">{{ __('JPG or PNG · up to 10 photos') }}</span>
 
         </label>
 
@@ -353,13 +376,13 @@
 
               src="{{ $image->public_url }}"
 
-              alt="Property image"
+              alt="{{ __('Property image') }}"
 
               style="width: 100%; height: 100%; object-fit: cover;">
 
             @if($image->is_primary)
 
-            <span class="cover">Cover</span>
+            <span class="cover">{{ __('Cover') }}</span>
 
             @endif
 
@@ -377,7 +400,7 @@
 
                            justify-content: center; cursor: pointer;"
 
-              title="Delete image">
+              title="{{ __('Delete image') }}">
 
               <input
 
@@ -413,8 +436,8 @@
 
       @unless(isset($property))
         <section class="panel form-section" aria-labelledby="secOwnership">
-          <h2 id="secOwnership">Ownership verification</h2>
-          <label for="createOwnershipDocument" class="form-label">Ownership document (PDF, JPG or PNG, up to 5 MB)</label>
+          <h2 id="secOwnership">{{ __('Ownership verification') }}</h2>
+          <label for="createOwnershipDocument" class="form-label">{{ __('Ownership document (PDF, JPG or PNG, up to 5 MB)') }}</label>
           <input id="createOwnershipDocument" class="form-control" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
         </section>
       @endunless
@@ -423,45 +446,48 @@
 
       <section class="panel form-section" aria-labelledby="secLocation">
 
-        <h2 id="secLocation">4. Location</h2>
+        <h2 id="secLocation">{{ __('4. Location') }}</h2>
 
-        <p>Search for the neighborhood, then place the marker at the exact building.</p>
+        <p>{{ __('Search for the neighborhood, then place the marker at the exact building.') }}</p>
 
         <div class="row g-3 mb-3">
 
           <div class="col-md-6">
 
-            <label for="fCity" class="form-label">City</label>
+            <label for="fCity" class="form-label">{{ __('City') }}</label>
 
-            <input type="text" class="form-control" id="fCity" name="city" value="{{ old('city', $property->city ?? '') }}">
+            <input type="text" class="form-control" id="fCity" value="{{ old('city', $property->city ?? '') }}" disabled>
+            <input type="hidden" id="fCityValue" name="city" value="{{ old('city', $property->city ?? '') }}">
 
           </div>
 
           <div class="col-md-6">
 
-            <label for="fArea" class="form-label">Area / Neighborhood</label>
+            <label for="fArea" class="form-label">{{ __('Area / Neighborhood') }}</label>
 
-            <input type="text" class="form-control" id="fArea" name="area" value="{{ old('area', $property->area ?? '') }}">
-
-          </div>
-
-          <div class="col-12">
-
-            <label for="fStreet" class="form-label">Street / Building Address</label>
-
-            <input type="text" class="form-control" id="fStreet" name="address" value="{{ old('address', $property->address ?? '') }}">
+            <input type="text" class="form-control" id="fArea" value="{{ old('area', $property->area ?? '') }}" disabled>
+            <input type="hidden" id="fAreaValue" name="area" value="{{ old('area', $property->area ?? '') }}">
 
           </div>
 
           <div class="col-12">
 
-            <label for="locationSearch" class="form-label">Search Property Location</label>
+            <label for="fStreet" class="form-label">{{ __('Street / Building Address') }}</label>
+
+            <input type="text" class="form-control" id="fStreet" value="{{ old('address', $property->address ?? '') }}" disabled>
+            <input type="hidden" id="fStreetValue" name="address" value="{{ old('address', $property->address ?? '') }}">
+
+          </div>
+
+          <div class="col-12">
+
+            <label for="locationSearch" class="form-label">{{ __('Search Property Location') }}</label>
 
             <div class="input-group">
 
-              <input type="text" id="locationSearch" class="form-control" placeholder="e.g. Khalda, Amman">
+              <input type="text" id="locationSearch" class="form-control" placeholder="{{ __('e.g. Khalda, Amman') }}">
 
-              <button type="button" id="searchLocationBtn" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
+              <button type="button" id="searchLocationBtn" class="btn btn-primary"><i class="bi bi-search"></i> {{ __('Search') }}</button>
 
             </div>
 
@@ -476,8 +502,9 @@
             <input type="hidden" id="fLat" name="latitude" value="{{ old('latitude', $property->latitude ?? '') }}">
 
             <input type="hidden" id="fLng" name="longitude" value="{{ old('longitude', $property->longitude ?? '') }}">
+            <input type="hidden" id="fApproximate" name="location_is_approximate" value="{{ (int) old('location_is_approximate', $property->location_is_approximate ?? false) }}">
 
-            <p class="small text-muted mt-2 mb-0">Choose a search result to move the map, then drag the pin to the exact building. You can also click the map directly.</p>
+            <p class="small text-muted mt-2 mb-0">{{ __('Search for a Jordan address and select a result to fill the location fields.') }}</p>
 
           </div>
 
@@ -489,9 +516,9 @@
 
       <section class="panel form-section" aria-labelledby="secPrice">
 
-        <h2 id="secPrice">5. Property Price</h2>
+        <h2 id="secPrice">{{ __('5. Property Price') }}</h2>
 
-        <p>Set the monthly rental price for your property.</p>
+        <p>{{ __('Set the monthly rental price for your property.') }}</p>
 
         <div class="row g-3">
 
@@ -499,7 +526,7 @@
 
             <label for="fRent" class="form-label">
 
-              Monthly Rent (JOD)
+              {{ __('Monthly Rent (JOD)') }}
 
             </label>
 
@@ -541,7 +568,7 @@
 
           value="publish">
 
-          Publish listing
+          {{ __('Publish listing') }}
 
         </button>
 
@@ -561,11 +588,11 @@
 
         <section class="panel" aria-labelledby="readyTitle">
 
-          <h2 class="fs-6 mb-2" id="readyTitle">Listing readiness</h2>
+          <h2 class="fs-6 mb-2" id="readyTitle">{{ __('Listing readiness') }}</h2>
 
           <div class="progress mb-3" role="progressbar"
 
-            aria-label="Listing readiness"
+            aria-label="{{ __('Listing readiness') }}"
 
             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
 
@@ -577,31 +604,31 @@
 
             <li class="d-flex align-items-center gap-2" data-check="basic">
 
-              <i class="bi bi-exclamation-circle-fill ic-warn"></i>Basic details
+              <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Basic details') }}
 
             </li>
 
             <li class="d-flex align-items-center gap-2" data-check="description">
 
-              <i class="bi bi-exclamation-circle-fill ic-warn"></i>Description
+              <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Description') }}
 
             </li>
 
             <li class="d-flex align-items-center gap-2" data-check="photos">
 
-              <i class="bi bi-exclamation-circle-fill ic-warn"></i>Photos
+              <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Photos') }}
 
             </li>
 
             <li class="d-flex align-items-center gap-2" data-check="location">
 
-              <i class="bi bi-exclamation-circle-fill ic-warn"></i>Location
+              <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Location') }}
 
             </li>
 
             <li class="d-flex align-items-center gap-2" data-check="price">
 
-              <i class="bi bi-exclamation-circle-fill ic-warn"></i>Price
+              <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Price') }}
 
             </li>
 
@@ -613,13 +640,13 @@
 
         <section class="panel" aria-labelledby="afterTitle">
 
-          <h2 class="fs-6 mb-2" id="afterTitle">After publishing</h2>
+          <h2 class="fs-6 mb-2" id="afterTitle">{{ __('After publishing') }}</h2>
 
           <div class="d-flex gap-2 small text-muted mb-2">
 
             <i class="bi bi-patch-check text-primary-bt"></i>
 
-            <span>Your property listing will be submitted for admin review.</span>
+            <span>{{ __('Your property listing will be submitted for admin review.') }}</span>
 
           </div>
 
@@ -627,7 +654,7 @@
 
             <i class="bi bi-arrow-repeat text-primary-bt"></i>
 
-            <span>You can edit your property details whenever needed.</span>
+            <span>{{ __('You can edit your property details whenever needed.') }}</span>
 
           </div>
 
@@ -646,256 +673,136 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+@php($jordanSites = config('jordan_locations.sites'))
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const element = id => document.getElementById(id);
+    const mapEl = element('locationMap');
+    const search = element('locationSearch');
+    const button = element('searchLocationBtn');
+    const results = element('locationResults');
+    if (!mapEl || !search || !button || !results) return;
 
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const el = id => document.getElementById(id);
-
-    const mapEl = el('locationMap');
-
-    const latEl = el('fLat');
-
-    const lngEl = el('fLng');
-
-    const searchEl = el('locationSearch');
-    const streetEl = el('fStreet');
-
-    const button = el('searchLocationBtn');
-
-    const results = el('locationResults');
-
-    const cityEl = el('fCity');
-
-    const areaEl = el('fArea');
-
-    if (!mapEl || !latEl || !lngEl || typeof L === 'undefined') {
-
-      console.error('Location map: missing required elements or Leaflet.');
-
-      return;
-
+    const latitude = element('fLat');
+    const longitude = element('fLng');
+    const approximate = element('fApproximate');
+    const saved = latitude.value !== '' && longitude.value !== '';
+    const initial = saved ? [+latitude.value, +longitude.value] : [31.9539, 35.9106];
+    const map = typeof L !== 'undefined' ? L.map(mapEl).setView(initial, saved ? 16 : 11) : null;
+    let marker;
+    if (map) {
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+      if (saved) marker = L.marker(initial).addTo(map);
+    } else {
+      mapEl.hidden = true;
     }
 
-    const savedLat = Number(latEl.value);
+    const fillField = (id, value) => {
+      element(id).value = value;
+      const hidden = element(id + 'Value');
+      hidden.value = value;
+      hidden.dispatchEvent(new Event('input', { bubbles: true }));
+    };
 
-    const savedLng = Number(lngEl.value);
-
-    const saved = latEl.value.trim() !== '' && lngEl.value.trim() !== '' &&
-
-      Number.isFinite(savedLat) && Number.isFinite(savedLng) &&
-
-      Math.abs(savedLat) <= 90 && Math.abs(savedLng) <= 180;
-
-    const map = L.map(mapEl).setView(saved ? [savedLat, savedLng] : [31.9539, 35.9106], saved ? 16 : 12);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-
-      maxZoom: 19,
-
-      attribution: '&copy; OpenStreetMap contributors'
-
-    }).addTo(map);
-
-    let marker = null;
-
-    function setLocation(lat, lng, name = 'Property Location') {
-
-      latEl.value = lat.toFixed(7);
-
-      lngEl.value = lng.toFixed(7);
-
-      // Notify Listing Readiness when the property location changes.*
-
-      latEl.dispatchEvent(new Event('input', {
-
-        bubbles: true
-
-      }));
-
-      lngEl.dispatchEvent(new Event('input', {
-
-        bubbles: true
-
-      }));
-
-      if (!marker) {
-
-        marker = L.marker([lat, lng], {
-
-          draggable: true
-
-        }).addTo(map);
-
-        marker.on('dragend', function() {
-
-          const pos = marker.getLatLng();
-
-          setLocation(pos.lat, pos.lng, 'Selected Property Location');
-
+    const selectPlace = place => {
+      const coordinates = [place.latitude, place.longitude];
+      const changed = +latitude.value !== place.latitude || +longitude.value !== place.longitude;
+      if (changed) {
+        ['city_ar', 'area_ar', 'address_ar', 'city_en', 'area_en', 'address_en'].forEach(id => {
+          if (element(id)) element(id).value = '';
         });
-
-      } else {
-
-        marker.setLatLng([lat, lng]);
-
       }
-
-      marker.unbindTooltip();
-
-      marker.bindTooltip(name, {
-
-        permanent: true,
-
-        direction: 'top',
-
-        offset: [0, -10]
-
-      }).openTooltip();
-
-    }
-
-    if (saved) {
-
-      setLocation(savedLat, savedLng, [areaEl?.value, cityEl?.value].filter(Boolean).join(', ') || 'Property Location');
-
-    }
-
-    map.on('click', event => setLocation(event.latlng.lat, event.latlng.lng, 'Selected Property Location'));
-
-    async function searchLocation() {
-
-      const query = searchEl.value.trim();
-
-      if (query.length < 3) {
-
-        results.textContent = 'Please enter at least 3 characters.';
-
-        return;
-
-      }
-
-      button.disabled = true;
-
-      results.textContent = 'Searching...';
-
-      try {
-
-        const params = new URLSearchParams({
-
-          q: query + ', Jordan',
-
-          limit: '8',
-
-          lang: 'en',
-
-          lat: '31.9539',
-
-          lon: '35.9106'
-
-        });
-
-        const response = await fetch('https://photon.komoot.io/api/?' + params.toString());
-
-        if (!response.ok) throw new Error('Geocoding HTTP ' + response.status);
-
-        const data = await response.json();
-
-        const places = (data.features || []).filter(place => {
-
-          const country = (place.properties?.country || '').toLowerCase();
-
-          return country === 'jordan' || country === 'الأردن';
-
-        });
-
-        results.replaceChildren();
-
-        if (!places.length) {
-
-          results.textContent = 'No results in Jordan. Try the city name or select the place manually on the map.';
-
-          return;
-
-        }
-
-        places.forEach(place => {
-
-          const p = place.properties || {};
-
-          const [lng, lat] = place.geometry.coordinates;
-
-          const name = [...new Set([p.name, p.district, p.city, p.state].filter(Boolean))].join(', ');
-
-          const option = document.createElement('button');
-
-          option.type = 'button';
-
-          option.className = 'list-group-item list-group-item-action';
-
-          option.textContent = name || 'Location result';
-
-          const chooseLocation = () => {
-
-            map.setView([lat, lng], 16);
-
-            setLocation(lat, lng, name || 'Property Location');
-
-            if (cityEl) cityEl.value = p.city || p.town || p.village || p.county || p.state || '';
-
-            if (areaEl) areaEl.value = p.neighbourhood || p.suburb || p.district || p.locality || p.name || '';
-
-            if (streetEl) {
-              streetEl.value = [p.housenumber, p.street].filter(Boolean).join(' ') || p.name || '';
-              streetEl.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-
-            searchEl.value = name;
-
-          };
-
-          option.addEventListener('click', chooseLocation);
-          if (place === places[0]) chooseLocation();
-          results.appendChild(option);
-
-        });
-
-      } catch (error) {
-
-        console.error('Location search failed:', error);
-
-        results.textContent = 'Search service unavailable. Click the map to select the property location manually.';
-
-      } finally {
-
-        button.disabled = false;
-
-      }
-
-    }
-
-    if (searchEl && button && results) {
-
-      button.addEventListener('click', searchLocation);
-
-      searchEl.addEventListener('keydown', event => {
-
-        if (event.key === 'Enter') {
-
-          event.preventDefault();
-
-          searchLocation();
-
-        }
-
+      Object.entries(place.translations || {}).forEach(([id, value]) => {
+        if (element(id)) element(id).value = value;
       });
+      fillField('fCity', place.city);
+      fillField('fArea', place.area);
+      fillField('fStreet', place.address);
+      latitude.value = place.latitude.toFixed(7);
+      longitude.value = place.longitude.toFixed(7);
+      approximate.value = place.approximate ? '1' : '0';
+      latitude.dispatchEvent(new Event('input', { bubbles: true }));
+      if (map) {
+        map.setView(coordinates, 16);
+        if (marker) marker.setLatLng(coordinates);
+        else marker = L.marker(coordinates).addTo(map);
+      }
+      search.value = place.label;
+      results.textContent = window.makanTranslate('Location selected.');
+    };
 
-    }
+    const sites = Object.values(@json($jordanSites));
+    const localResults = query => sites.filter(place => {
+      const normalize = value => value.toLowerCase().replace(/[\u064b-\u065f]/g, '').replace(/[أإآ]/g, 'ا');
+      const text = normalize(place.slice(0, 6).join(' '));
+      return normalize(query).split(/[\s,،]+/).every(term => text.includes(term));
+    }).map(([city, cityAr, area, areaAr, address, addressAr, latitude, longitude]) => ({
+      city, area, address, latitude, longitude, approximate: true,
+      label: document.documentElement.lang === 'ar' ? [addressAr, areaAr, cityAr].join('، ') : [address, area, city].join(', '),
+      translations: { city_ar: cityAr, area_ar: areaAr, address_ar: addressAr, city_en: city, area_en: area, address_en: address },
+    }));
 
-    setTimeout(() => map.invalidateSize(), 250);
+    const fromPhoton = feature => {
+      const place = feature.properties || {};
+      if (place.countrycode?.toUpperCase() !== 'JO') return null;
+      const [longitude, latitude] = feature.geometry?.coordinates || [];
+      const municipality = place.type === 'city' || place.type === 'town' || place.type === 'village';
+      const city = place.city || place.town || place.village || (municipality ? place.name : '') || place.county || place.state;
+      const area = place.neighbourhood || place.suburb || place.district || place.locality || (place.type === 'district' ? place.name : '') || '';
+      const address = [place.street, place.housenumber].filter(Boolean).join(' ') || place.name;
+      if (!city || !address || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+      const label = [...new Set([address, area, city].filter(Boolean))].join(', ');
+      return { city, area, address, latitude, longitude, label, approximate: !place.housenumber };
+    };
 
+    const findLocation = async () => {
+      const query = search.value.trim();
+      if (query.length < 3) {
+        results.textContent = window.makanTranslate('Please enter at least 3 characters.');
+        return;
+      }
+      button.disabled = true;
+      results.textContent = window.makanTranslate('Searching...');
+      let places = localResults(query);
+      try {
+        const params = new URLSearchParams({ q: query, countrycode: 'JO', limit: '8', lang: 'en' });
+        const response = await fetch('https://photon.komoot.io/api/?' + params, { signal: AbortSignal.timeout(7000) });
+        if (!response.ok) throw new Error('Location search failed');
+        const payload = await response.json();
+        places = [...places, ...(payload.features || []).map(fromPhoton).filter(Boolean)];
+      } catch {
+        if (!places.length) {
+          results.textContent = window.makanTranslate('Location search is unavailable. Try again.');
+          return;
+        }
+      } finally {
+        button.disabled = false;
+      }
+
+      results.replaceChildren();
+      if (places.length === 0) {
+        results.textContent = window.makanTranslate('No matching locations in Jordan.');
+      }
+      for (const place of places) {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'list-group-item list-group-item-action';
+        option.textContent = place.label;
+        option.addEventListener('click', () => selectPlace(place));
+        results.append(option);
+      }
+    };
+
+    button.addEventListener('click', findLocation);
+    search.addEventListener('keydown', event => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      if (!button.disabled) findLocation();
+    });
   });
-
 </script>
 
 <!-- Listing Readiness: Dynamic Progress -->

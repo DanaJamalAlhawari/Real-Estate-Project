@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -16,9 +17,12 @@ class PropertyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $properties = Property::with('images')->where('agent_id', request()->user()->id)->get();
+        $filters = $request->validate(['q' => 'nullable|string|max:255']);
+        $properties = $request->user()->properties()->with('images')
+            ->matchingSearch($filters['q'] ?? '')
+            ->latest()->orderByDesc('id')->paginate(config('app.properties_per_page'))->withQueryString();
 
         return view('owner.properties', ['properties' => $properties]);
     }
@@ -54,17 +58,20 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
+        $translationRules = $this->translationRules();
         $this->ensureCanSubmitProperty($request);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            ...$translationRules,
             'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
             'price' => 'required|numeric|min:0',
             'city' => 'required|string|max:255',
             'area' => 'nullable|string|max:255',
             'address' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
+            'latitude' => 'required|numeric|between:29.18,33.4',
+            'longitude' => 'required|numeric|between:34.9,39.32',
+            'location_is_approximate' => 'sometimes|boolean',
             'bedrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:0',
             'services' => 'sometimes|array',
@@ -91,13 +98,14 @@ class PropertyController extends Controller
             // 4. Upload property photos.
             foreach ($photos as $photo) {
                 $path = $photo->store('properties', 'public');
-                abort_if($path === false, 500, 'Could not store the property photo.');
+                abort_if($path === false, 500, __('Could not store the property photo.'));
                 $uploadedPaths[] = $path;
             }
 
             // 5. Save property, services, and image records together.
             $property = DB::transaction(function () use (
                 $validated,
+                $translationRules,
                 $services,
                 $uploadedPaths,
                 $agentId,
@@ -108,6 +116,7 @@ class PropertyController extends Controller
                 // Create property.
                 $property = Property::create([
                     'agent_id' => $agentId,
+                    ...Arr::only($validated, array_keys($translationRules)),
                     'title' => $validated['title'],
                     'description' => $validated['description'],
                     'category' => $validated['category'],
@@ -115,8 +124,9 @@ class PropertyController extends Controller
                     'city' => $validated['city'],
                     'area' => $validated['area'] ?? null,
                     'address' => $validated['address'],
-                    'latitude' => $validated['latitude'] ?? null,
-                    'longitude' => $validated['longitude'] ?? null,
+                    'latitude' => $validated['latitude'],
+                    'longitude' => $validated['longitude'],
+                    'location_is_approximate' => (bool) ($validated['location_is_approximate'] ?? true),
                     'bedrooms' => $validated['bedrooms'],
                     'bathrooms' => $validated['bathrooms'],
                     'ownership_deed_url' => 'NULL',
@@ -135,11 +145,11 @@ class PropertyController extends Controller
 
                 if ($document) {
                     $path = $document->store('verifications', 'local');
-                    abort_if($path === false, 500, 'Could not store the ownership document.');
+                    abort_if($path === false, 500, __('Could not store the ownership document.'));
                     $ownershipPath = $path;
                     $property->ownership_deed_url = $path;
                     $property->verification_status = 'pending';
-                    abort_unless($property->save(), 500, 'Could not save the ownership document.');
+                    abort_unless($property->save(), 500, __('Could not save the ownership document.'));
                 }
 
                 return $property;
@@ -157,13 +167,13 @@ class PropertyController extends Controller
 
         if ($document) {
             return redirect()->route('owner.properties.edit', $property)
-                ->with('success', 'Property created and ownership document uploaded.');
+                ->with('success', __('Property created and ownership document uploaded.'));
         }
 
         // 6. Redirect after successful creation.
         return redirect()
             ->route('owner.properties')
-            ->with('success', 'Property created successfully.');
+            ->with('success', __('Property created successfully.'));
     }
 
     /**
@@ -190,6 +200,7 @@ class PropertyController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $translationRules = $this->translationRules();
         // 1. Find the property belonging to the agent.
         $property = Property::where('agent_id', $request->user()->id)->findOrFail($id);
 
@@ -197,13 +208,15 @@ class PropertyController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            ...$translationRules,
             'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
             'price' => 'required|numeric|min:0',
             'city' => 'required|string|max:255',
             'area' => 'nullable|string|max:255',
             'address' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
+            'location_is_approximate' => 'sometimes|boolean',
             'bedrooms' => 'nullable|integer|min:0',
             'bathrooms' => 'nullable|integer|min:0',
             // Validate selected services.
@@ -219,6 +232,7 @@ class PropertyController extends Controller
         ]);
 
         // 3. Update basic property information.
+        $property->fill(Arr::only($validated, array_keys($translationRules)));
         $property->title = $validated['title'];
         $property->description = $validated['description'];
         $property->category = $validated['category'];
@@ -228,8 +242,11 @@ class PropertyController extends Controller
         $property->city = $validated['city'];
         $property->area = $validated['area'] ?? null;
         $property->address = $validated['address'];
-        $property->latitude = $validated['latitude'] ?? null;
-        $property->longitude = $validated['longitude'] ?? null;
+        $property->latitude = $validated['latitude'] ?? $property->latitude;
+        $property->longitude = $validated['longitude'] ?? $property->longitude;
+        if ($property->isDirty(['latitude', 'longitude'])) {
+            $property->location_is_approximate = (bool) ($validated['location_is_approximate'] ?? true);
+        }
 
         // 5. Update property details.
         // Keep existing values if bedrooms or bathrooms are not submitted.
@@ -246,7 +263,7 @@ class PropertyController extends Controller
 
         if ($imagesToDelete->count() !== count($deletedImageIds)) {
             throw ValidationException::withMessages([
-                'deleted_images' => 'One or more selected images do not belong to this property.',
+                'deleted_images' => __('One or more selected images do not belong to this property.'),
             ]);
         }
 
@@ -256,7 +273,7 @@ class PropertyController extends Controller
 
         if ($remainingPhotos + count($newPhotos) > 10) {
             throw ValidationException::withMessages([
-                'photos' => 'A property can have a maximum of 10 photos.',
+                'photos' => __('A property can have a maximum of 10 photos.'),
             ]);
         }
 
@@ -266,7 +283,7 @@ class PropertyController extends Controller
         try {
             foreach ($newPhotos as $photo) {
                 $path = $photo->store('properties', 'public');
-                abort_if($path === false, 500, 'Could not store the property photo.');
+                abort_if($path === false, 500, __('Could not store the property photo.'));
                 $uploadedPaths[] = $path;
             }
 
@@ -337,7 +354,7 @@ class PropertyController extends Controller
         // 7. Redirect after successful update.
         return redirect()
             ->route('owner.properties')
-            ->with('success', 'Property updated successfully.');
+            ->with('success', __('Property updated successfully.'));
     }
 
     /**
@@ -353,7 +370,21 @@ class PropertyController extends Controller
 
         return redirect()
             ->route('owner.properties')
-            ->with('success', 'Property deleted successfully.');
+            ->with('success', __('Property deleted successfully.'));
+    }
+
+    /** @return array<string, string> */
+    private function translationRules(): array
+    {
+        $rules = [];
+
+        foreach (Property::TRANSLATABLE_FIELDS as $field) {
+            $rule = $field === 'description' ? 'nullable|string' : 'nullable|string|max:255';
+            $rules[$field.'_ar'] = $rule;
+            $rules[$field.'_en'] = $rule;
+        }
+
+        return $rules;
     }
 
     private function ensureCanSubmitProperty(Request $request): void

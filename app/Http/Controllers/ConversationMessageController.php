@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InboxMessageReceived;
+use App\Events\MessageReactionChanged;
 use App\Events\MessageSent;
 use App\Models\Conversation;
+use App\Models\Property;
 use App\Models\RealEstateUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
-use App\Events\InboxMessageReceived;
 use Illuminate\Validation\Rule;
-use App\Events\MessageReactionChanged;
-use App\Models\Property;
+use Illuminate\View\View;
 
 class ConversationMessageController extends Controller
 {
@@ -49,16 +50,17 @@ class ConversationMessageController extends Controller
             return $message;
         });
 
-        rescue(fn() => MessageSent::dispatch($message));
+        rescue(fn () => MessageSent::dispatch($message));
         $recipientId = (int) $user->getKey() === (int) $conversation->tenant_id
             ? (int) $conversation->agent_id
             : (int) $conversation->tenant_id;
 
-        rescue(fn() => InboxMessageReceived::dispatch($message, $recipientId));
+        rescue(fn () => InboxMessageReceived::dispatch($message, $recipientId));
 
         return response()->json($message->chatPayload(), 201);
     }
-    public function markRead(Request $request, Conversation $conversation): \Illuminate\Http\Response
+
+    public function markRead(Request $request, Conversation $conversation): Response
     {
         $user = $request->user();
 
@@ -82,11 +84,12 @@ class ConversationMessageController extends Controller
 
         return response()->noContent();
     }
+
     public function toggleReaction(
         Request $request,
         Conversation $conversation,
         int $messageId
-    ): \Illuminate\Http\JsonResponse {
+    ): JsonResponse {
         $user = $request->user();
 
         abort_unless(
@@ -100,7 +103,7 @@ class ConversationMessageController extends Controller
 
         $userId = (int) $user->getKey();
 
-        $emoji = \Illuminate\Support\Facades\DB::transaction(
+        $emoji = DB::transaction(
             function () use ($conversation, $messageId, $userId, $data) {
                 $message = $conversation->messages()
                     ->lockForUpdate()
@@ -125,7 +128,7 @@ class ConversationMessageController extends Controller
             }
 
         );
-        rescue(fn() => MessageReactionChanged::dispatch(
+        rescue(fn () => MessageReactionChanged::dispatch(
             (int) $conversation->getKey(),
             $messageId,
             $userId,
@@ -138,6 +141,7 @@ class ConversationMessageController extends Controller
             'emoji' => $emoji,
         ]);
     }
+
     public function index(Request $request): View
     {
         $user = $request->user();
@@ -154,13 +158,13 @@ class ConversationMessageController extends Controller
         $conversations = $user->inboxConversations()
             ->with(['agent.agentProfile', 'tenant.agentProfile', 'tenant.tenantProfile'])
             ->withCount([
-                'messages as unread_count' => fn($messages) => $messages
+                'messages as unread_count' => fn ($messages) => $messages
                     ->where('sender_id', '!=', $user->getKey())
                     ->where('is_read', false),
             ])
             ->orderByDesc('last_message_at')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(config('app.pagination_per_page'), ['*'], 'inbox_page')->withQueryString();
 
         return view($view, [
             'conversations' => $conversations,
@@ -211,13 +215,12 @@ class ConversationMessageController extends Controller
         $messages = $conversation->messages()
             ->with(['replyTo', 'reactions'])
             ->latest('id')
-            ->limit(50)
-            ->get()
-            ->reverse();
+            ->paginate(config('app.pagination_per_page'), ['*'], 'messages_page')->withQueryString();
+        $messages->setCollection($messages->getCollection()->reverse()->values());
 
-        $lastLoadedMessage = $messages->last();
+        $lastLoadedMessage = $messages->getCollection()->last();
 
-        if ($lastLoadedMessage !== null) {
+        if ($messages->onFirstPage() && $lastLoadedMessage !== null) {
             $conversation->messages()
                 ->where('id', '<=', $lastLoadedMessage->id)
                 ->where('sender_id', '!=', $user->getKey())
@@ -231,20 +234,20 @@ class ConversationMessageController extends Controller
         $conversations = $user->inboxConversations()
             ->with(['agent.agentProfile', 'tenant.agentProfile', 'tenant.tenantProfile'])
             ->withCount([
-                'messages as unread_count' => fn($messages) => $messages
+                'messages as unread_count' => fn ($messages) => $messages
                     ->where('sender_id', '!=', $user->getKey())
                     ->where('is_read', false),
             ])
             ->orderByDesc('last_message_at')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(config('app.pagination_per_page'), ['*'], 'inbox_page')->withQueryString();
 
         $chatProperty = $conversation->property_id === null
             ? null
             : Property::query()
-            ->where('verification_status', 'verified')
-            ->whereIn('status', ['available', 'partially_rented'])
-            ->find($conversation->property_id, ['id', 'title', 'price']);
+                ->where('verification_status', 'verified')
+                ->whereIn('status', ['available', 'partially_rented'])
+                ->find($conversation->property_id, ['id', 'title', 'title_ar', 'title_en', 'price']);
         $partner = $isTenant ? $conversation->agent : $conversation->tenant;
 
         return view($view, [

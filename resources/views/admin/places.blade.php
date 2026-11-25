@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Areas")
+@section('title', __('Makan — Areas'))
 @section('roleStyle', 'admin')
 @section('bodyAttributes') data-role="admin" data-page="places"@endsection
 
@@ -10,7 +10,7 @@
       type="checkbox"
       class="sidebar-toggle"
       id="sidebarToggle"
-      aria-label="Collapse the menu"
+      aria-label="{{ __('Collapse the menu') }}"
     />
 
     <!-- ===== Topbar ===== -->
@@ -20,14 +20,14 @@
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#appSidebar"
-        aria-label="Menu"
+        aria-label="{{ __('Menu') }}"
       >
         <i class="bi bi-list"></i>
       </button>
       <label
         for="sidebarToggle"
         class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
+        title="{{ __('Collapse or expand the menu') }}"
         aria-hidden="true"
       >
         <i class="bi bi-list"></i>
@@ -40,7 +40,7 @@
         <a
           class="icon-btn"
           href="{{ route('admin.chat') }}"
-          aria-label="Messages, 2 unread"
+          aria-label="{{ __('Messages, 2 unread') }}"
         >
           <i class="bi bi-chat-dots"></i><span class="icon-badge">2</span>
         </a>
@@ -49,7 +49,7 @@
             class="icon-btn"
             type="button"
             data-bs-toggle="dropdown"
-            aria-label="Notifications"
+            aria-label="{{ __('Notifications') }}"
           >
             <i class="bi bi-bell"></i><span class="dot"></span>
           </button>
@@ -57,7 +57,7 @@
             class="dropdown-menu dropdown-menu-end shadow-sm p-0"
             style="width: 320px"
           >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="px-3 py-2 border-bottom fw-semibold">{{ __('Notifications') }}</div>
             <div class="py-1">
               <a
                 class="dropdown-item d-flex gap-2 py-2 text-wrap"
@@ -73,7 +73,7 @@
                     >4 verification requests waiting for review</span
                   >
                   <span class="text-muted" style="font-size: 0.72rem"
-                    >Today</span
+                    >{{ __('Today') }}</span
                   >
                 </span>
               </a>
@@ -98,6 +98,7 @@
           </ul>
         </div>
       </div>
+      <x-language-switch />
     </header>
 
     <div class="app-shell">
@@ -116,31 +117,31 @@
             class="btn-close"
             data-bs-dismiss="offcanvas"
             data-bs-target="#appSidebar"
-            aria-label="Close"
+            aria-label="{{ __('Close') }}"
           ></button>
         </div>
         <div class="offcanvas-body">
-          <div class="side-label">Admin</div>
-          <a class="side-link" href="{{ route('admin.dashboard') }}" title="Dashboard"
+          <div class="side-label">{{ __('Admin') }}</div>
+          <a class="side-link" href="{{ route('admin.dashboard') }}" title="{{ __('Dashboard') }}"
             ><i class="bi bi-grid-1x2"></i
-            ><span class="flex-grow-1">Dashboard</span></a
+            ><span class="flex-grow-1">{{ __('Dashboard') }}</span></a
           >
-          <a class="side-link" href="{{ route('admin.verifications') }}" title="Verifications"
+          <a class="side-link" href="{{ route('admin.verifications') }}" title="{{ __('Verifications') }}"
             ><i class="bi bi-patch-check"></i
-            ><span class="flex-grow-1">Verifications</span
+            ><span class="flex-grow-1">{{ __('Verifications') }}</span
             ><span class="side-badge">4</span></a
           >
-          <a class="side-link" href="{{ route('admin.users') }}" title="Users"
+          <a class="side-link" href="{{ route('admin.users') }}" title="{{ __('Users') }}"
             ><i class="bi bi-people"></i
-            ><span class="flex-grow-1">Users</span></a
+            ><span class="flex-grow-1">{{ __('Users') }}</span></a
           >
-          <a class="side-link active" href="{{ route('admin.places') }}" aria-current="page" title="Areas"
+          <a class="side-link active" href="{{ route('admin.places') }}" aria-current="page" title="{{ __('Areas') }}"
             ><i class="bi bi-geo-alt"></i
-            ><span class="flex-grow-1">Areas</span></a
+            ><span class="flex-grow-1">{{ __('Areas') }}</span></a
           >
-          <a class="side-link" href="{{ route('admin.chat') }}" title="Messages"
+          <a class="side-link" href="{{ route('admin.chat') }}" title="{{ __('Messages') }}"
             ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span
+            ><span class="flex-grow-1">{{ __('Messages') }}</span
             ><span class="side-badge">2</span></a
           >
         </div>
@@ -151,10 +152,9 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Areas</h1>
+            <h1>{{ __('Areas') }}</h1>
             <p>
-              Average bills and internet for each area power the true monthly
-              cost on every home.
+              {{ __('Average bills and internet for each area power the true monthly cost on every home.') }}
             </p>
           </div>
           <button
@@ -163,31 +163,31 @@
             id="addHoodBtn"
             data-action="add-hood"
           >
-            <i class="bi bi-plus-lg"></i><span>Add area</span>
+            <i class="bi bi-plus-lg"></i><span>{{ __('Add area') }}</span>
           </button>
         </div>
 
           <!-- ===== 2. Areas ===== -->
-          <section aria-label="Areas">
+          <section aria-label="{{ __('Areas') }}">
             <div class="panel panel-table">
               <div class="table-responsive">
                 <table class="table bt-table hoods-table">
                   <thead>
                     <tr>
-                      <th scope="col">Area</th>
-                      <th scope="col">City</th>
-                      <th scope="col">Avg. electricity &amp; water</th>
-                      <th scope="col">Internet</th>
-                      <th scope="col">Properties</th>
+                      <th scope="col">{{ __('Area') }}</th>
+                      <th scope="col">{{ __('City') }}</th>
+                      <th scope="col">{{ __('Avg. electricity &amp; water') }}</th>
+                      <th scope="col">{{ __('Internet') }}</th>
+                      <th scope="col">{{ __('Properties') }}</th>
                       <th scope="col">
-                        <span class="visually-hidden">Actions</span>
+                        <span class="visually-hidden">{{ __('Actions') }}</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody id="hoodsBody">
                     <tr>
-                      <td class="fw-semibold">Al Jubeiha</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Al Jubeiha') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>30 JOD</td>
                       <td>15 JOD</td>
                       <td class="text-muted">2</td>
@@ -196,15 +196,15 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Al Jubeiha"
+                          aria-label="{{ __('Edit Al Jubeiha') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold">Sweileh</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Sweileh') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>25 JOD</td>
                       <td>15 JOD</td>
                       <td class="text-muted">1</td>
@@ -213,15 +213,15 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Sweileh"
+                          aria-label="{{ __('Edit Sweileh') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold">Tla Al Ali</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Tla Al Ali') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>35 JOD</td>
                       <td>20 JOD</td>
                       <td class="text-muted">1</td>
@@ -230,15 +230,15 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Tla Al Ali"
+                          aria-label="{{ __('Edit Tla Al Ali') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold">Shmeisani</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Shmeisani') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>40 JOD</td>
                       <td>20 JOD</td>
                       <td class="text-muted">1</td>
@@ -247,15 +247,15 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Shmeisani"
+                          aria-label="{{ __('Edit Shmeisani') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold">Khalda</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Khalda') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>40 JOD</td>
                       <td>20 JOD</td>
                       <td class="text-muted">1</td>
@@ -264,15 +264,15 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Khalda"
+                          aria-label="{{ __('Edit Khalda') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
                     <tr>
-                      <td class="fw-semibold">Abdali</td>
-                      <td class="text-muted">Amman</td>
+                      <td class="fw-semibold">{{ __('Abdali') }}</td>
+                      <td class="text-muted">{{ __('Amman') }}</td>
                       <td>40 JOD</td>
                       <td>20 JOD</td>
                       <td class="text-muted">0</td>
@@ -281,7 +281,7 @@
                           type="button"
                           class="btn-icon"
                           data-action="edit-hood"
-                          aria-label="Edit Abdali"
+                          aria-label="{{ __('Edit Abdali') }}"
                         >
                           <i class="bi bi-pencil"></i>
                         </button>

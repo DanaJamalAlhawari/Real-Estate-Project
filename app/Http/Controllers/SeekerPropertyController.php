@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
 use App\Models\Property;
+use App\Models\PropertyDailyView;
 use App\Models\RealEstateUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use App\Models\Conversation;
-use Illuminate\Http\RedirectResponse;
-
 
 class SeekerPropertyController extends Controller
 {
@@ -24,7 +24,7 @@ class SeekerPropertyController extends Controller
 
         $property = Property::discoverable()
             ->with([
-                'images' => fn($query) => $query
+                'images' => fn ($query) => $query
                     ->whereNull('room_id')
                     ->orderByDesc('is_primary')
                     ->orderBy('id'),
@@ -33,6 +33,11 @@ class SeekerPropertyController extends Controller
                 'rooms',
             ])
             ->findOrFail($propertyId);
+
+        PropertyDailyView::incrementOrCreate([
+            'property_id' => $property->id,
+            'viewed_on' => today('Asia/Amman')->toDateString(),
+        ], 'views');
 
         return view('seeker.property', [
             'property' => $property,
@@ -47,6 +52,7 @@ class SeekerPropertyController extends Controller
                 ]),
         ]);
     }
+
     public function startConversation(Request $request, Property $property): RedirectResponse
     {
         $tenant = $request->user();
@@ -60,7 +66,7 @@ class SeekerPropertyController extends Controller
         );
 
         $conversation = Conversation::unguarded(
-            fn() => Conversation::firstOrCreate([
+            fn () => Conversation::firstOrCreate([
                 'property_id' => $property->getKey(),
                 'tenant_id' => $tenant->getKey(),
                 'agent_id' => $property->agent_id,

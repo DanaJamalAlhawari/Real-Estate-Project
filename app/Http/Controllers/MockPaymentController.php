@@ -24,11 +24,13 @@ class MockPaymentController extends Controller
     {
         $bookings = $request->user()->bookings()->where('status', 'confirmed')
             ->whereDoesntHave('payments', fn ($query) => $query->whereIn('status', ['successful', 'refunded']))
-            ->with('property')->orderBy('id')->get();
+            ->orderBy('id');
+        $checkoutBookings = (clone $bookings)->pluck('total_price', 'id');
 
         return view('seeker.cart', [
-            'bookings' => $bookings,
-            'total' => $bookings->sum(fn (Booking $booking) => (int) round((float) $booking->total_price * 100)) / 100,
+            'bookings' => $bookings->with('property')->paginate(config('app.pagination_per_page'))->withQueryString(),
+            'checkoutBookingIds' => $checkoutBookings->keys(),
+            'total' => $checkoutBookings->sum(fn ($price) => (int) round((float) $price * 100)) / 100,
         ]);
     }
 
@@ -46,14 +48,14 @@ class MockPaymentController extends Controller
 
             foreach ($bookings as $booking) {
                 if ($booking->status !== 'confirmed' && ! $booking->payments()->where('status', 'successful')->exists()) {
-                    throw ValidationException::withMessages(['payment' => 'A booking in your cart changed. Review the updated cart and try again.']);
+                    throw ValidationException::withMessages(['payment' => __('A booking in your cart changed. Review the updated cart and try again.')]);
                 }
 
                 $this->recordPayment($booking);
             }
         }, 3);
 
-        return to_route('seeker.bookings')->with('success', 'Demo checkout complete. Your receipts are available below.');
+        return to_route('seeker.bookings')->with('success', __('Demo checkout complete. Your receipts are available below.'));
     }
 
     public function show(Request $request, Booking $booking): View
@@ -91,9 +93,9 @@ class MockPaymentController extends Controller
             'card_expiry' => ['bail', 'required', 'string', 'in:12/30'],
             'card_cvv' => ['bail', 'required', 'string', 'in:123'],
         ], [
-            'card_number.regex' => 'Enter the demo card number 4242 4242 4242 4242.',
-            'card_expiry.in' => 'Enter the demo expiration date 12/30.',
-            'card_cvv.in' => 'Enter the demo security code 123.',
+            'card_number.regex' => __('Enter the demo card number 4242 4242 4242 4242.'),
+            'card_expiry.in' => __('Enter the demo expiration date 12/30.'),
+            'card_cvv.in' => __('Enter the demo security code 123.'),
         ], [
             'card_number' => 'card number',
             'card_expiry' => 'expiration date',
@@ -126,14 +128,14 @@ class MockPaymentController extends Controller
         abort_unless($booking->status === 'confirmed', 403);
 
         if ($booking->commission()->exists() || $booking->payments()->where('status', 'refunded')->exists()) {
-            throw ValidationException::withMessages(['payment' => 'An existing payment record needs review before checkout.']);
+            throw ValidationException::withMessages(['payment' => __('An existing payment record needs review before checkout.')]);
         }
 
         $rate = $booking->approved_commission_rate
             ?? config('commissions.category_rates.'.$booking->property->category);
 
         if ($rate === null) {
-            throw ValidationException::withMessages(['payment' => 'No commission rate is available for this property.']);
+            throw ValidationException::withMessages(['payment' => __('No commission rate is available for this property.')]);
         }
 
         $paidCents = (int) round((float) $booking->total_price * 100);

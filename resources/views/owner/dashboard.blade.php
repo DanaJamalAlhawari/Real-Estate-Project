@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Dashboard")
+@section('title', __('Makan — Dashboard'))
 @section('roleStyle', 'owner')
 @section('bodyAttributes') data-role="owner" data-page="dashboard"@endsection
 
@@ -15,7 +15,7 @@
       type="checkbox"
       class="sidebar-toggle"
       id="sidebarToggle"
-      aria-label="Collapse the menu"
+      aria-label="{{ __('Collapse the menu') }}"
     />
 
     <!-- ===== Topbar ===== -->
@@ -25,14 +25,14 @@
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#appSidebar"
-        aria-label="Menu"
+        aria-label="{{ __('Menu') }}"
       >
         <i class="bi bi-list"></i>
       </button>
       <label
         for="sidebarToggle"
         class="icon-btn sidebar-burger d-none d-lg-inline-flex"
-        title="Collapse or expand the menu"
+        title="{{ __('Collapse or expand the menu') }}"
         aria-hidden="true"
       >
         <i class="bi bi-list"></i>
@@ -46,7 +46,7 @@
           class="icon-btn"
           href="{{ route('owner.chat') }}"
           data-inbox-messages-link
-          aria-label="Messages, {{ $unreadMessageCount }} unread"
+          aria-label="{{ __('Messages, :count unread', ['count' => $unreadMessageCount]) }}"
         >
           <i class="bi bi-chat-dots"></i><span class="icon-badge" data-inbox-unread @if (!$unreadMessageCount) hidden @endif>{{ $unreadMessageCount }}</span>
         </a>
@@ -55,7 +55,7 @@
             class="icon-btn"
             type="button"
             data-bs-toggle="dropdown"
-            aria-label="Notifications"
+            aria-label="{{ __('Notifications') }}"
           >
             <i class="bi bi-bell"></i>
           </button>
@@ -63,7 +63,7 @@
             class="dropdown-menu dropdown-menu-end shadow-sm p-0"
             style="width: 320px"
           >
-            <div class="px-3 py-2 border-bottom fw-semibold">Notifications</div>
+            <div class="px-3 py-2 border-bottom fw-semibold">{{ __('Notifications') }}</div>
             <div class="py-1">
               <a
                 class="dropdown-item d-flex gap-2 py-2 text-wrap"
@@ -75,7 +75,7 @@
                   ><i class="bi bi-inbox"></i
                 ></span>
                 <span class="small">
-                  <span class="d-block">{{ $pendingBookingCount }} pending booking {{ Str::plural('request', $pendingBookingCount) }}</span>
+                  <span class="d-block">{{ $pendingBookingCount }} {{ __('pending booking') }} {{ Str::plural('request', $pendingBookingCount) }}</span>
                 </span>
               </a>
               <a
@@ -89,7 +89,7 @@
                 ></span>
                 <span class="small">
                   <span class="d-block"
-                    >{{ $latestVerifiedProperty ? $latestVerifiedProperty->title.' has been verified' : 'No property verification updates' }}</span
+                    >{{ $latestVerifiedProperty ? __(':property has been verified', ['property' => $latestVerifiedProperty->localized('title')]) : __('No property verification updates') }}</span
                   >
                   @if ($latestVerifiedProperty)
                     <span class="text-muted small">{{ $latestVerifiedProperty->verified_at->diffForHumans() }}</span>
@@ -105,13 +105,13 @@
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            aria-label="Account menu, {{ $displayName ?? 'Agent' }}"
+            aria-label="{{ __('Account menu, :name', ['name' => $displayName ?? __('Agent')]) }}"
           >
             <span class="avatar">{{ $displayInitial }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><h6 class="dropdown-header">{{ $displayName ?? 'Agent' }}</h6></li>
-            <li><a class="dropdown-item" href="{{ route('owner.account') }}">My account</a></li>
+            <li><h6 class="dropdown-header">{{ $displayName ?? __('Agent') }}</h6></li>
+            <li><a class="dropdown-item" href="{{ route('owner.account') }}">{{ __('My account') }}</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
               <x-logout-form />
@@ -119,6 +119,7 @@
           </ul>
         </div>
       </div>
+      <x-language-switch />
     </header>
 
     <div class="app-shell">
@@ -137,36 +138,36 @@
             class="btn-close"
             data-bs-dismiss="offcanvas"
             data-bs-target="#appSidebar"
-            aria-label="Close"
+            aria-label="{{ __('Close') }}"
           ></button>
         </div>
         <div class="offcanvas-body">
-          <div class="side-label">Property owner</div>
-          <a class="side-link active" href="{{ route('owner.dashboard') }}" aria-current="page" title="Dashboard"
+          <div class="side-label">{{ __('Property owner') }}</div>
+          <a class="side-link active" href="{{ route('owner.dashboard') }}" aria-current="page" title="{{ __('Dashboard') }}"
             ><i class="bi bi-grid-1x2"></i
-            ><span class="flex-grow-1">Dashboard</span></a
+            ><span class="flex-grow-1">{{ __('Dashboard') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.properties') }}" title="My properties"
+          <a class="side-link" href="{{ route('owner.properties') }}" title="{{ __('My properties') }}"
             ><i class="bi bi-house-door"></i
-            ><span class="flex-grow-1">My properties</span></a
+            ><span class="flex-grow-1">{{ __('My properties') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.property-form') }}" title="Add property"
+          <a class="side-link" href="{{ route('owner.property-form') }}" title="{{ __('Add property') }}"
             ><i class="bi bi-plus-square"></i
-            ><span class="flex-grow-1">Add property</span></a
+            ><span class="flex-grow-1">{{ __('Add property') }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.requests') }}" title="Booking requests"
+          <a class="side-link" href="{{ route('owner.requests') }}" title="{{ __('Booking requests') }}"
             ><i class="bi bi-inbox"></i
-            ><span class="flex-grow-1">Booking requests</span
+            ><span class="flex-grow-1">{{ __('Booking requests') }}</span
             ><span class="side-badge">{{ $pendingBookingCount }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.chat') }}" title="Messages"
+          <a class="side-link" href="{{ route('owner.chat') }}" title="{{ __('Messages') }}"
             ><i class="bi bi-chat-dots"></i
-            ><span class="flex-grow-1">Messages</span
+            ><span class="flex-grow-1">{{ __('Messages') }}</span
             ><span class="side-badge">{{ $unreadMessageCount }}</span></a
           >
-          <a class="side-link" href="{{ route('owner.account') }}" title="My account"
+          <a class="side-link" href="{{ route('owner.account') }}" title="{{ __('My account') }}"
             ><i class="bi bi-person-badge"></i
-            ><span class="flex-grow-1">My account</span></a
+            ><span class="flex-grow-1">{{ __('My account') }}</span></a
           >
         </div>
       </aside>
@@ -176,12 +177,12 @@
         <!-- 1. Page header -->
         <div class="page-head">
           <div>
-            <h1>Welcome back{{ $displayName ? ', '.$displayName : '' }}</h1>
-            <p>Overview of your properties and recent activity.</p>
+            <h1>{{ __('Welcome back') }}{{ $displayName ? ', '.$displayName : '' }}</h1>
+            <p>{{ __('Overview of your properties and recent activity.') }}</p>
           </div>
           <a href="{{ route('owner.property-form') }}" class="btn btn-accent">
             <i class="bi bi-plus-lg"></i>
-            <span>Add property</span>
+            <span>{{ __('Add property') }}</span>
           </a>
         </div>
 
@@ -189,14 +190,14 @@
         <div class="alert-soft flex-wrap mb-4" id="staleAlert">
           <i class="bi bi-arrow-repeat"></i>
           <span class="flex-grow-1"
-            >Availability reminders are unavailable.</span
+            >{{ __('Availability reminders are unavailable.') }}</span
           >
           <button
             type="button"
             class="btn btn-alert"
             disabled
           >
-            Still available
+            {{ __('Still available') }}
           </button>
         </div>
 
@@ -206,7 +207,7 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-eye"></i></span>
               <div>
-                <b>—</b><span>Views</span>
+                <b>—</b><span>{{ __('Views') }}</span>
               </div>
             </div>
           </div>
@@ -214,20 +215,20 @@
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-inbox"></i></span>
               <div>
-                <b>{{ $recentBookingCount }}</b><span>Booking requests · last 30 days</span>
+                <b>{{ $recentBookingCount }}</b><span>{{ __('Booking requests · last 30 days') }}</span>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-xl-3">
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-stars"></i></span>
-              <div><b>—</b><span>Average match</span></div>
+              <div><b>{{ array_sum(array_column($dailyPropertyViews, 'amount')) }}</b><span>{{ __('Property views · last 14 days') }}</span></div>
             </div>
           </div>
           <div class="col-sm-6 col-xl-3">
             <div class="kpi">
               <span class="kpi-icon"><i class="bi bi-house-door"></i></span>
-              <div><b>{{ $activeProperties }} / {{ $totalProperties }}</b><span>Active properties</span></div>
+              <div><b>{{ $activeProperties }} / {{ $totalProperties }}</b><span>{{ __('Active properties') }}</span></div>
             </div>
           </div>
         </div>
@@ -238,18 +239,16 @@
             <!-- 4. Views -->
             <section class="panel" aria-labelledby="viewsTitle">
               <div class="panel-head">
-                <h2 id="viewsTitle">Property views · last 14 days</h2>
+                <h2 id="viewsTitle">{{ __('Property views · last 14 days') }}</h2>
               </div>
-              <div class="bar-chart align-items-center justify-content-center" id="viewsChart">
-                <span class="text-muted small">Property view data is unavailable.</span>
-              </div>
+              <x-dashboard-chart :series="$dailyPropertyViews" :label="__('Property views · last 14 days')" />
             </section>
 
             <!-- 5. New booking requests -->
             <section class="panel" aria-labelledby="newRequestsTitle">
               <div class="panel-head">
-                <h2 id="newRequestsTitle">New booking requests</h2>
-                <a href="{{ route('owner.requests') }}">View all</a>
+                <h2 id="newRequestsTitle">{{ __('New booking requests') }}</h2>
+                <a href="{{ route('owner.requests') }}">{{ __('View all') }}</a>
               </div>
               <ul class="list-clean" id="newRequests">
                 @forelse ($pendingBookings as $booking)
@@ -262,7 +261,7 @@
                     <div class="grow flex-main">
                       <b>{{ $tenantName }}</b>
                       <small>
-                        {{ $booking->property->title }} · from {{ $booking->start_date->format('j M Y') }}
+                        {{ $booking->property?->localized('title') }} {{ __('· from') }} {{ $booking->start_date->translatedFormat('j M Y') }}
                         @if ($booking->duration_unit)
                           · {{ $booking->duration }} {{ Str::plural($booking->duration_unit === 'daily' ? 'day' : Str::beforeLast($booking->duration_unit, 'ly'), $booking->duration) }}
                         @endif
@@ -272,18 +271,19 @@
                       <form method="post" action="{{ route('owner.requests.accept', $booking) }}">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                        <button type="submit" class="btn btn-primary btn-sm">{{ __('Accept') }}</button>
                       </form>
                       <form method="post" action="{{ route('owner.requests.reject', $booking) }}">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-ghost btn-sm">Decline</button>
+                        <button type="submit" class="btn btn-ghost btn-sm">{{ __('Decline') }}</button>
                       </form>
                     </div>
                   </li>
                 @empty
-                  <li class="list-row text-muted">No pending booking requests.</li>
+                  <li class="list-row text-muted">{{ __('No pending booking requests.') }}</li>
                 @endforelse
+        <x-pagination :items="$pendingBookings" />
               </ul>
             </section>
           </div>
@@ -293,27 +293,28 @@
             <!-- 6. Featured listing -->
             <section class="panel panel-featured">
               <div class="featured-label">
-                <i class="bi bi-star-fill"></i>Featured listing
+                <i class="bi bi-star-fill"></i>{{ __('Featured listing') }}
               </div>
-              <p>Featured listing data is unavailable.</p>
-              <a href="{{ route('owner.account') }}" class="btn btn-light text-primary-bt">My account</a>
+              <p>{{ __('Featured listing data is unavailable.') }}</p>
+              <a href="{{ route('owner.account') }}" class="btn btn-light text-primary-bt">{{ __('My account') }}</a>
             </section>
 
             <!-- 7. Per-property performance -->
             <section class="panel" aria-labelledby="perfTitle">
               <div class="panel-head">
-                <h2 id="perfTitle">Performance by property</h2>
+                <h2 id="perfTitle">{{ __('Performance by property') }}</h2>
               </div>
               <div class="d-flex flex-column gap-3" id="propertyPerformance">
                 @forelse ($propertyPreview as $property)
                   <div class="d-flex justify-content-between small mb-1">
-                    <span class="fw-medium">{{ $property->title }}</span>
-                    <span class="text-muted">Views unavailable</span>
+                    <span class="fw-medium">{{ $property->localized('title') }}</span>
+                    <span class="text-muted">{{ __((int) $property->period_views === 1 ? ':count view' : ':count views', ['count' => (int) $property->period_views]) }}</span>
                   </div>
                 @empty
-                  <p class="text-muted small mb-0">No properties to show.</p>
+                  <p class="text-muted small mb-0">{{ __('No properties to show.') }}</p>
                 @endforelse
               </div>
+        <x-pagination :items="$propertyPreview" />
             </section>
 
             <!-- 8. Verification status -->
@@ -322,8 +323,8 @@
                 ><i class="bi bi-patch-check-fill"></i
               ></span>
               <div>
-                <b class="d-block">Account verification</b>
-                <span class="small text-muted">{{ $verificationStatus ? ucfirst($verificationStatus) : 'Status unavailable' }}</span>
+                <b class="d-block">{{ __('Account verification') }}</b>
+                <span class="small text-muted">{{ $verificationStatus ? __(\Illuminate\Support\Str::headline($verificationStatus)) : __('Status unavailable') }}</span>
               </div>
             </section>
           </div>

@@ -17,7 +17,7 @@
     notice.dataset.demoNotice = "";
     notice.className = "small text-muted mb-0";
     notice.setAttribute("role", "status");
-    notice.textContent = "This feature is not available yet.";
+    notice.textContent = window.makanTranslate("This feature is not available yet.");
     form.prepend(notice);
   });
 })();

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Create account")
+@section('title', __('Makan — Create account'))
 
 @section('content')
     <main class="auth-wrap">
@@ -9,22 +9,22 @@
           ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
         ></a>
         <div>
-          <h2>Your next home is waiting</h2>
+          <h2>{{ __('Your next home is waiting') }}</h2>
           <ul class="list-unstyled d-grid gap-3 mt-4 mb-0">
             <li class="d-flex gap-2">
-              <i class="bi bi-stars"></i><span>A match score on every home, based on your priorities</span>
+              <i class="bi bi-stars"></i><span>{{ __('A match score on every home, based on your priorities') }}</span>
             </li>
             <li class="d-flex gap-2">
               <i class="bi bi-receipt"></i
-              ><span>The full monthly cost before you decide</span>
+              ><span>{{ __('The full monthly cost before you decide') }}</span>
             </li>
             <li class="d-flex gap-2">
               <i class="bi bi-gift"></i
-              ><span>Free for home seekers — no commission</span>
+              ><span>{{ __('Free for home seekers — no commission') }}</span>
             </li>
           </ul>
         </div>
-        <small class="opacity-75">Verified homes across Jordan</small>
+        <small class="opacity-75">{{ __('Verified homes across Jordan') }}</small>
       </aside>
 
       <section class="auth-main">
@@ -49,11 +49,11 @@
               </ul>
             </div>
           @endif
-          <h1>Create your account</h1>
-          <p class="text-muted mb-4">It takes a minute.</p>
+          <h1>{{ __('Create your account') }}</h1>
+          <p class="text-muted mb-4">{{ __('It takes a minute.') }}</p>
 
           <!-- Account type -->
-          <label class="form-label">I'm...</label>
+          <label class="form-label">{{ __('I\'m...') }}</label>
           <div class="row g-2 mb-3">
             <div class="col-sm-6">
               <input
@@ -67,8 +67,8 @@
               <label class="choice-card" for="roleTenant">
                 <span class="ci"><i class="bi bi-search-heart"></i></span>
                 <span
-                  ><b>Looking for a home</b
-                  ><small>Study, work, tourism, medical care, or relocation</small
+                  ><b>{{ __('Looking for a home') }}</b
+                  ><small>{{ __('Study, work, tourism, medical care, or relocation') }}</small
                 ></span>
               </label>
             </div>
@@ -84,8 +84,8 @@
               <label class="choice-card" for="roleOwner">
                 <span class="ci"><i class="bi bi-house-door"></i></span>
                 <span
-                  ><b>A property owner</b
-                  ><small>Individual owner or real estate agency</small
+                  ><b>{{ __('A property owner') }}</b
+                  ><small>{{ __('Individual owner or real estate agency') }}</small
                 ></span>
               </label>
             </div>
@@ -93,7 +93,7 @@
 
           <!-- Owners only: shown when "A property owner" is picked (CSS :has) -->
           <div class="mb-3 owner-only" id="ownerType">
-            <label class="form-label">Account type</label>
+            <label class="form-label">{{ __('Account type') }}</label>
             <div class="d-flex flex-wrap gap-2">
               <input
                 type="radio"
@@ -105,7 +105,7 @@
               />
               <label class="chip-select" for="otIndividual"
                 ><i class="bi bi-person"></i
-                ><span>Individual owner</span
+                ><span>{{ __('Individual owner') }}</span
               ></label>
               <input
                 type="radio"
@@ -117,14 +117,14 @@
               />
               <label class="chip-select" for="otAgency"
                 ><i class="bi bi-building"></i
-                ><span>Real estate agency</span
+                ><span>{{ __('Real estate agency') }}</span
               ></label>
             </div>
           </div>
 
           <!-- Agencies only: shown when "Real estate agency" is picked -->
           <div class="mb-3 agency-only">
-            <label class="form-label" for="agencyName">Agency name</label>
+            <label class="form-label" for="agencyName">{{ __('Agency name') }}</label>
             <input
               type="text"
               class="form-control"
@@ -132,14 +132,14 @@
               name="agency_name"
               value="{{ old('agency_name') }}"
               autocomplete="organization"
-              placeholder="e.g. Al Riyada Real Estate"
+              placeholder="{{ __('e.g. Al Riyada Real Estate') }}"
             />
           </div>
 
           <div class="row g-3 mb-3">
             @foreach (['first_name' => 'First name', 'last_name' => 'Last name'] as $field => $label)
               <div class="col-sm-6">
-                <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                <label class="form-label" for="{{ $field }}">{{ __($label) }}</label>
                 <input class="form-control" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}"
                        required>
               </div>
@@ -147,7 +147,7 @@
           </div>
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
-              <label class="form-label" for="email">Email</label>
+              <label class="form-label" for="email">{{ __('Email') }}</label>
               <input
                 type="email"
                 class="form-control"
@@ -160,7 +160,7 @@
               />
             </div>
             <div class="col-sm-6">
-              <label class="form-label" for="phone">Phone number</label>
+              <label class="form-label" for="phone">{{ __('Phone number') }}</label>
               <input
                 type="tel"
                 class="form-control"
@@ -176,14 +176,14 @@
               <small class="text-muted"
                 ><i class="bi bi-telephone"></i>
                 <span
-                  >Enter the number in international format, for example +9627XXXXXXXX.</span
+                  >{{ __('Enter the number in international format, for example +9627XXXXXXXX.') }}</span
                 ></small
               >
             </div>
           </div>
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
-              <label class="form-label" for="password">Password</label>
+              <label class="form-label" for="password">{{ __('Password') }}</label>
               <input
                 type="password"
                 class="form-control"
@@ -197,7 +197,7 @@
             </div>
             <div class="col-sm-6">
               <label class="form-label" for="confirmPassword"
-                >Confirm password</label
+                >{{ __('Confirm password') }}</label
               >
               <input
                 type="password"
@@ -211,7 +211,7 @@
               />
             </div>
             <div class="col-12 mt-1">
-              <small class="text-muted">At least 8 characters.</small>
+              <small class="text-muted">{{ __('At least 8 characters.') }}</small>
             </div>
           </div>
           <div class="form-check mb-4">
@@ -226,17 +226,17 @@
             <label
               class="form-check-label small"
               for="terms"
-            >I agree to the Terms of Service and Privacy Policy</label>
+            >{{ __('I agree to the Terms of Service and Privacy Policy') }}</label>
           </div>
 
           <button
             type="submit"
             class="btn btn-accent btn-lg w-100"
-          >Create account</button>
+          >{{ __('Create account') }}</button>
 
           <p class="text-center small mt-4 mb-0">
-            <span class="text-muted">Already have an account?</span>
-            <a href="{{ route('auth.login') }}" class="fw-semibold">Log in</a>
+            <span class="text-muted">{{ __('Already have an account?') }}</span>
+            <a href="{{ route('auth.login') }}" class="fw-semibold">{{ __('Log in') }}</a>
           </p>
         </form>
       </section>

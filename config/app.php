@@ -56,6 +56,9 @@ return [
 
     'home_excluded_property_id' => (int) env('HOME_EXCLUDED_PROPERTY_ID', 0),
 
+    'pagination_per_page' => 4,
+    'properties_per_page' => 6,
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -80,7 +83,7 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'ar'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

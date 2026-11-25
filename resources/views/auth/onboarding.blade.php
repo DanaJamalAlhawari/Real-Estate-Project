@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Get to know you")
+@section('title', __('Makan — Get to know you'))
 
 @section('content')
     <header class="app-topbar">
@@ -11,21 +11,22 @@
         <a
           href="{{ route('seeker.search') }}"
           class="btn btn-sm btn-link text-muted text-decoration-none"
-        >Skip for now</a>
+        >{{ __('Skip for now') }}</a>
       </div>
+      <x-language-switch />
     </header>
 
     <main class="container py-4 py-lg-5">
       <!-- All three steps are shown one after another -->
       <form class="wizard" id="wizard" method="post" action="{{ route('demo.notice') }}" data-demo-form>
               @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+              <p class="small text-muted" role="note">{{ __('Demo form. Use sample details only.') }}</p>
         <!-- ===== Step 1: Why are you coming ===== -->
         <section class="wizard-step" data-step="1">
-          <span class="step-tag">Step 1 of 3</span>
-          <h1 class="h2">Why are you coming?</h1>
+          <span class="step-tag">{{ __('Step 1 of 3') }}</span>
+          <h1 class="h2">{{ __('Why are you coming?') }}</h1>
           <p class="text-muted mb-4">
-            Pick one or more, and we'll suggest the right priorities.
+            {{ __('Pick one or more, and we\'ll suggest the right priorities.') }}
           </p>
 
           <div class="row row-cols-2 row-cols-md-3 g-2 mb-4">
@@ -39,7 +40,7 @@
                 checked
               /><label class="choice-card align-items-center" for="pStudy"
                 ><span class="ci"><i class="bi bi-mortarboard"></i></span
-                ><b>Study</b
+                ><b>{{ __('Study') }}</b
               ></label>
             </div>
             <div class="col">
@@ -51,7 +52,7 @@
                 value="work"
               /><label class="choice-card align-items-center" for="pWork"
                 ><span class="ci"><i class="bi bi-briefcase"></i></span
-                ><b>Work</b
+                ><b>{{ __('Work') }}</b
               ></label>
             </div>
             <div class="col">
@@ -63,7 +64,7 @@
                 value="tourism"
               /><label class="choice-card align-items-center" for="pTourism"
                 ><span class="ci"><i class="bi bi-camera"></i></span
-                ><b>Tourism</b
+                ><b>{{ __('Tourism') }}</b
               ></label>
             </div>
             <div class="col">
@@ -75,7 +76,7 @@
                 value="medical"
               /><label class="choice-card align-items-center" for="pMedical"
                 ><span class="ci"><i class="bi bi-hospital"></i></span
-                ><b>Medical care</b
+                ><b>{{ __('Medical care') }}</b
               ></label>
             </div>
             <div class="col">
@@ -87,7 +88,7 @@
                 value="relocation"
               /><label class="choice-card align-items-center" for="pRelocation"
                 ><span class="ci"><i class="bi bi-truck"></i></span
-                ><b>Relocation</b
+                ><b>{{ __('Relocation') }}</b
               ></label>
             </div>
             <div class="col">
@@ -99,47 +100,47 @@
                 value="other"
               /><label class="choice-card align-items-center" for="pOther"
                 ><span class="ci"><i class="bi bi-three-dots"></i></span
-                ><b>Other</b
+                ><b>{{ __('Other') }}</b
               ></label>
             </div>
           </div>
 
           <div class="row g-3">
             <div class="col-md-7">
-              <label class="form-label">How long will you stay?</label>
+              <label class="form-label">{{ __('How long will you stay?') }}</label>
               <div class="d-flex flex-wrap gap-2">
                 <input
                   type="radio"
                   class="btn-check"
                   name="duration"
                   id="d1"
-                /><label class="chip-select" for="d1">Under a month</label>
+                /><label class="chip-select" for="d1">{{ __('Under a month') }}</label>
                 <input
                   type="radio"
                   class="btn-check"
                   name="duration"
                   id="d3"
-                /><label class="chip-select" for="d3">1 – 3 months</label>
+                /><label class="chip-select" for="d3">{{ __('1 – 3 months') }}</label>
                 <input
                   type="radio"
                   class="btn-check"
                   name="duration"
                   id="d6"
                   checked
-                /><label class="chip-select" for="d6">3 – 6 months</label>
+                /><label class="chip-select" for="d6">{{ __('3 – 6 months') }}</label>
                 <input
                   type="radio"
                   class="btn-check"
                   name="duration"
                   id="d12"
-                /><label class="chip-select" for="d12">6 months or more</label>
+                /><label class="chip-select" for="d12">{{ __('6 months or more') }}</label>
               </div>
             </div>
             <div class="col-md-5">
               <label
                 class="form-label"
                 for="moveIn"
-              >When do you want to move in?</label>
+              >{{ __('When do you want to move in?') }}</label>
               <input
                 type="date"
                 class="form-control"
@@ -152,54 +153,53 @@
 
         <!-- ===== Step 2: Where do you want to live ===== -->
         <section class="wizard-step" data-step="2">
-          <span class="step-tag">Step 2 of 3</span>
-          <h1 class="h2">Where do you want to live?</h1>
+          <span class="step-tag">{{ __('Step 2 of 3') }}</span>
+          <h1 class="h2">{{ __('Where do you want to live?') }}</h1>
           <p class="text-muted mb-4">
-            Pick a city, then an area if you have one in mind. We'll show homes
-            there first.
+            {{ __('Pick a city, then an area if you have one in mind. We\'ll show homes there first.') }}
           </p>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label" for="city">City</label>
+              <label class="form-label" for="city">{{ __('City') }}</label>
               <select class="form-select form-select-lg" id="city" name="city" required>
-                <option value="" selected disabled>Choose a city</option>
-                <option value="amman">Amman</option>
-                <option value="irbid">Irbid</option>
-                <option value="zarqa">Zarqa</option>
-                <option value="aqaba">Aqaba</option>
-                <option value="salt">Salt</option>
-                <option value="madaba">Madaba</option>
-                <option value="jerash">Jerash</option>
-                <option value="ajloun">Ajloun</option>
-                <option value="mafraq">Mafraq</option>
-                <option value="karak">Karak</option>
-                <option value="tafilah">Tafilah</option>
-                <option value="maan">Ma'an</option>
+                <option value="" selected disabled>{{ __('Choose a city') }}</option>
+                <option value="amman">{{ __('Amman') }}</option>
+                <option value="irbid">{{ __('Irbid') }}</option>
+                <option value="zarqa">{{ __('Zarqa') }}</option>
+                <option value="aqaba">{{ __('Aqaba') }}</option>
+                <option value="salt">{{ __('Salt') }}</option>
+                <option value="madaba">{{ __('Madaba') }}</option>
+                <option value="jerash">{{ __('Jerash') }}</option>
+                <option value="ajloun">{{ __('Ajloun') }}</option>
+                <option value="mafraq">{{ __('Mafraq') }}</option>
+                <option value="karak">{{ __('Karak') }}</option>
+                <option value="tafilah">{{ __('Tafilah') }}</option>
+                <option value="maan">{{ __('Ma\'an') }}</option>
               </select>
             </div>
             <div class="col-md-6">
               <label class="form-label" for="area"
-                >Area <span class="text-muted fw-normal">(optional)</span></label
+                >{{ __('Area') }} <span class="text-muted fw-normal">{{ __('(optional)') }}</span></label
               >
               <!-- Areas are grouped by city; the backend fills this list -->
               <select class="form-select form-select-lg" id="area" name="area">
-                <option value="" selected>Any area</option>
+                <option value="" selected>{{ __('Any area') }}</option>
                 <optgroup label="Amman">
-                  <option>Abdali</option>
-                  <option>Al Jubeiha</option>
-                  <option>Khalda</option>
-                  <option>Shmeisani</option>
-                  <option>Sweileh</option>
-                  <option>Tla Al Ali</option>
+                  <option>{{ __('Abdali') }}</option>
+                  <option>{{ __('Al Jubeiha') }}</option>
+                  <option>{{ __('Khalda') }}</option>
+                  <option>{{ __('Shmeisani') }}</option>
+                  <option>{{ __('Sweileh') }}</option>
+                  <option>{{ __('Tla Al Ali') }}</option>
                 </optgroup>
                 <optgroup label="Irbid">
-                  <option>Al Hay Al Janoubi</option>
-                  <option>Al Nuzha</option>
+                  <option>{{ __('Al Hay Al Janoubi') }}</option>
+                  <option>{{ __('Al Nuzha') }}</option>
                 </optgroup>
                 <optgroup label="Aqaba">
-                  <option>Al Shallaleh</option>
-                  <option>Area 9</option>
+                  <option>{{ __('Al Shallaleh') }}</option>
+                  <option>{{ __('Area 9') }}</option>
                 </optgroup>
               </select>
             </div>
@@ -208,16 +208,16 @@
 
         <!-- ===== Step 3: Priorities ===== -->
         <section class="wizard-step" data-step="3">
-          <span class="step-tag">Step 3 of 3</span>
-          <h1 class="h2">What matters most?</h1>
+          <span class="step-tag">{{ __('Step 3 of 3') }}</span>
+          <h1 class="h2">{{ __('What matters most?') }}</h1>
           <p class="text-muted mb-4">
-            Set your budget and tick anything you need.
+            {{ __('Set your budget and tick anything you need.') }}
           </p>
 
           <!-- Budget: type any amount, or pick one from the list -->
           <div class="panel mb-3">
             <label class="form-label" for="budget"
-              >Monthly budget (bills included)</label
+              >{{ __('Monthly budget (bills included)') }}</label
             >
             <div class="input-group budget-input">
               <input
@@ -230,10 +230,10 @@
                 max="2000"
                 step="10"
                 value="300"
-                placeholder="e.g. 300"
+                placeholder="{{ __('e.g. 300') }}"
                 aria-describedby="budgetHint"
               />
-              <span class="input-group-text">JOD / month</span>
+              <span class="input-group-text">{{ __('JOD / month') }}</span>
             </div>
             <datalist id="budgetOptions">
               <option value="150"></option>
@@ -246,7 +246,7 @@
               <option value="1000"></option>
             </datalist>
             <small class="form-text text-muted" id="budgetHint"
-              >Type an amount or pick one from the list.</small
+              >{{ __('Type an amount or pick one from the list.') }}</small
             >
           </div>
 
@@ -256,9 +256,9 @@
               <label for="pr-furnished"
                 ><i class="bi bi-lamp"></i
                 ><span
-                  >Furnished
+                  >{{ __('Furnished') }}
                   <small class="d-block text-muted fw-normal"
-                    >I want it furnished</small
+                    >{{ __('I want it furnished') }}</small
                   ></span
                 ></label
               >
@@ -274,9 +274,9 @@
               <label for="pr-access"
                 ><i class="bi bi-universal-access"></i
                 ><span
-                  >Easy access
+                  >{{ __('Easy access') }}
                   <small class="d-block text-muted fw-normal"
-                    >Elevator or ground floor</small
+                    >{{ __('Elevator or ground floor') }}</small
                   ></span
                 ></label
               >
@@ -294,9 +294,9 @@
               <label for="pr-sharing"
                 ><i class="bi bi-people"></i
                 ><span
-                  >Shared housing
+                  >{{ __('Shared housing') }}
                   <small class="students-only-note d-block fw-normal"
-                    >For students only</small
+                    >{{ __('For students only') }}</small
                   ></span
                 ></label
               >
@@ -313,7 +313,7 @@
 
         <div class="wizard-nav justify-content-end">
           <a href="{{ route('seeker.search') }}" class="btn btn-accent btn-lg"
-            ><span>Show my matches</span>
+            ><span>{{ __('Show my matches') }}</span>
             <i class="bi bi-arrow-right"></i
           ></a>
         </div>

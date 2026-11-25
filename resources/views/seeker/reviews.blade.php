@@ -1,6 +1,6 @@
 @extends('layouts.app', ['homes' => []])
 
-@section('title', 'Property Reviews')
+@section('title', __('Property Reviews'))
 @section('roleStyle', 'seeker')
 
 @section('content')
@@ -252,26 +252,26 @@
         <header class="reviews-header">
             <div>
                 <h1 class="reviews-heading">
-                    @if ($reviews->count() > 0)
+                    @if ($reviews->total() > 0)
                         <i class="bi bi-star-fill" aria-hidden="true"></i>
-                        {{ number_format($reviews->avg('rating'), 2) }}
-                        · {{ $reviews->count() }} reviews
+                        {{ number_format($averageRating, 2) }}
+                        · {{ __(':count reviews', ['count' => $reviews->total()]) }}
                     @else
-                        Property Reviews
+                        {{ __('Property Reviews') }}
                     @endif
                 </h1>
 
-                <p class="reviews-subtitle">{{ $property->title }}</p>
+                <p class="reviews-subtitle">{{ $property->localized('title') }}</p>
             </div>
 
             <a href="{{ route('seeker.search') }}" class="btn btn-outline-primary">
-                Back to properties
+                {{ __('Back to properties') }}
             </a>
         </header>
 
 @if (!$myReview)
         <details class="review-editor" @if ($errors->any()) open @endif>
-            <summary>Write a review</summary>
+            <summary>{{ __('Write a review') }}</summary>
 
 
 
@@ -283,15 +283,15 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
+                    <label for="rating" class="form-label">{{ __('Rating') }}</label>
 
                     <select name="rating" id="rating" class="form-select" required>
-                        <option value="">Choose a rating</option>
-                        <option value="1" @selected(old('rating') == 1)>★ — 1 star</option>
-                        <option value="2" @selected(old('rating') == 2)>★★ — 2 stars</option>
-                        <option value="3" @selected(old('rating') == 3)>★★★ — 3 stars</option>
-                        <option value="4" @selected(old('rating') == 4)>★★★★ — 4 stars</option>
-                        <option value="5" @selected(old('rating') == 5)>★★★★★ — 5 stars</option>
+                        <option value="">{{ __('Choose a rating') }}</option>
+                        <option value="1" @selected(old('rating') == 1)>{{ __('★ — 1 star') }}</option>
+                        <option value="2" @selected(old('rating') == 2)>{{ __('★★ — 2 stars') }}</option>
+                        <option value="3" @selected(old('rating') == 3)>{{ __('★★★ — 3 stars') }}</option>
+                        <option value="4" @selected(old('rating') == 4)>{{ __('★★★★ — 4 stars') }}</option>
+                        <option value="5" @selected(old('rating') == 5)>{{ __('★★★★★ — 5 stars') }}</option>
                     </select>
 
                     @error('rating')
@@ -301,7 +301,7 @@
 
                 <div class="mb-3">
                     <label for="comment" class="form-label">
-                        Comment (optional)
+                        {{ __('Comment (optional)') }}
                     </label>
 
                     <textarea
@@ -310,7 +310,7 @@
                         class="form-control"
                         rows="4"
                         maxlength="2000"
-                        placeholder="Share your experience..."
+                        placeholder="{{ __('Share your experience...') }}"
                     >{{ old('comment') }}</textarea>
 
                     @error('comment')
@@ -319,17 +319,17 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    Submit review
+                    {{ __('Submit review') }}
                 </button>
             </form>
         </details>
              @else
                  <p class="text-muted mt-4">
-                  You have already reviewed this property.
+                  {{ __('You have already reviewed this property.') }}
                   </p>
             @endif
 
-        <section class="reviews-grid" aria-label="Guest reviews">
+        <section class="reviews-grid" aria-label="{{ __('Guest reviews') }}">
             @forelse ($reviews as $review)
                 <article>
                     <div class="review-person">
@@ -346,7 +346,7 @@
                                 {{ $review->tenant->tenantProfile->first_name }}
                                 {{ $review->tenant->tenantProfile->last_name }}
                             @else
-                                Makan user
+                                {{ __('Makan user') }}
                             @endif
                         </h2>
                     </div>
@@ -354,7 +354,7 @@
                     <div class="review-meta">
                         <span class="review-stars">
                             <span class="visually-hidden">
-                                {{ $review->rating }} out of 5 stars
+                                {{ $review->rating }} {{ __('out of 5 stars') }}
                             </span>
 
                             @for ($star = 1; $star <= $review->rating; $star++)
@@ -363,7 +363,7 @@
                         </span>
 
                         <span class="review-date">
-                            · {{ $review->created_at->format('F Y') }}
+                            · {{ $review->created_at->translatedFormat('F Y') }}
                         </span>
                     </div>
 
@@ -371,7 +371,7 @@
                         <p class="review-comment">{{ mb_substr($review->comment, 0, 220) }}…</p>
 
                         <details class="review-more">
-                            <summary>Show more</summary>
+                            <summary>{{ __('Show more') }}</summary>
 
                             <p class="review-comment mt-2">{{ mb_substr($review->comment, 220) }}</p>
                         </details>
@@ -385,7 +385,7 @@
                                 href="{{ route('seeker.reviews.edit', ['review' => $review->id]) }}"
                                 class="review-action"
                             >
-                                Edit
+                                {{ __('Edit') }}
                             </a>
 
                             <form
@@ -399,7 +399,7 @@
                                     type="submit"
                                     class="review-action review-action-delete"
                                 >
-                                    Delete
+                                    {{ __('Delete') }}
                                 </button>
                             </form>
                         </div>
@@ -408,12 +408,13 @@
             @empty
                 <div class="reviews-empty">
                     <i class="bi bi-chat-square-text fs-2" aria-hidden="true"></i>
-                    <h2 class="h5 mt-3">No reviews yet</h2>
+                    <h2 class="h5 mt-3">{{ __('No reviews yet') }}</h2>
                     <p class="text-muted">
-                        Be the first to review this property.
+                        {{ __('Be the first to review this property.') }}
                     </p>
                 </div>
             @endforelse
+        <x-pagination :items="$reviews" />
         </section>
     </main>
 @endsection

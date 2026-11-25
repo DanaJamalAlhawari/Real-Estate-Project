@@ -13,12 +13,15 @@ class FavoriteController extends Controller
 
         abort_unless($request->user()->role === 'tenant', 403);
 
+        $filters = $request->validate(['q' => 'nullable|string|max:255']);
         $favorites = $request->user()->favoriteProperties()
             ->discoverable()
             ->with('images')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
-            ->get();
+            ->matchingSearch($filters['q'] ?? '')
+            ->orderByPivot('created_at', 'desc')->orderByDesc('properties.id')
+            ->paginate(config('app.properties_per_page'))->withQueryString();
 
         return view('seeker.favorites', [
             'favorites' => $favorites,

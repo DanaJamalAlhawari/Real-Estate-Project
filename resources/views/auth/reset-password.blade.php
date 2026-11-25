@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', "Makan — Reset password")
+@section('title', __('Makan — Reset password'))
 
 @section('content')
     <main class="auth-wrap">
@@ -9,10 +9,10 @@
           ><img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span
         ></a>
         <div>
-          <h2>Almost done</h2>
-          <p class="mb-0">Enter the code from your email and choose a new password.</p>
+          <h2>{{ __('Almost done') }}</h2>
+          <p class="mb-0">{{ __('Enter the code from your email and choose a new password.') }}</p>
         </div>
-        <small class="opacity-75">Verified homes across Jordan</small>
+        <small class="opacity-75">{{ __('Verified homes across Jordan') }}</small>
       </aside>
 
       <section class="auth-main">
@@ -28,16 +28,16 @@
           id="resetForm"
          method="post" action="{{ route('demo.notice') }}" data-demo-form data-demo-next="{{ route('auth.login') }}">
               @csrf
-              <p class="small text-muted" role="note">Demo form. Use sample details only.</p>
+              <p class="small text-muted" role="note">{{ __('Demo form. Use sample details only.') }}</p>
           <span class="feature-icon"><i class="bi bi-shield-lock"></i></span>
-          <h1>Choose a new password</h1>
+          <h1>{{ __('Choose a new password') }}</h1>
           <p class="text-muted mb-4">
-            We sent a 6-digit code to
-            <b class="text-body" id="resetEmail">name@example.com</b>.
+            {{ __('We sent a 6-digit code to') }}
+            <b class="text-body" id="resetEmail">{{ __('name') }}@example.com</b>.
           </p>
 
           <div class="mb-2">
-            <label class="form-label" for="otp">Code</label>
+            <label class="form-label" for="otp">{{ __('Code') }}</label>
             <input
               type="text"
               class="form-control form-control-lg otp-input"
@@ -53,19 +53,19 @@
             />
           </div>
           <p class="small text-muted mb-3" id="otpHint">
-            The code expires in 10 minutes.
+            {{ __('The code expires in 10 minutes.') }}
             <button
               type="button"
               class="btn btn-link btn-sm p-0 fw-semibold align-baseline"
               id="resendCode"
             >
-              Resend code
+              {{ __('Resend code') }}
             </button>
           </p>
 
           <div class="row g-3 mb-4">
             <div class="col-sm-6">
-              <label class="form-label" for="newPassword">New password</label>
+              <label class="form-label" for="newPassword">{{ __('New password') }}</label>
               <input
                 type="password"
                 class="form-control"
@@ -79,7 +79,7 @@
             </div>
             <div class="col-sm-6">
               <label class="form-label" for="confirmPassword"
-                >Confirm password</label
+                >{{ __('Confirm password') }}</label
               >
               <input
                 type="password"
@@ -93,17 +93,17 @@
               />
             </div>
             <div class="col-12 mt-1">
-              <small class="text-muted">At least 8 characters.</small>
+              <small class="text-muted">{{ __('At least 8 characters.') }}</small>
             </div>
           </div>
 
           <button type="submit" class="btn btn-accent btn-lg w-100">
-            Save new password
+            {{ __('Save new password') }}
           </button>
 
           <p class="text-center small mt-4 mb-0">
             <a href="{{ route('auth.login') }}" class="fw-semibold"
-              ><i class="bi bi-arrow-left"></i> Back to log in</a
+              ><i class="bi bi-arrow-left"></i> {{ __('Back to log in') }}</a
             >
           </p>
         </form>

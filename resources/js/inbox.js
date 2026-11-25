@@ -9,13 +9,13 @@ function connectInbox() {
     container.innerHTML = `
         <div class="toast" role="status" aria-atomic="true">
             <div class="toast-header">
-                <strong class="me-auto">New message</strong>
+                <strong class="me-auto">${window.makanTranslate("New message")}</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
+                        aria-label="${window.makanTranslate("Close")}"></button>
             </div>
             <div class="toast-body">
                 <p class="mb-2" data-inbox-preview></p>
-                <a class="fw-semibold" data-inbox-link>Open conversation</a>
+                <a class="fw-semibold" data-inbox-link>${window.makanTranslate("Open conversation")}</a>
             </div>
         </div>
     `;
@@ -60,7 +60,7 @@ function connectInbox() {
                 headerBadge.hidden = false;
                 messagesLink.setAttribute(
                     "aria-label",
-                    `Messages, ${unread} unread`,
+                    window.makanTranslate("Messages, :count unread", { count: unread }),
                 );
             }
 
@@ -71,15 +71,15 @@ function connectInbox() {
             if (badge) {
                 const unread = Number(badge.textContent) + 1;
                 badge.textContent = String(unread);
-                badge.setAttribute("aria-label", `${unread} unread messages`);
+                badge.setAttribute("aria-label", window.makanTranslate(":count unread messages", { count: unread }));
                 badge.hidden = false;
             }
 
-            notify("New message", event.preview, event.url, "Open conversation");
+            notify(window.makanTranslate("New message"), event.preview, event.url, window.makanTranslate("Open conversation"));
         },
     );
     inbox.listen("BookingActivity", (event) => {
-        notify("Booking update", event.preview, event.url, "View bookings");
+        notify(window.makanTranslate("Booking update"), event.preview, event.url, window.makanTranslate("View bookings"));
     });
 }
 

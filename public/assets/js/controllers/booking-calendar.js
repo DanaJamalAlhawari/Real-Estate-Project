@@ -11,8 +11,11 @@ if (bookingForm) {
     const help = calendar.querySelector('[data-calendar-help]');
     const previous = calendar.querySelector('[data-calendar-previous]');
     const next = calendar.querySelector('[data-calendar-next]');
-    const monthName = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-    const dateName = new Intl.DateTimeFormat('en', { dateStyle: 'full', timeZone: 'UTC' });
+    const locale = document.documentElement.lang;
+    const weekday = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+    const number = new Intl.NumberFormat(locale);
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    const dateName = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'UTC' });
 
     const monthOf = (value) => new Date(value.slice(0, 7) + '-01T00:00:00Z');
     const dateKey = (date) => date.toISOString().slice(0, 10);
@@ -28,13 +31,13 @@ if (bookingForm) {
         heading.textContent = monthName.format(month);
         previous.disabled = dateKey(month) <= dateKey(monthOf(today));
         help.textContent = choosingEnd
-            ? 'Choose a checkout date. Your stay cannot cross reserved nights.'
-            : 'Choose a start date. Reserved nights are unavailable.';
+            ? window.makanTranslate('Choose a checkout date. Your stay cannot cross reserved nights.')
+            : window.makanTranslate('Choose a start date. Reserved nights are unavailable.');
         days.replaceChildren();
 
-        for (const name of ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']) {
+        for (let day = 1; day <= 7; day++) {
             const label = document.createElement('small');
-            label.textContent = name;
+            label.textContent = weekday.format(new Date(Date.UTC(2023, 0, day)));
             days.append(label);
         }
         for (let space = 0; space < firstDay; space++) {
@@ -46,7 +49,7 @@ if (bookingForm) {
             const selected = value === start.value || value === end.value;
             button.type = 'button';
             button.className = 'btn btn-sm px-0 ' + (selected ? 'btn-accent' : 'btn-outline-secondary');
-            button.textContent = day.getUTCDate();
+            button.textContent = number.format(day.getUTCDate());
             button.setAttribute('aria-label', dateName.format(day));
             button.setAttribute('aria-pressed', String(selected));
             button.disabled = choosingEnd ? !canEnd(value) : value < today || isReserved(value);
@@ -73,7 +76,7 @@ if (bookingForm) {
     for (const input of [start, end]) {
         input.type = 'text';
         input.readOnly = true;
-        input.placeholder = 'Select from the calendar';
+        input.placeholder = window.makanTranslate('Select from the calendar');
         input.addEventListener('click', () => {
             choosingEnd = input === end && Boolean(start.value);
             month = monthOf(input.value || start.value || today);
@@ -100,7 +103,7 @@ if (bookingForm) {
             event.preventDefault();
             choosingEnd = Boolean(start.value && start.value >= today && !isReserved(start.value));
             render();
-            help.textContent = 'Choose an available start and checkout date before sending your request.';
+            help.textContent = window.makanTranslate('Choose an available start and checkout date before sending your request.');
             (choosingEnd ? end : start).focus();
         }
     });

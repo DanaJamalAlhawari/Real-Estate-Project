@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,9 +15,7 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'agent', 403);
 
-        $ownedProperties = Property::where('agent_id', $request->user()->id)->get();
-
-        return view('owner.properties', compact('ownedProperties'));
+        return app(PropertyController::class)->index($request);
     }
 
     public function ownerEdit(Request $request, $property)
@@ -31,14 +31,25 @@ class VerificationController extends Controller
     {
         abort_unless($request->user()?->role === 'admin', 403);
 
-        $properties = Property::where('ownership_deed_url', 'like', 'verifications/%')->get()
+        $filters = $request->validate([
+            'q' => 'nullable|string|max:255',
+            'status' => 'nullable|in:pending,verified,rejected',
+        ]);
+        $properties = Property::where('ownership_deed_url', 'like', 'verifications/%')
+            ->matchingSearch($filters['q'] ?? '')->latest()->orderByDesc('id')->get()
             ->filter(fn (Property $property) => Storage::disk('local')->exists($property->ownership_deed_url));
 
-        $queues = $properties->groupBy('verification_status');
-        $selectedProperty = $properties->find($request->integer('property'))
-            ?? $queues->get('pending')?->first();
+        $selectedProperty = $properties->find($request->integer('property'));
+        $activeStatus = $filters['status'] ?? $selectedProperty?->verification_status ?? 'pending';
+        $pendingCount = $properties->where('verification_status', 'pending')->count();
+        $activeProperties = $properties->where('verification_status', $activeStatus);
+        $page = Paginator::resolveCurrentPage();
+        $perPage = config('app.properties_per_page');
+        $queue = new LengthAwarePaginator($activeProperties->forPage($page, $perPage), $activeProperties->count(), $perPage, $page, ['path' => $request->url()]);
+        $queue->appends(['status' => $activeStatus] + $request->only('q'));
+        $selectedProperty = $selectedProperty?->verification_status === $activeStatus ? $selectedProperty : $queue->first();
 
-        return view('admin.verifications', compact('queues', 'selectedProperty'));
+        return view('admin.verifications', compact('queue', 'activeStatus', 'pendingCount', 'selectedProperty'));
     }
 
     public function store(Request $request)
@@ -53,7 +64,7 @@ class VerificationController extends Controller
         $property = $request->user()->properties()->findOrFail($request->integer('property_id'));
 
         $path = $request->file('document')->store('verifications', 'local');
-        abort_if($path === false, 500, 'Could not store the ownership document.');
+        abort_if($path === false, 500, __('Could not store the ownership document.'));
 
         $property->ownership_deed_url = $path;
         $property->verification_status = 'pending';
@@ -66,6 +77,7 @@ class VerificationController extends Controller
         return redirect()->route('owner.properties.edit', $property)
             ->with('success', 'Document uploaded');
     }
+
     public function document(Request $request, $verification)
     {
         abort_unless($request->user()?->role === 'admin', 403);
@@ -77,6 +89,7 @@ class VerificationController extends Controller
 
         return response()->file(Storage::disk('local')->path($path));
     }
+
     public function update(Request $request, $verification)
     {
         abort_unless($request->user()?->role === 'admin', 403);

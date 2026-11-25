@@ -5,26 +5,26 @@
                 <a class="brand" href="{{ route('home') }}">
                     <img class="brand-mark" src="{{ asset('assets/images/makan-mark.svg') }}" alt="" width="36" height="36"><span>Makan</span>
                 </a>
-                <p>Find and manage rental homes in Jordan.</p>
+                <p>{{ __('Find and manage rental homes in Jordan.') }}</p>
             </div>
-            <nav aria-label="Footer">
-                <a href="{{ route('home') }}#how">How it works</a>
+            <nav aria-label="{{ __('Footer') }}">
+                <a href="{{ route('home') }}#how">{{ __('How it works') }}</a>
                 @switch(auth()->user()?->role)
                     @case('tenant')
-                        <a href="{{ route('seeker.search') }}">Discover</a>
-                        <a href="{{ route('seeker.bookings') }}">My bookings</a>
+                        <a href="{{ route('seeker.search') }}">{{ __('Discover') }}</a>
+                        <a href="{{ route('seeker.bookings') }}">{{ __('My bookings') }}</a>
                         @break
                     @case('agent')
-                        <a href="{{ route('owner.properties') }}">My properties</a>
-                        <a href="{{ route('owner.requests') }}">Booking requests</a>
+                        <a href="{{ route('owner.properties') }}">{{ __('My properties') }}</a>
+                        <a href="{{ route('owner.requests') }}">{{ __('Booking requests') }}</a>
                         @break
                     @case('admin')
-                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-                        <a href="{{ route('admin.verifications') }}">Verifications</a>
+                        <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                        <a href="{{ route('admin.verifications') }}">{{ __('Verifications') }}</a>
                         @break
                     @default
-                        <a href="{{ route('home') }}#owners">For owners</a>
-                        <a href="{{ route('auth.login') }}">Sign in</a>
+                        <a href="{{ route('home') }}#owners">{{ __('For owners') }}</a>
+                        <a href="{{ route('auth.login') }}">{{ __('Sign in') }}</a>
                 @endswitch
             </nav>
         </div>

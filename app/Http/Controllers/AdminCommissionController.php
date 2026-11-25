@@ -17,9 +17,9 @@ class AdminCommissionController extends Controller
         return view('admin.commissions', [
             'agents' => RealEstateUser::with('agentProfile')
                 ->where('role', 'agent')->orderBy('email')->get(),
-            'rates' => CommissionRate::with('agent.agentProfile')->orderByDesc('created_at')->get(),
+            'rates' => CommissionRate::with('agent.agentProfile')->orderByDesc('created_at')->orderByDesc('id')->paginate(config('app.pagination_per_page'), ['*'], 'rates_page')->withQueryString(),
             'commissions' => Commission::with(['agent', 'payment'])
-                ->orderByDesc('created_at')->paginate(15),
+                ->orderByDesc('created_at')->orderByDesc('id')->paginate(config('app.pagination_per_page'), ['*'], 'commissions_page')->withQueryString(),
         ]);
     }
 
@@ -45,7 +45,7 @@ class AdminCommissionController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Commission rate saved.');
+        return back()->with('success', __('Commission rate saved.'));
     }
 
     public function updateRate(Request $request, CommissionRate $rate)
@@ -67,7 +67,7 @@ class AdminCommissionController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Commission rate updated.');
+        return back()->with('success', __('Commission rate updated.'));
     }
 
     public function destroyRate(Request $request, CommissionRate $rate)
@@ -75,6 +75,6 @@ class AdminCommissionController extends Controller
         abort_unless($request->user()?->role === 'admin', 403);
         $rate->delete();
 
-        return back()->with('success', 'Commission rate deleted.');
+        return back()->with('success', __('Commission rate deleted.'));
     }
 }

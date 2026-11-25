@@ -1,12 +1,13 @@
 @extends('layouts.app', ['homes' => []])
 
-@section('title', 'Edit Review')
+@section('title', __('Edit Review'))
 @section('roleStyle', 'seeker')
 
 @section('content')
+<x-seeker-navbar />
     <main class="app-page container">
         <div class="page-head">
-            <h1>Edit Review</h1>
+            <h1>{{ __('Edit Review') }}</h1>
         </div>
 
         <div class="panel">
@@ -15,14 +16,14 @@
                 @method('PUT')
 
                 <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
+                    <label for="rating" class="form-label">{{ __('Rating') }}</label>
 
                     <select name="rating" id="rating" class="form-select" required>
-                        <option value="1" @selected(old('rating', $review->rating) == 1)>★ — 1 star</option>
-                        <option value="2" @selected(old('rating', $review->rating) == 2)>★★ — 2 stars</option>
-                        <option value="3" @selected(old('rating', $review->rating) == 3)>★★★ — 3 stars</option>
-                        <option value="4" @selected(old('rating', $review->rating) == 4)>★★★★ — 4 stars</option>
-                        <option value="5" @selected(old('rating', $review->rating) == 5)>★★★★★ — 5 stars</option>
+                        <option value="1" @selected(old('rating', $review->rating) == 1)>{{ __('★ — 1 star') }}</option>
+                        <option value="2" @selected(old('rating', $review->rating) == 2)>{{ __('★★ — 2 stars') }}</option>
+                        <option value="3" @selected(old('rating', $review->rating) == 3)>{{ __('★★★ — 3 stars') }}</option>
+                        <option value="4" @selected(old('rating', $review->rating) == 4)>{{ __('★★★★ — 4 stars') }}</option>
+                        <option value="5" @selected(old('rating', $review->rating) == 5)>{{ __('★★★★★ — 5 stars') }}</option>
                     </select>
 
                     @error('rating')
@@ -31,7 +32,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="comment" class="form-label">Comment (optional)</label>
+                    <label for="comment" class="form-label">{{ __('Comment (optional)') }}</label>
 
                     <textarea
                         name="comment"
@@ -47,14 +48,14 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    Save changes
+                    {{ __('Save changes') }}
                 </button>
 
                 <a
                     href="{{ route('seeker.reviews.index', ['property' => $review->property_id]) }}"
                     class="btn btn-outline-primary"
                 >
-                    Cancel
+                    {{ __('Cancel') }}
                 </a>
             </form>
         </div>

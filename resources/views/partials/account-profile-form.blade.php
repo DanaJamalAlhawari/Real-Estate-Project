@@ -1,6 +1,6 @@
 <section class="panel">
     @if (session('success'))
-        <p class="alert alert-success" role="status">{{ session('success') }}</p>
+        <p class="alert alert-success" role="status">{{ __(session('success')) }}</p>
     @endif
     @if ($errors->any())
         <p class="alert alert-danger" role="alert">{{ $errors->first() }}</p>
@@ -17,7 +17,7 @@
             @endphp
             @foreach ($fields as $field => $label)
                 <div class="col-md-6">
-                    <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                    <label class="form-label" for="{{ $field }}">{{ __($label) }}</label>
                     <input class="form-control" id="{{ $field }}" name="{{ $field }}"
                            value="{{ old($field, $profile?->{$field}) }}"
                            @required(in_array($field, ['first_name', 'last_name', 'phone'], true))>
@@ -25,17 +25,17 @@
             @endforeach
         @endif
         <div class="col-md-6">
-            <label class="form-label" for="email">Email</label>
+            <label class="form-label" for="email">{{ __('Email') }}</label>
             <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>
         </div>
-        <div class="col-12"><h2 class="h6 mb-0">Change password (optional)</h2></div>
+        <div class="col-12"><h2 class="h6 mb-0">{{ __('Change password (optional)') }}</h2></div>
         @foreach (['current_password' => 'Current password', 'password' => 'New password', 'password_confirmation' => 'Confirm new password'] as $field => $label)
             <div class="col-md-4">
-                <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                <label class="form-label" for="{{ $field }}">{{ __($label) }}</label>
                 <input type="password" class="form-control" id="{{ $field }}" name="{{ $field }}"
                        autocomplete="{{ $field === 'current_password' ? 'current-password' : 'new-password' }}">
             </div>
         @endforeach
-        <div class="col-12"><button type="submit" class="btn btn-accent">Save profile</button></div>
+        <div class="col-12"><button type="submit" class="btn btn-accent">{{ __('Save profile') }}</button></div>
     </form>
 </section>
