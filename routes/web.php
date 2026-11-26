@@ -15,7 +15,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TenantProfileController;
 
 use App\Http\Controllers\ConversationMessageController;
-use App\Http\Controllers\SeekerPropertyController;
+use App\Http\Controllers\SeekePropertyController;
 use App\Http\Controllers\VerificationController;
 
 

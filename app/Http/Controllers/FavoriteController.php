@@ -11,6 +11,7 @@ class FavoriteController extends Controller
     public function index(Request $request)
     {
 
+    // Check if the authenticated user is a tenant
     abort_unless($request->user()->role === 'tenant', 403);
 
         $favorites = $request->user()->favoriteProperties()->get([
