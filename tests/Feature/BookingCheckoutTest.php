@@ -34,6 +34,10 @@ class BookingCheckoutTest extends TestCase
             'category' => 'studio',
             'verification_status' => 'pending',
         ]);
+        $property->images()->create([
+            'image_url' => 'properties/test-cover.jpg',
+            'is_primary' => true,
+        ]);
 
         $review = route('admin.verifications', ['property' => $property->id]);
         $approval = route('admin.verifications.update', $property);
@@ -61,14 +65,19 @@ class BookingCheckoutTest extends TestCase
         $this->actingAs($agent)->patch(route('owner.requests.accept', $booking))
             ->assertRedirect(route('owner.requests'))->assertSessionHas('success');
         $this->assertEquals(6.5, $booking->fresh()->approved_commission_rate);
-        Event::assertDispatched(BookingActivity::class, fn ($event) => $event->broadcastOn()->name === 'private-inbox.'.$tenant->id
-            && str_contains($event->broadcastWith()['preview'], 'You can now pay.')
-            && $event->broadcastWith()['url'] === route('payments.mock.show', $booking, false)
+        Event::assertDispatched(
+            BookingActivity::class,
+            fn($event) => $event->broadcastOn()->name === 'private-inbox.' . $tenant->id
+                && str_contains($event->broadcastWith()['preview'], 'You can now pay.')
+                && $event->broadcastWith()['url'] === route('payments.mock.show', $booking, false)
         );
 
         $this->put(route('properties.update', $property), [
-            'title' => $property->title, 'description' => $property->description,
-            'category' => 'apartment', 'price' => 620, 'city' => $property->city,
+            'title' => $property->title,
+            'description' => $property->description,
+            'category' => 'apartment',
+            'price' => 620,
+            'city' => $property->city,
             'address' => $property->address,
         ])->assertRedirect(route('owner.properties'));
         $this->assertSame('pending', $property->fresh()->verification_status);
@@ -83,7 +92,9 @@ class BookingCheckoutTest extends TestCase
         $this->from($checkout)->post($pay, ['payment_method' => 'cash', 'outcome' => 'success'])
             ->assertRedirect($checkout)->assertSessionHasErrors(['card_number', 'card_expiry', 'card_cvv']);
         $this->from($checkout)->post($pay, [
-            'card_number' => '4000 0000 0000 0002', 'card_expiry' => '01/20', 'card_cvv' => '999',
+            'card_number' => '4000 0000 0000 0002',
+            'card_expiry' => '01/20',
+            'card_cvv' => '999',
         ])->assertRedirect($checkout)->assertSessionHasErrors(['card_number', 'card_expiry', 'card_cvv'])
             ->assertSessionMissing('_old_input.card_number')
             ->assertSessionMissing('_old_input.card_expiry')
@@ -101,20 +112,29 @@ class BookingCheckoutTest extends TestCase
         $this->assertDatabaseCount('payments', 1);
         $this->assertDatabaseCount('commissions', 1);
         $this->assertDatabaseHas('payments', [
-            'id' => $payment->id, 'booking_id' => $booking->id, 'tenant_id' => $tenant->id,
-            'amount' => 310, 'status' => 'successful', 'payment_method' => 'credit_card',
+            'id' => $payment->id,
+            'booking_id' => $booking->id,
+            'tenant_id' => $tenant->id,
+            'amount' => 310,
+            'status' => 'successful',
+            'payment_method' => 'credit_card',
         ]);
         $this->assertDatabaseHas('commissions', [
-            'booking_id' => $booking->id, 'payment_id' => $payment->id, 'agent_id' => $agent->id,
-            'commission_rate' => 6.5, 'commission_amount' => 20.15, 'agent_net_amount' => 289.85,
-            'status' => 'pending', 'paid_at' => null,
+            'booking_id' => $booking->id,
+            'payment_id' => $payment->id,
+            'agent_id' => $agent->id,
+            'commission_rate' => 6.5,
+            'commission_amount' => 20.15,
+            'agent_net_amount' => 289.85,
+            'status' => 'pending',
+            'paid_at' => null,
         ]);
         $this->get($checkout)->assertSee('Payment recorded successfully')
             ->assertSee('20.15 JOD')->assertSee('289.85 JOD')->assertDontSee('name="card_number"', false);
         $this->actingAs($agent)->get(route('owner.earnings'))->assertOk()->assertSee('289.85');
         $this->actingAs(RealEstateUser::where('role', 'admin')->firstOrFail())
             ->get(route('admin.dashboard'))->assertOk()
-            ->assertViewHas('monthlyCommissionRevenue', fn (array $months) => (float) $months[5]['amount'] === 20.15);
+            ->assertViewHas('monthlyCommissionRevenue', fn(array $months) => (float) $months[5]['amount'] === 20.15);
     }
 
     public function test_reserved_periods_block_overlapping_requests_and_acceptance_but_allow_checkout_day(): void
@@ -160,24 +180,39 @@ class BookingCheckoutTest extends TestCase
             ->assertDontSee('name="emergency_contact"', false)->assertDontSee('name="student_id"', false);
 
         $common = [
-            'first_name' => 'Test', 'last_name' => 'Person',
-            'agency_name' => 'Test Agency', 'license_number' => 'ignored',
-            'emergency_contact' => 'ignored', 'student_id' => 'ignored',
-            'password' => 'test-password', 'password_confirmation' => 'test-password', 'terms' => '1',
+            'first_name' => 'Test',
+            'last_name' => 'Person',
+            'agency_name' => 'Test Agency',
+            'license_number' => 'ignored',
+            'emergency_contact' => 'ignored',
+            'student_id' => 'ignored',
+            'password' => 'test-password',
+            'password_confirmation' => 'test-password',
+            'terms' => '1',
         ];
         $this->post($register, $common + [
-            'role' => 'tenant', 'email' => 'tenant@example.test', 'phone' => '+962711111111',
+            'role' => 'tenant',
+            'email' => 'tenant@example.test',
+            'phone' => '+962711111111',
         ])->assertRedirect(route('seeker.search'));
         $this->assertDatabaseHas('tenant_profiles', [
-            'first_name' => 'Test', 'last_name' => 'Person', 'phone' => '+962711111111',
-            'emergency_contact' => null, 'student_id' => null,
+            'first_name' => 'Test',
+            'last_name' => 'Person',
+            'phone' => '+962711111111',
+            'emergency_contact' => null,
+            'student_id' => null,
         ]);
         $this->post(route('logout'));
         $this->post($register, $common + [
-            'role' => 'agent', 'owner_type' => 'agency', 'email' => 'agent@example.test', 'phone' => '+962722222222',
+            'role' => 'agent',
+            'owner_type' => 'agency',
+            'email' => 'agent@example.test',
+            'phone' => '+962722222222',
         ])->assertRedirect(route('owner.dashboard'));
         $this->assertDatabaseHas('agent_profiles', [
-            'phone' => '+962722222222', 'agency_name' => 'Test Agency', 'license_number' => null,
+            'phone' => '+962722222222',
+            'agency_name' => 'Test Agency',
+            'license_number' => null,
         ]);
     }
 
@@ -190,8 +225,13 @@ class BookingCheckoutTest extends TestCase
         $private = $this->listing($agent, ['title' => 'Private booking title', 'verification_status' => 'pending', 'city' => 'Hidden city']);
         foreach ([[$tenant, $visible], [$otherTenant, $private]] as [$customer, $property]) {
             Booking::forceCreate([
-                'tenant_id' => $customer->id, 'property_id' => $property->id, 'status' => 'pending',
-                'start_date' => '2027-02-05', 'end_date' => '2027-02-06', 'duration' => 1, 'total_price' => 10,
+                'tenant_id' => $customer->id,
+                'property_id' => $property->id,
+                'status' => 'pending',
+                'start_date' => '2027-02-05',
+                'end_date' => '2027-02-06',
+                'duration' => 1,
+                'total_price' => 10,
             ]);
         }
         $this->actingAs($tenant)->get(route('seeker.search'))->assertOk()
@@ -201,7 +241,7 @@ class BookingCheckoutTest extends TestCase
             ->assertOk()->assertSee('Visible studio');
         $this->get(route('seeker.search', ['city' => 'Other city']))->assertOk()->assertSee('0 homes');
 
-        $url = rtrim(config('services.ollama.url'), '/').'/api/chat';
+        $url = rtrim(config('services.ollama.url'), '/') . '/api/chat';
         Http::preventStrayRequests();
         Http::fake([$url => Http::sequence()
             ->push(['message' => ['content' => '{"intent":"bookings","reply":"Untrusted model text"}']])
@@ -214,7 +254,7 @@ class BookingCheckoutTest extends TestCase
             ->assertOk()->assertSee('Visible studio')->assertDontSee('Private booking title');
         $this->postJson(route('assistant.chat'), ['message' => 'Find listings in Irbid'])
             ->assertServiceUnavailable()
-            ->assertJsonFragment(['message' => 'Ollama could not find '.config('services.ollama.model').'. Install it with ollama pull '.config('services.ollama.model').' and check OLLAMA_MODEL.']);
+            ->assertJsonFragment(['message' => 'Ollama could not find ' . config('services.ollama.model') . '. Install it with ollama pull ' . config('services.ollama.model') . ' and check OLLAMA_MODEL.']);
         Http::assertSent(function ($request) use ($url) {
             return $request->url() === $url && $request['model'] === config('services.ollama.model')
                 && $request['format'] === 'json'
@@ -235,10 +275,13 @@ class BookingCheckoutTest extends TestCase
         $unpaid = $this->booking($tenant, $property, 'confirmed');
         $paid = $this->booking($tenant, $property, 'confirmed');
         $paid->payments()->create([
-            'tenant_id' => $tenant->id, 'amount' => 20, 'payment_method' => 'credit_card', 'status' => 'successful',
+            'tenant_id' => $tenant->id,
+            'amount' => 20,
+            'payment_method' => 'credit_card',
+            'status' => 'successful',
         ]);
 
-        $cancel = fn (Booking $booking) => route('seeker.bookings.cancel', $booking);
+        $cancel = fn(Booking $booking) => route('seeker.bookings.cancel', $booking);
         $this->actingAs($otherTenant)->patch($cancel($pending))->assertNotFound();
         $this->actingAs($tenant)->get(route('seeker.bookings'))->assertOk()->assertSee($cancel($pending))
             ->assertSee($cancel($unpaid))->assertDontSee($cancel($paid));
@@ -320,24 +363,37 @@ class BookingCheckoutTest extends TestCase
     private function booking(RealEstateUser $tenant, Property $property, string $status): Booking
     {
         return Booking::forceCreate([
-            'tenant_id' => $tenant->id, 'property_id' => $property->id, 'status' => $status,
-            'start_date' => '2027-02-05', 'end_date' => '2027-02-07', 'duration' => 2, 'total_price' => 20,
+            'tenant_id' => $tenant->id,
+            'property_id' => $property->id,
+            'status' => $status,
+            'start_date' => '2027-02-05',
+            'end_date' => '2027-02-07',
+            'duration' => 2,
+            'total_price' => 20,
         ]);
     }
 
     private function account(string $role): RealEstateUser
     {
         return RealEstateUser::forceCreate([
-            'role' => $role, 'email' => fake()->unique()->safeEmail(), 'password' => 'test-password',
+            'role' => $role,
+            'email' => fake()->unique()->safeEmail(),
+            'password' => 'test-password',
         ]);
     }
 
     private function listing(RealEstateUser $agent, array $attributes = []): Property
     {
         return Property::forceCreate($attributes + [
-            'agent_id' => $agent->id, 'title' => 'Test home', 'description' => 'Test property',
-            'category' => 'apartment', 'price' => 310, 'city' => 'Amman', 'address' => 'Test address',
-            'status' => 'available', 'verification_status' => 'verified',
+            'agent_id' => $agent->id,
+            'title' => 'Test home',
+            'description' => 'Test property',
+            'category' => 'apartment',
+            'price' => 310,
+            'city' => 'Amman',
+            'address' => 'Test address',
+            'status' => 'available',
+            'verification_status' => 'verified',
             'ownership_deed_url' => 'verifications/deed.pdf',
         ]);
     }

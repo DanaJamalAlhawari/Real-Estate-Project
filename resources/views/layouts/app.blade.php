@@ -26,6 +26,7 @@
     @endif
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/makan.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/property-gallery.css') }}" />
     @if (auth()->user() instanceof \App\Models\RealEstateUser)
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="makan-user-id" content="{{ auth()->id() }}">
@@ -34,8 +35,9 @@
 </head>
 
 <body @yield('bodyAttributes')>
-    @if (request()->routeIs('auth.*') && ! request()->routeIs('auth.onboarding'))
-        <nav class="container d-flex justify-content-end pt-3" aria-label="{{ __('Language') }}"><x-language-switch /></nav>
+    @if (request()->routeIs('auth.*') && !request()->routeIs('auth.onboarding'))
+        <nav class="container d-flex justify-content-end pt-3" aria-label="{{ __('Language') }}"><x-language-switch />
+        </nav>
     @endif
     @yield('content')
     @include('partials.site-footer')
@@ -43,7 +45,15 @@
         <x-seeker-assistant />
         <script src="{{ asset('assets/js/controllers/makan-assistant.js') }}" defer></script>
     @endif
+    <x-feedback-modal />
+    <x-property-image-lightbox />
+
     <script src="{{ asset('assets/vendor/bootstrap.bundle.min.js') }}"></script>
+
+    <script src="{{ asset('assets/js/controllers/feedback-modal.js') }}"></script>
+    <script src="{{ asset('assets/js/controllers/form-validation.js') }}" defer></script>
+    <script src="{{ asset('assets/js/controllers/property-gallery.js') }}" defer></script>
+
     <script src="{{ asset('assets/js/controllers/bayti.js') }}" defer></script>
 
 </body>

@@ -77,7 +77,7 @@
             @endisset
             <div class="row g-4 align-items-start">
                 <div class="col-lg-8">
-                    <form id="propertyForm" method="POST"
+                    <form id="propertyForm" method="POST" data-popup-validation
                         action="{{ isset($property) ? route('properties.update', $property->id) : route('properties.store') }}"
                         enctype="multipart/form-data">
                         @csrf
@@ -224,7 +224,9 @@
                                     <fieldset class="col-md-6">
                                         <legend class="h6">{{ __($languageLabel) }}</legend>
                                         @foreach (['title' => 'Property title', 'description' => 'Property description', 'city' => 'City', 'area' => 'Area', 'address' => 'Address'] as $field => $label)
-                                            @php($translation = $field . '_' . $language)
+                                            @php
+                                                $translation = $field . '_' . $language;
+                                            @endphp
                                             <div class="mb-3">
                                                 <label class="form-label"
                                                     for="{{ $translation }}">{{ __($label) }}</label>
@@ -246,71 +248,127 @@
                         </details>
 
                         <!-- 3. Photos -->
-
                         <section class="panel form-section" aria-labelledby="secPhotos">
 
                             <h2 id="secPhotos">{{ __('3. Photos') }}</h2>
 
-                            <p>{{ __('Real, recent photos. The first photo is the cover.') }}</p>
+                            @php
+                                $existingCover = isset($property) ? $property->coverImage() : null;
+                            @endphp
 
-                            <label class="dropzone d-block mb-3" for="fPhotos">
+                            <p>{{ __('Upload a default photo and optional additional photos.') }}</p>
 
-                                <i class="bi bi-cloud-arrow-up"></i>
+                            <!-- Default property photo -->
+                            <h3 class="h6 fw-semibold">
+                                {{ __('Default photo') }}
+                                <span class="text-danger">*</span>
+                            </h3>
 
-                                <span class="d-block fw-semibold text-body">{{ __('Drag photos here, or') }}
+                            <p class="small text-muted">
+                                {{ __('This photo will appear on the property card.') }}
+                            </p>
 
-                                    <span
-                                        class="text-primary-bt text-decoration-underline">{{ __('choose from your device') }}</span></span>
+                            <label class="dropzone d-block mb-3" for="fDefaultPhoto">
+                                <i class="bi bi-image"></i>
 
-                                <span class="d-block small">{{ __('JPG or PNG · up to 10 photos') }}</span>
+                                <span class="d-block fw-semibold text-body">
+                                    {{ __('Choose default photo') }}
+                                </span>
 
+                                <span class="d-block small">
+                                    {{ __('JPG or PNG · 1 photo · Max 5 MB') }}
+                                </span>
                             </label>
 
-                            <!-- Upload new property photos -->
+                            <input type="file" class="visually-hidden" id="fDefaultPhoto" name="default_photo"
+                                accept="image/jpeg,image/png" @required(!$existingCover) />
+
+                            @error('default_photo')
+                                <div class="text-danger small mb-2">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                            <div class="thumbs mb-4" id="defaultPhotoThumbs"></div>
+
+                            <!-- Additional property photos -->
+                            <h3 class="h6 fw-semibold">
+                                {{ __('Additional photos') }}
+                                <span class="small text-muted">
+                                    ({{ __('Optional') }})
+                                </span>
+                            </h3>
+
+                            <label class="dropzone d-block mb-3" for="fPhotos">
+                                <i class="bi bi-cloud-arrow-up"></i>
+
+                                <span class="d-block fw-semibold text-body">
+                                    {{ __('Choose additional photos') }}
+                                </span>
+
+                                <span class="d-block small">
+                                    {{ __('JPG or PNG · up to 9 additional photos') }}
+                                </span>
+                            </label>
 
                             <input type="file" class="visually-hidden" id="fPhotos" name="photos[]"
                                 accept="image/jpeg,image/png" multiple />
 
-                            <!-- images -->
+                            @error('photos')
+                                <div class="text-danger small mb-2">
+                                    {{ $message }}
+                                </div>
+                            @enderror
 
-                            <div class="thumbs" id="photoThumbs">
+                            @foreach ($errors->get('photos.*') as $messages)
+                                @foreach ($messages as $message)
+                                    <div class="text-danger small mb-2">
+                                        {{ $message }}
+                                    </div>
+                                @endforeach
+                            @endforeach
 
-                                @if (isset($property) && $property->images->isNotEmpty())
+                            <div class="thumbs mb-3" id="photoThumbs"></div>
 
-                                    @foreach ($property->images as $image)
+                            <!-- Existing property photos -->
+                            @if (isset($property) && $property->images->whereNull('room_id')->isNotEmpty())
+
+                                <h3 class="h6 fw-semibold mt-3">
+                                    {{ __('Existing photos') }}
+                                </h3>
+
+                                <div class="thumbs" id="existingPhotoThumbs">
+
+                                    @foreach ($property->images->whereNull('room_id') as $image)
                                         <div class="t" id="property-image-{{ $image->id }}"
+                                            data-existing-cover="{{ $existingCover?->id === $image->id ? '1' : '0' }}"
                                             style="position: relative;">
 
                                             <img src="{{ $image->public_url }}" alt="{{ __('Property image') }}"
                                                 style="width: 100%; height: 100%; object-fit: cover;">
 
-                                            @if ($image->is_primary)
+                                            @if ($existingCover?->id === $image->id)
                                                 <span class="cover">{{ __('Cover') }}</span>
                                             @endif
 
-                                            <!-- Mark existing image for deletion -->
-
                                             <label
-                                                style="position: absolute; top: 5px; right: 5px;
-
-                           background: #dc3545; color: white;
-
-                           border-radius: 50%; width: 25px; height: 25px;
-
-                           display: flex; align-items: center;
-
-                           justify-content: center; cursor: pointer;"
+                                                style="position: absolute;
+                            top: 5px;
+                            right: 5px;
+                            background: #dc3545;
+                            color: white;
+                            border-radius: 50%;
+                            width: 25px;
+                            height: 25px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;"
                                                 title="{{ __('Delete image') }}">
 
                                                 <input type="checkbox" name="deleted_images[]"
                                                     value="{{ $image->id }}" class="visually-hidden"
-                                                    onchange="
-
-                            this.closest('.t').style.opacity =
-
-                                this.checked ? '0.4' : '1';
-
-                        ">
+                                                    onchange="this.closest('.t').style.opacity = this.checked ? '0.4' : '1';">
 
                                                 <i class="bi bi-x-lg"></i>
 
@@ -319,9 +377,15 @@
                                         </div>
                                     @endforeach
 
-                                @endif
+                                </div>
 
-                            </div>
+                            @endif
+
+                            @error('deleted_images')
+                                <div class="text-danger small mt-2">
+                                    {{ $message }}
+                                </div>
+                            @enderror
 
                         </section>
 
@@ -563,7 +627,9 @@
 
         <script src="{{ asset('assets/js/controllers/localized-map.js') }}"></script>
 
-        @php($jordanSites = config('jordan_locations.sites'))
+        @php
+            $jordanSites = config('jordan_locations.sites');
+        @endphp
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const element = id => document.getElementById(id);
@@ -777,9 +843,12 @@
 
                         description: filled('fDescEn'),
 
-                        photos: (field('fPhotos')?.files.length || 0) > 0 ||
-
-                            document.querySelectorAll('#photoThumbs .t').length > 0,
+                        photos: (
+                            (field('fDefaultPhoto')?.files.length || 0) > 0 ||
+                            Boolean(document.querySelector(
+                                '#existingPhotoThumbs [data-existing-cover="1"] input:not(:checked)'
+                            ))
+                        ),
 
                         location: filled('fCity') && filled('fStreet') &&
 
@@ -846,139 +915,312 @@
             });
         </script>
 
-        <!-- Preview newly selected property photos -->
-
+        <!-- Preview and validate property photos -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('propertyForm');
+                const defaultInput = document.getElementById('fDefaultPhoto');
+                const additionalInput = document.getElementById('fPhotos');
 
-                const photoInput = document.getElementById('fPhotos');
+                const defaultThumbs = document.getElementById('defaultPhotoThumbs');
+                const additionalThumbs = document.getElementById('photoThumbs');
+                const existingThumbs = document.getElementById('existingPhotoThumbs');
 
-                const photoThumbs = document.getElementById('photoThumbs');
+                if (!form || !defaultInput || !additionalInput ||
+                    !defaultThumbs || !additionalThumbs) return;
 
-                if (!photoInput || !photoThumbs) return;
+                const MAX_SIZE = 5 * 1024 * 1024;
+                const MAX_PHOTOS = 10;
+                const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 
-                let newPreviews = [];
+                let selectedAdditionalPhotos = [];
+                let selectedDefaultPhoto = null;
 
-                photoInput.addEventListener('change', function() {
+                const translate = text =>
+                    window.makanTranslate?.(text) ?? text;
 
-                    // Remove only previous previews, not saved property images.*
+                const existingImages = () =>
+                    Array.from(existingThumbs?.querySelectorAll('.t') || []);
 
-                    newPreviews.forEach(preview => preview.remove());
+                function retainedImages() {
+                    return existingImages().filter(image =>
+                        !image.querySelector('input[type="checkbox"]')?.checked
+                    );
+                }
 
-                    newPreviews = [];
+                function hasExistingCover() {
+                    return retainedImages().some(image =>
+                        image.dataset.existingCover === '1'
+                    );
+                }
 
-                    Array.from(photoInput.files).forEach(file => {
+                function totalPhotos() {
+                    return retainedImages().length +
+                        defaultInput.files.length +
+                        additionalInput.files.length;
+                }
 
-                        if (!['image/jpeg', 'image/png'].includes(file.type)) return;
+                function validateFile(file) {
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        return translate('Only JPG and PNG images are allowed.');
+                    }
 
+                    if (file.size > MAX_SIZE) {
+                        return translate('Each photo must not exceed 5 MB.');
+                    }
+
+                    return '';
+                }
+
+                function updatePhotoState() {
+                    const hasNewCover = defaultInput.files.length > 0;
+
+                    defaultInput.required = !hasExistingCover();
+
+                    existingImages().forEach(image => {
+                        const deleted = image.querySelector(
+                            'input[type="checkbox"]'
+                        )?.checked;
+
+                        const badge = image.querySelector('.cover');
+
+                        image.style.opacity = deleted ? '0.4' : '1';
+
+                        if (badge) {
+                            badge.hidden = hasNewCover || deleted;
+                        }
+                    });
+                }
+
+                function syncPhotoInput(input, photos) {
+                    const transfer = new DataTransfer();
+
+                    photos.forEach(file => {
+                        transfer.items.add(file);
+                    });
+
+                    input.files = transfer.files;
+                }
+
+                function renderPreviews(input, container, isCover = false) {
+                    container.replaceChildren();
+
+                    Array.from(input.files).forEach((file, index) => {
                         const preview = document.createElement('div');
-
                         preview.className = 't';
+                        preview.style.position = 'relative';
 
                         const img = document.createElement('img');
+                        const objectUrl = URL.createObjectURL(file);
 
-                        img.src = URL.createObjectURL(file);
+                        img.src = objectUrl;
+                        img.alt = translate('New property photo');
+                        img.style.cssText =
+                            'width:100%;height:100%;object-fit:cover;';
 
-                        img.alt = 'New property photo';
-
-                        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-
-                        img.addEventListener('load', function() {
-
-                            URL.revokeObjectURL(img.src);
-
+                        img.addEventListener('load', () => {
+                            URL.revokeObjectURL(objectUrl);
                         }, {
-
                             once: true
-
                         });
 
-                        // Add image to preview.*
+                        img.addEventListener('error', () => {
+                            URL.revokeObjectURL(objectUrl);
+                        }, {
+                            once: true
+                        });
 
                         preview.appendChild(img);
 
-                        // Create remove button for newly selected photo.*
+                        if (isCover) {
+                            const badge = document.createElement('span');
+                            badge.className = 'cover';
+                            badge.textContent = translate('Cover');
+                            preview.appendChild(badge);
+                        }
 
                         const removeBtn = document.createElement('button');
 
                         removeBtn.type = 'button';
-
                         removeBtn.className = 'btn btn-danger btn-sm';
-
                         removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
-
-                        removeBtn.title = 'Remove photo';
+                        removeBtn.title = translate('Remove photo');
+                        removeBtn.setAttribute(
+                            'aria-label',
+                            translate('Remove photo')
+                        );
 
                         removeBtn.style.cssText = `
-
-    position: absolute;
-
-    top: 5px;
-
-    right: 5px;
-
-    border-radius: 50%;
-
-    width: 25px;
-
-    height: 25px;
-
-    padding: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-`;
-
-                        preview.style.position = 'relative';
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    border-radius: 50%;
+                    width: 25px;
+                    height: 25px;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
 
                         removeBtn.addEventListener('click', function() {
+                            if (isCover) {
+                                selectedDefaultPhoto = null;
 
-                            // Remove selected photo from the actual file input.*
+                                syncPhotoInput(defaultInput, []);
+                            } else {
+                                selectedAdditionalPhotos.splice(index, 1);
 
-                            const files = new DataTransfer();
+                                syncPhotoInput(
+                                    additionalInput,
+                                    selectedAdditionalPhotos
+                                );
+                            }
 
-                            Array.from(photoInput.files).forEach(selectedFile => {
-
-                                if (selectedFile !== file) {
-
-                                    files.items.add(selectedFile);
-
-                                }
-
-                            });
-
-                            photoInput.files = files.files;
-
-                            // Remove photo preview.*
-
-                            preview.remove();
-
-                            newPreviews = newPreviews.filter(item => item !== preview);
-
-                            // Update Listing Readiness.*
-
-                            photoInput.dispatchEvent(new Event('change', {
-
-                                bubbles: true
-
-                            }));
-
+                            renderPreviews(input, container, isCover);
+                            updatePhotoState();
                         });
-
                         preview.appendChild(removeBtn);
+                        container.appendChild(preview);
+                    });
+                }
 
-                        photoThumbs.appendChild(preview);
+                function handleSelection(input, container, isCover) {
+                    const errors = new Set();
+                    const validFiles = [];
 
-                        newPreviews.push(preview);
+                    Array.from(input.files).forEach(file => {
+                        const error = validateFile(file);
 
+                        if (error) {
+                            errors.add(error);
+                            return;
+                        }
+
+                        validFiles.push(file);
                     });
 
+                    if (isCover) {
+                        const nextCover =
+                            validFiles[0] || selectedDefaultPhoto;
+
+                        const nextTotal =
+                            retainedImages().length +
+                            (nextCover ? 1 : 0) +
+                            selectedAdditionalPhotos.length;
+
+                        if (nextTotal > MAX_PHOTOS) {
+                            errors.add(translate(
+                                'A property can have a maximum of 10 photos.'
+                            ));
+                        } else {
+                            selectedDefaultPhoto = nextCover;
+                        }
+
+                        syncPhotoInput(
+                            defaultInput,
+                            selectedDefaultPhoto ?
+                            [selectedDefaultPhoto] :
+                            []
+                        );
+
+                    } else {
+                        const mergedPhotos = [...selectedAdditionalPhotos];
+
+                        validFiles.forEach(file => {
+                            const exists = mergedPhotos.some(photo =>
+                                photo.name === file.name &&
+                                photo.size === file.size &&
+                                photo.lastModified === file.lastModified
+                            );
+
+                            if (!exists) {
+                                mergedPhotos.push(file);
+                            }
+                        });
+
+                        const nextTotal =
+                            retainedImages().length +
+                            (selectedDefaultPhoto ? 1 : 0) +
+                            mergedPhotos.length;
+
+                        if (
+                            mergedPhotos.length > 9 ||
+                            nextTotal > MAX_PHOTOS
+                        ) {
+                            errors.add(translate(
+                                'A property can have a maximum of 10 photos.'
+                            ));
+                        } else {
+                            selectedAdditionalPhotos = mergedPhotos;
+                        }
+
+                        syncPhotoInput(
+                            additionalInput,
+                            selectedAdditionalPhotos
+                        );
+                    }
+
+                    renderPreviews(input, container, isCover);
+                    updatePhotoState();
+
+                    if (errors.size > 0) {
+                        MakanPopup.error(
+                            Array.from(errors).join('\n')
+                        );
+                    }
+                }
+                defaultInput.addEventListener('change', function() {
+                    handleSelection(defaultInput, defaultThumbs, true);
                 });
 
+                additionalInput.addEventListener('change', function() {
+                    handleSelection(additionalInput, additionalThumbs, false);
+                });
+
+                existingThumbs?.addEventListener('change', function() {
+                    updatePhotoState();
+                });
+
+                form.addEventListener('submit', function(event) {
+                    if (!defaultInput.files.length && !hasExistingCover()) {
+                        event.preventDefault();
+
+                        MakanPopup.error(translate(
+                            'Please upload a default property photo.'
+                        ));
+
+                        return;
+                    }
+
+                    if (totalPhotos() > MAX_PHOTOS ||
+                        additionalInput.files.length > 9) {
+                        event.preventDefault();
+
+                        MakanPopup.error(translate(
+                            'A property can have a maximum of 10 photos.'
+                        ));
+
+                        return;
+                    }
+
+                    const selectedFiles = [
+                        ...defaultInput.files,
+                        ...additionalInput.files
+                    ];
+
+                    for (const file of selectedFiles) {
+                        const error = validateFile(file);
+
+                        if (error) {
+                            event.preventDefault();
+                            MakanPopup.error(error);
+                            return;
+                        }
+                    }
+                });
+
+                updatePhotoState();
             });
         </script>
     @endpush

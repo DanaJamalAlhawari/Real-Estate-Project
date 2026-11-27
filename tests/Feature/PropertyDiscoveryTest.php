@@ -60,7 +60,7 @@ class PropertyDiscoveryTest extends TestCase
         $filters = ['q' => 'Sunny', 'category' => 'studio'];
 
         $this->get(route('home', $filters + ['lang' => 'ar']))
-            ->assertRedirect(route('home').'/?'.http_build_query($filters))
+            ->assertRedirect(route('home') . '/?' . http_build_query($filters))
             ->assertSessionHas('locale', 'ar');
 
         $this->get(route('home', $filters))->assertOk()
@@ -71,7 +71,7 @@ class PropertyDiscoveryTest extends TestCase
             ->assertDontSee('Sunny studio');
 
         $this->get(route('home', $filters + ['lang' => 'en']))
-            ->assertRedirect(route('home').'/?'.http_build_query($filters))
+            ->assertRedirect(route('home') . '/?' . http_build_query($filters))
             ->assertSessionHas('locale', 'en');
 
         $this->get(route('home', $filters))->assertOk()
@@ -105,6 +105,11 @@ class PropertyDiscoveryTest extends TestCase
         $agent = $this->account('agent');
         $property = $this->listing($agent, [
             'title' => 'استوديو بجانب الحديقة',
+
+        ]);
+        $property->images()->create([
+            'image_url' => 'properties/test-cover.jpg',
+            'is_primary' => true,
         ]);
 
         $this->actingAs($agent)->put(route('properties.update', $property), [
@@ -150,25 +155,43 @@ class PropertyDiscoveryTest extends TestCase
             'location_is_approximate' => true,
         ]);
         $folder = 'assets/properties/Data/Vactions/Vactions/vaction 2/';
-        $property->images()->create(['image_url' => $folder.'default.jpg', 'is_primary' => true]);
-        $property->images()->create(['image_url' => $folder.'living-room.jpg']);
+        $property->images()->create(['image_url' => $folder . 'default.jpg', 'is_primary' => true]);
+        $property->images()->create(['image_url' => $folder . 'living-room.jpg']);
 
-        $this->actingAs($this->account('tenant'))->get(route('seeker.search'))->assertOk()
-            ->assertSee('vaction%202/living-room.jpg')->assertDontSee('vaction%202/default.jpg');
+        $this->actingAs($this->account('tenant'))
+            ->get(route('seeker.search'))
+            ->assertOk()
+            ->assertSee('data-property-carousel', false)
+            ->assertSeeInOrder([
+                'vaction%202/default.jpg',
+                'vaction%202/living-room.jpg',
+            ])
+            ->assertSee('data-carousel-prev', false)
+            ->assertSee('data-carousel-next', false)
+            ->assertSee('id="propertyImageLightbox"', false);
 
-        $this->get(route('seeker.property.details', ['property_id' => $property->id]))->assertOk()
-            ->assertSee('vaction%202/default.jpg')->assertSee('vaction%202/living-room.jpg')
-            ->assertSee('marker=29.54953%2C34.98715')->assertSee('Approximate location');
-
+        $this->get(route('seeker.property.details', ['property_id' => $property->id]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'vaction%202/default.jpg',
+                'vaction%202/living-room.jpg',
+            ])
+            ->assertSee('data-property-gallery', false)
+            ->assertSee('id="propertyDetailMap"', false)
+            ->assertSee('data-latitude="29.54953"', false)
+            ->assertSee('data-longitude="34.98715"', false)
+            ->assertSee('maplibre-gl')
+            ->assertSee('localized-map.js')
+            ->assertSee('Approximate location');
         $this->actingAs($agent)->get(route('owner.dashboard'))->assertOk()
-            ->assertViewHas('dailyPropertyViews', fn (array $days) => count($days) === 14 && $days[13]['amount'] === 1)
+            ->assertViewHas('dailyPropertyViews', fn(array $days) => count($days) === 14 && $days[13]['amount'] === 1)
             ->assertSee('1 view');
     }
 
     private function account(string $role, ?string $username = null): RealEstateUser
     {
         return RealEstateUser::forceCreate([
-            'email' => ($username ?? $role).'@example.test',
+            'email' => ($username ?? $role) . '@example.test',
             'role' => $role,
             'password' => 'test-password',
         ]);

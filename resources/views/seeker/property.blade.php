@@ -23,16 +23,43 @@
     <main class="app-page container">
         <a href="{{ route('seeker.search') }}" class="back-link"><i
                 class="bi bi-arrow-left"></i>{{ __('Back to results') }}</a>
+        @php
+            $galleryImages = $property->galleryImages();
+            $galleryCount = $galleryImages->count();
+        @endphp
 
-        <div class="gallery mt-2 mb-4" aria-label="{{ __('Property photos') }}">
-            @forelse ($property->images as $image)
-                <a @class(['g-main' => $loop->first]) href="{{ $image->public_url }}" target="_blank" rel="noopener">
+        <div class="gallery property-detail-gallery mt-2 mb-4" data-property-gallery
+            data-gallery-title="{{ $property->localized('title') }}" aria-label="{{ __('Property photos') }}">
+            @forelse ($galleryImages as $image)
+                <button type="button" @class(['property-detail-gallery-item', 'g-main' => $loop->first]) data-gallery-open data-slide-index="{{ $loop->index }}"
+                    aria-label="{{ __('View photo') }} {{ $loop->iteration }}"
+                    @if ($loop->index >= 5) hidden @endif>
                     <img src="{{ $image->public_url }}"
-                        alt="{{ __(':property — photo :number', ['property' => $property->localized('title'), 'number' => $loop->iteration]) }}"
-                        class="w-100 h-100 object-fit-cover" @unless ($loop->first) loading="lazy" @endunless>
-                </a>
+                        alt="{{ __(':property — photo :number', [
+                            'property' => $property->localized('title'),
+                            'number' => $loop->iteration,
+                        ]) }}"
+                        class="w-100 h-100 object-fit-cover" @unless ($loop->first) loading="lazy" @endunless
+                        draggable="false">
+
+                    @if ($loop->first)
+                        <span class="property-detail-gallery-count" dir="ltr">
+                            <i class="bi bi-images"></i>
+                            {{ $galleryCount }}
+                        </span>
+                    @endif
+
+                    @if ($loop->index === 4 && $galleryCount > 5)
+                        <span class="property-detail-gallery-more">
+                            +{{ $galleryCount - 5 }}
+                        </span>
+                    @endif
+                </button>
             @empty
-                <div class="g-main ph"><i class="bi bi-house-door"></i> {{ __('No property photos yet.') }}</div>
+                <div class="g-main ph">
+                    <i class="bi bi-house-door"></i>
+                    {{ __('No property photos yet.') }}
+                </div>
             @endforelse
         </div>
 
@@ -143,7 +170,8 @@
                                     style="grid-template-columns: repeat(7, minmax(0, 1fr))" data-calendar-days></div>
                                 <p class="small text-muted mt-2 mb-0" data-calendar-help aria-live="polite"></p>
                             </div>
-                            <button type="submit" class="btn btn-accent btn-lg w-100">{{ __('Request booking') }}</button>
+                            <button type="submit"
+                                class="btn btn-accent btn-lg w-100">{{ __('Request booking') }}</button>
                         </form>
                     @else
                         <p>{{ __('Contact the owner for a price before booking.') }}</p>
