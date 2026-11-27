@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -83,7 +84,7 @@ class Property extends Model
     {
         $locale ??= app()->getLocale();
         $original = $this->getAttribute($field);
-        $translation = $this->getAttribute($field.'_'.$locale);
+        $translation = $this->getAttribute($field . '_' . $locale);
 
         if (filled($translation)) {
             return $translation;
@@ -120,20 +121,20 @@ class Property extends Model
     {
         $columns = $fields;
         foreach ($fields as $field) {
-            $columns[] = $field.'_ar';
-            $columns[] = $field.'_en';
+            $columns[] = $field . '_ar';
+            $columns[] = $field . '_en';
         }
 
         $terms = preg_split('/[\s,،]+/u', trim($search), -1, PREG_SPLIT_NO_EMPTY) ?: [];
         foreach ($terms as $term) {
-            $pattern = '%'.strtr(mb_strtolower($term), ['!' => '!!', '%' => '!%', '_' => '!_']).'%';
+            $pattern = '%' . strtr(mb_strtolower($term), ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
             $query->where(function (Builder $matches) use ($columns, $pattern, $term, $includeCategoryAndCity): void {
                 foreach ($columns as $column) {
                     $matches->orWhereRaw("LOWER(properties.{$column}) LIKE ? ESCAPE '!'", [$pattern]);
                 }
 
                 if ($includeCategoryAndCity) {
-                    $categories = array_keys(array_filter(self::CATEGORIES, fn (string $label): bool => mb_stripos($label, $term) !== false || mb_stripos(__($label, [], 'ar'), $term) !== false));
+                    $categories = array_keys(array_filter(self::CATEGORIES, fn(string $label): bool => mb_stripos($label, $term) !== false || mb_stripos(__($label, [], 'ar'), $term) !== false));
                     $matches->orWhereRaw("LOWER(properties.category) LIKE ? ESCAPE '!'", [$pattern])
                         ->orWhereIn('properties.category', $categories)
                         ->orWhereIn('properties.city', self::cityVariants($term));
@@ -148,7 +149,7 @@ class Property extends Model
     {
         $variants = self::cityVariants($city);
 
-        return $query->where(fn (Builder $matches) => $matches->whereIn('properties.city', $variants)
+        return $query->where(fn(Builder $matches) => $matches->whereIn('properties.city', $variants)
             ->orWhereIn('properties.city_ar', $variants)->orWhereIn('properties.city_en', $variants));
     }
 
@@ -198,6 +199,36 @@ class Property extends Model
     public function images(): HasMany
     {
         return $this->hasMany(PropertyImage::class, 'property_id');
+    }
+    public function coverImage(): ?PropertyImage
+    {
+        $images = $this->images
+            ->whereNull('room_id')
+            ->sortBy('id');
+
+        return $images->firstWhere('is_primary', true)
+            ?? $images->first(fn($image) => $image->isDemoDefaultImage())
+            ?? $images->first();
+    }
+
+    /**
+     * Return property gallery images with the cover image first.
+     *
+     * @return Collection<int, PropertyImage>
+     */
+    public function galleryImages(): Collection
+    {
+        $cover = $this->coverImage();
+
+        return $this->images
+            ->whereNull('room_id')
+            ->sortBy([
+                fn(PropertyImage $a, PropertyImage $b) => ($a->id !== $cover?->id)
+                    <=> ($b->id !== $cover?->id),
+
+                ['id', 'asc'],
+            ])
+            ->values();
     }
 
     public function dailyViews(): HasMany

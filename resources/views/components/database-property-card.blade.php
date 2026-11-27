@@ -3,69 +3,42 @@
 <div class="col-sm-6 col-xxl-4">
     <article class="prop-card">
         @if (auth()->user()?->role === 'tenant')
-        <form
-            action="{{ route(
-                $saved ? 'seeker.favorites.destroy' : 'seeker.favorites.store',
-                ['property' => $property->id]
-            ) }}"
-            method="POST"
-        >
-            @csrf
+            <form
+                action="{{ route($saved ? 'seeker.favorites.destroy' : 'seeker.favorites.store', ['property' => $property->id]) }}"
+                method="POST">
+                @csrf
 
-            @if ($saved)
-                @method('DELETE')
-            @endif
+                @if ($saved)
+                    @method('DELETE')
+                @endif
 
-            <button
-                type="submit"
-                class="fav-btn {{ $saved ? 'is-on' : '' }}"
-                style="position:absolute; top:8px; inset-inline-end:8px; z-index:2;"
-                aria-label="{{ $saved ? __('Remove from favorites') : __('Add to favorites') }}"
-            >
-                <i class="{{ $saved ? 'bi bi-heart-fill' : 'bi bi-heart' }}"></i>
-            </button>
-        </form>
+                <button type="submit" class="fav-btn {{ $saved ? 'is-on' : '' }}"
+                    style="position:absolute; top:8px; inset-inline-end:8px; z-index:2;"
+                    aria-label="{{ $saved ? __('Remove from favorites') : __('Add to favorites') }}">
+                    <i class="{{ $saved ? 'bi bi-heart-fill' : 'bi bi-heart' }}"></i>
+                </button>
+            </form>
         @endif
 
         <div class="prop-media">
-            @php
-                $cardImages = $property->images->filter(fn ($image) => ! $image->isDemoDefaultImage());
-                $primaryImage = $cardImages->firstWhere('is_primary', true) ?? $cardImages->first();
-            @endphp
 
-            @if ($primaryImage)
-                <img
-                    src="{{ $primaryImage->public_url }}"
-                    alt="{{ $property->localized('title') }}"
-                    class="w-100 h-100"
-                    style="object-fit:cover;"
-                >
-            @else
-                <span class="ph-icon">
-                    <i class="bi bi-house-door"></i>
-                </span>
-            @endif
+            <x-property-image-carousel :property="$property" />
 
             @if ($property->verification_status === 'verified')
                 <span class="badge-verified">
                     <i class="bi bi-patch-check-fill"></i>{{ __('Verified') }}
                 </span>
             @endif
+
         </div>
 
         <div class="prop-body">
             <div class="d-flex justify-content-between align-items-start gap-2">
-                <a
-                    href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}"
-                    class="prop-title"
-                >
+                <a href="{{ route('seeker.property.details', ['property_id' => $property->id]) }}" class="prop-title">
                     {{ $property->localized('title') }}
                 </a>
 
-                <a
-                    href="{{ route('seeker.reviews.index', ['property' => $property->id]) }}"
-                    class="property-rating"
-                >
+                <a href="{{ route('seeker.reviews.index', ['property' => $property->id]) }}" class="property-rating">
                     @if ($property->reviews_count > 0)
                         <i class="bi bi-star-fill"></i>
                         {{ number_format($property->reviews_avg_rating, 1) }}

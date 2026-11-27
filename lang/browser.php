@@ -35,4 +35,27 @@ return [
     'Location selected.',
     'No matching locations in Jordan.',
     'Location search is unavailable. Try again.',
+    // Feedback popup
+    'Error',
+    'Success',
+    'Warning',
+    'Information',
+    'Confirm action',
+    'Confirm',
+    'OK',
+    // Property photo validation
+    'Only JPG and PNG images are allowed.',
+    'Each photo must not exceed 5 MB.',
+    'New property photo',
+    'Cover',
+    'Remove photo',
+    'A property can have a maximum of 10 photos.',
+    'Please upload a default property photo.',
+    // Form validation popup
+    'Please complete the required fields.',
+    'Please complete or correct the following fields:',
+    'Please review the entered information.',
+    'Please enter a valid value.',
+    'Property photos',
+    'View photo',
 ];

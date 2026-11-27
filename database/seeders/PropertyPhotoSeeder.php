@@ -52,8 +52,8 @@ class PropertyPhotoSeeder extends Seeder
         ];
 
         $folders = collect(File::allFiles(public_path($root)))
-            ->filter(fn ($file) => in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'], true))
-            ->groupBy(fn ($file) => str_replace('\\', '/', $file->getRelativePath()));
+            ->filter(fn($file) => in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'], true))
+            ->groupBy(fn($file) => str_replace('\\', '/', $file->getRelativePath()));
 
         if ($folders->isEmpty()) {
             throw new RuntimeException('No listing images were found.');
@@ -98,11 +98,11 @@ class PropertyPhotoSeeder extends Seeder
 
                 $folderName = basename($folder);
                 if (! isset(self::LISTINGS[$folderName])) {
-                    throw new RuntimeException('No demo location is defined for '.$folder);
+                    throw new RuntimeException('No demo location is defined for ' . $folder);
                 }
 
                 [$site, $title, $titleAr] = self::LISTINGS[$folderName];
-                $legacyTitle = Property::CATEGORIES[$category].' — '.Str::headline($folderName);
+                $legacyTitle = Property::CATEGORIES[$category] . ' — ' . Str::headline($folderName);
                 $property = $listingsByFolder[$folder]
                     ?? $existing->firstWhere('title', $legacyTitle)
                     ?? new Property(['agent_id' => $agent->id]);
@@ -121,15 +121,66 @@ class PropertyPhotoSeeder extends Seeder
                     $this->setListingLocation($property, $site, $title, $titleAr);
                 }
 
-                $images = $files->sortBy(fn ($file) => [strtolower($file->getBasename('.'.$file->getExtension())) !== 'default', $file->getFilename()])->values();
+                $images = $files->sortBy(function ($file) use ($folderName) {
+                    $filename = strtolower($file->getFilename());
+                    $basename = pathinfo($filename, PATHINFO_FILENAME);
+
+                    $isDefault = $basename === 'default';
+
+                    $isPreferredCover = $folderName === 'vaction 4'
+                        && $filename === 'livig-room.jpeg';
+
+                    return [
+                        $isDefault ? 0 : ($isPreferredCover ? 1 : 2),
+                        $filename,
+                    ];
+                })->values();
+
+                $primaryImage = null;
+
                 foreach ($images as $index => $image) {
-                    $suffix = $folder.'/'.$image->getFilename();
-                    $old = $property->images->firstWhere('image_url', 'assets/images/properties/Data/'.$suffix);
-                    if ($old && ! $property->images->contains('image_url', $root.'/'.$suffix)) {
-                        $old->update(['image_url' => $root.'/'.$suffix]);
-                    } else {
-                        $property->images()->firstOrCreate(['image_url' => $root.'/'.$suffix], ['is_primary' => $index === 0]);
+                    $suffix = $folder . '/' . $image->getFilename();
+
+                    $currentPath = $root . '/' . $suffix;
+                    $legacyPath = 'assets/images/properties/Data/' . $suffix;
+
+                    $propertyImage = $property->images()
+                        ->whereNull('room_id')
+                        ->where('image_url', $currentPath)
+                        ->first();
+
+                    if (! $propertyImage) {
+                        $propertyImage = $property->images()
+                            ->whereNull('room_id')
+                            ->where('image_url', $legacyPath)
+                            ->first();
+
+                        if ($propertyImage) {
+                            $propertyImage->update([
+                                'image_url' => $currentPath,
+                            ]);
+                        } else {
+                            $propertyImage = $property->images()->create([
+                                'image_url' => $currentPath,
+                                'is_primary' => false,
+                            ]);
+                        }
                     }
+
+                    if ($index === 0) {
+                        $primaryImage = $propertyImage;
+                    }
+                }
+
+                if ($primaryImage) {
+                    $property->images()
+                        ->whereNull('room_id')
+                        ->where('id', '!=', $primaryImage->id)
+                        ->update(['is_primary' => false]);
+
+                    $primaryImage->update([
+                        'is_primary' => true,
+                    ]);
                 }
             }
 
@@ -158,12 +209,20 @@ class PropertyPhotoSeeder extends Seeder
 
     private function setListingLocation(Property $property, string $site, string $title, string $titleAr): void
     {
-        [$city, $cityAr, $area, $areaAr, $address, $addressAr, $latitude, $longitude] = config('jordan_locations.sites.'.$site);
+        [$city, $cityAr, $area, $areaAr, $address, $addressAr, $latitude, $longitude] = config('jordan_locations.sites.' . $site);
         $property->fill([
-            'title' => $title, 'title_en' => $title, 'title_ar' => $titleAr,
-            'city' => $city, 'city_en' => $city, 'city_ar' => $cityAr,
-            'area' => $area, 'area_en' => $area, 'area_ar' => $areaAr,
-            'address' => $address, 'address_en' => $address, 'address_ar' => $addressAr,
+            'title' => $title,
+            'title_en' => $title,
+            'title_ar' => $titleAr,
+            'city' => $city,
+            'city_en' => $city,
+            'city_ar' => $cityAr,
+            'area' => $area,
+            'area_en' => $area,
+            'area_ar' => $areaAr,
+            'address' => $address,
+            'address_en' => $address,
+            'address_ar' => $addressAr,
         ]);
 
         if ($property->latitude === null || $property->longitude === null) {
@@ -172,6 +231,6 @@ class PropertyPhotoSeeder extends Seeder
             $property->location_is_approximate = true;
         }
 
-        Property::withoutTimestamps(fn () => $property->save());
+        Property::withoutTimestamps(fn() => $property->save());
     }
 }

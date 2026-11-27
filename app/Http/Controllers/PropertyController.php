@@ -76,7 +76,8 @@ class PropertyController extends Controller
             'bathrooms' => 'required|integer|min:0',
             'services' => 'sometimes|array',
             'services.*' => 'integer|distinct|exists:services,id',
-            'photos' => 'sometimes|array|max:10',
+            'default_photo' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'photos' => 'sometimes|array|max:9',
             'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
             'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'action' => 'required|in:publish',
@@ -87,6 +88,7 @@ class PropertyController extends Controller
 
         // 2. Get selected services and uploaded photos.
         $services = $validated['services'] ?? [];
+        $defaultPhoto = $request->file('default_photo');
         $photos = $request->file('photos', []);
 
         // 3. Keep track of uploaded files for cleanup.
@@ -95,7 +97,19 @@ class PropertyController extends Controller
 
         try {
 
-            // 4. Upload property photos.
+
+            // 4. Upload the default property photo.
+            $defaultPath = $defaultPhoto->store('properties', 'public');
+
+            abort_if(
+                $defaultPath === false,
+                500,
+                __('Could not store the property photo.')
+            );
+
+            $uploadedPaths[] = $defaultPath;
+
+            // Upload additional property photos.
             foreach ($photos as $photo) {
                 $path = $photo->store('properties', 'public');
                 abort_if($path === false, 500, __('Could not store the property photo.'));
@@ -223,7 +237,8 @@ class PropertyController extends Controller
             'services' => 'sometimes|array',
             'services.*' => 'integer|distinct|exists:services,id',
             // Validate newly uploaded photos.
-            'photos' => 'sometimes|array',
+            'default_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'photos' => 'sometimes|array|max:9',
             'photos.*' => 'image|mimes:jpg,jpeg,png|max:5120',
 
             // Validate existing images selected for deletion.
@@ -258,6 +273,7 @@ class PropertyController extends Controller
 
         // Ensure that the selected images belong to this property.
         $imagesToDelete = $property->images()
+            ->whereNull('room_id')
             ->whereIn('id', $deletedImageIds)
             ->get();
 
@@ -267,11 +283,31 @@ class PropertyController extends Controller
             ]);
         }
 
-        // Check the maximum number of photos after updating.
-        $remainingPhotos = $property->images()->count() - $imagesToDelete->count();
+        // Check the remaining property photos.
+        $remainingImages = $property->images()
+            ->whereNull('room_id')
+            ->whereNotIn('id', $deletedImageIds)
+            ->get();
+
+        $currentCover = $property->coverImage();
+
+        $defaultPhoto = $request->file('default_photo');
         $newPhotos = $request->file('photos', []);
 
-        if ($remainingPhotos + count($newPhotos) > 10) {
+        if (
+            !$defaultPhoto &&
+            (!$currentCover || !$remainingImages->contains('id', $currentCover->id))
+        ) {
+            throw ValidationException::withMessages([
+                'default_photo' => __('Please upload a default property photo.'),
+            ]);
+        }
+
+        $totalPhotos = $remainingImages->count()
+            + count($newPhotos)
+            + ($defaultPhoto ? 1 : 0);
+
+        if ($totalPhotos > 10) {
             throw ValidationException::withMessages([
                 'photos' => __('A property can have a maximum of 10 photos.'),
             ]);
@@ -279,8 +315,21 @@ class PropertyController extends Controller
 
         // Upload new photos before saving the database changes.
         $uploadedPaths = [];
+        $defaultPath = null;
 
         try {
+            if ($defaultPhoto) {
+                $defaultPath = $defaultPhoto->store('properties', 'public');
+
+                abort_if(
+                    $defaultPath === false,
+                    500,
+                    __('Could not store the property photo.')
+                );
+
+                $uploadedPaths[] = $defaultPath;
+            }
+
             foreach ($newPhotos as $photo) {
                 $path = $photo->store('properties', 'public');
                 abort_if($path === false, 500, __('Could not store the property photo.'));
@@ -291,10 +340,15 @@ class PropertyController extends Controller
                 $property,
                 $validated,
                 $imagesToDelete,
-                $uploadedPaths
+                $uploadedPaths,
+                $defaultPath
             ) {
                 // Save property details.
                 $current = Property::lockForUpdate()->findOrFail($property->id);
+
+                // Read the latest cover after acquiring the property lock.
+                $currentCover = $current->coverImage();
+
                 $current->forceFill($property->getDirty());
                 if ($current->getOriginal('category') !== $validated['category']) {
                     $current->category = $validated['category'];
@@ -317,27 +371,49 @@ class PropertyController extends Controller
                     $image->delete();
                 }
 
+
                 // Add newly uploaded images.
+                $newCover = null;
+
                 foreach ($uploadedPaths as $path) {
-                    $property->images()->create([
+                    $image = $property->images()->create([
                         'image_url' => $path,
+                        'is_primary' => false,
+                    ]);
+
+                    if ($defaultPath !== null && $path === $defaultPath) {
+                        $newCover = $image;
+                    }
+                }
+
+                // Ensure exactly one property image is the cover.
+                $images = $property->images()
+                    ->whereNull('room_id')
+                    ->orderBy('id')
+                    ->get();
+
+                $primary = $newCover
+                    ?? $images->firstWhere('id', $currentCover?->id);
+
+                if (!$primary) {
+                    throw ValidationException::withMessages([
+                        'default_photo' => __('Please upload a default property photo.'),
                     ]);
                 }
 
-                // Ensure exactly one remaining image is the cover.
-                $images = $property->images()->orderBy('id')->get();
-
-                if ($images->isNotEmpty()) {
-                    $primary = $images->firstWhere('is_primary', true)
-                        ?? $images->first();
-
-                    $property->images()
-                        ->where('id', '!=', $primary->id)
-                        ->update(['is_primary' => false]);
-
-                    $primary->is_primary = true;
-                    $primary->save();
+                if ($images->count() > 10) {
+                    throw ValidationException::withMessages([
+                        'photos' => __('A property can have a maximum of 10 photos.'),
+                    ]);
                 }
+
+                $property->images()
+                    ->whereNull('room_id')
+                    ->where('id', '!=', $primary->id)
+                    ->update(['is_primary' => false]);
+
+                $primary->is_primary = true;
+                $primary->save();
             });
         } catch (\Throwable $e) {
             // Remove newly uploaded files if saving fails.
@@ -380,8 +456,8 @@ class PropertyController extends Controller
 
         foreach (Property::TRANSLATABLE_FIELDS as $field) {
             $rule = $field === 'description' ? 'nullable|string' : 'nullable|string|max:255';
-            $rules[$field.'_ar'] = $rule;
-            $rules[$field.'_en'] = $rule;
+            $rules[$field . '_ar'] = $rule;
+            $rules[$field . '_en'] = $rule;
         }
 
         return $rules;
@@ -391,6 +467,8 @@ class PropertyController extends Controller
     {
         $properties = $request->user()->properties();
         abort_if((clone $properties)->exists() && ! $properties->where('verification_status', 'verified')->exists(),
-            403, 'An admin must approve your first property before you add another.');
+            403,
+            'An admin must approve your first property before you add another.'
+        );
     }
 }
