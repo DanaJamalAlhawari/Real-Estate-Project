@@ -24,7 +24,7 @@ class MakanAssistantController extends Controller
         $instructions = <<<'PROMPT'
             Classify one Makan property-platform question in Arabic or English. Return only JSON.
             Output intent as one of listings, bookings, dashboard, unsupported.
-            listings means a request to find rental properties. Copy the property name, city, area, or type
+            listings means a request to find rental properties. Copy the property name, city, address, or type
             from the question into search, leaving out generic words such as find, show and please.
             bookings means a question about the user's own booking records or incoming booking requests.
             dashboard means a request for the user's listing totals or administrative platform counts.
@@ -35,7 +35,7 @@ class MakanAssistantController extends Controller
 
         try {
             $response = Http::acceptJson()->connectTimeout(3)->timeout(90)->withoutRedirecting()
-                ->post(rtrim(config('services.ollama.url'), '/').'/api/chat', [
+                ->post(rtrim(config('services.ollama.url'), '/') . '/api/chat', [
                     'model' => $model,
                     'stream' => false,
                     'format' => 'json',
@@ -68,7 +68,8 @@ class MakanAssistantController extends Controller
             $intent === 'bookings' && $user->role === 'agent' => $this->agentBookings($user, $locale),
             $intent === 'dashboard' && $user->role === 'agent' => __('You have :count listings.', ['count' => $user->properties()->count()], $locale),
             $intent === 'dashboard' && $user->role === 'admin' => __('Makan has :users users and :properties properties.', [
-                'users' => RealEstateUser::count(), 'properties' => Property::count(),
+                'users' => RealEstateUser::count(),
+                'properties' => Property::count(),
             ], $locale),
             default => __('I can only answer questions about Makan listings and records your account can access.', [], $locale),
         };
@@ -85,10 +86,16 @@ class MakanAssistantController extends Controller
             return __('No matching Makan listings were found.', [], $locale);
         }
 
-        $lines = $properties->map(fn (Property $property) => __(':title — :location — :price', [
+        $lines = $properties->map(fn(Property $property) => __(':title — :location — :area — :price', [
             'title' => $property->localized('title', $locale),
-            'location' => implode($locale === 'ar' ? '، ' : ', ', array_filter([$property->localized('area', $locale), $property->localized('city', $locale)])),
-            'price' => $property->price === null ? __('Contact for price', [], $locale) : $property->price.' '.__('JOD', [], $locale),
+            'location' => $property->localized('city', $locale),
+            'area' => rtrim(rtrim(
+                number_format((float) $property->area_sqm, 2, '.', ''),
+                '0'
+            ), '.') . ' ' . __('m²', [], $locale),
+            'price' => $property->price === null
+                ? __('Contact for price', [], $locale)
+                : $property->price . ' ' . __('JOD', [], $locale),
         ], $locale));
 
         return $lines->implode("\n");
@@ -101,7 +108,7 @@ class MakanAssistantController extends Controller
             return __('You have no booking requests yet.', [], $locale);
         }
 
-        return $bookings->map(fn ($booking) => __(':title — :status (:start to :end)', [
+        return $bookings->map(fn($booking) => __(':title — :status (:start to :end)', [
             'title' => $booking->property?->localized('title', $locale) ?? __('Property unavailable', [], $locale),
             'status' => __(Str::headline($booking->status), [], $locale),
             'start' => $booking->start_date->toDateString(),

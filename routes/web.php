@@ -16,6 +16,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SeekerPropertyController;
 use App\Http\Controllers\TenantProfileController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Middleware\ModerateChatMessage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'show'])
@@ -232,7 +233,7 @@ Route::post('/demo/notice', [PageController::class, 'demoNotice'])->name('demo.n
 // Discover Page
 
 Route::post('/conversations/{conversation}/messages', [ConversationMessageController::class, 'store'])
-    ->middleware('auth')
+    ->middleware(['auth', ModerateChatMessage::class])
     ->name('conversations.messages.store');
 
 Route::get('/conversations/{conversation}', [ConversationMessageController::class, 'show'])

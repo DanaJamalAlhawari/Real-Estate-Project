@@ -31,7 +31,7 @@ final class PageController extends Controller
                 ->when($excludedPropertyId > 0, fn ($query) => $query->whereKeyNot($excludedPropertyId))
                 ->when(is_string($category) && isset(Property::CATEGORIES[$category]),
                     fn ($query) => $query->where('category', $category))
-                ->matchingTitleOrArea($filters['q'] ?? '')
+                ->matchingTitleOrLocation($filters['q'] ?? '')
                 ->latest()->orderByDesc('id')->paginate(config('app.properties_per_page'))->withQueryString()->fragment('homes');
             $favoriteIds = $request->user()?->role === 'tenant'
                 ? $request->user()->favoriteProperties()->whereKey($properties->getCollection()->modelKeys())->pluck('properties.id')->all()

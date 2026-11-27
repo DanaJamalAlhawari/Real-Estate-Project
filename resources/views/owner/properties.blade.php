@@ -94,6 +94,13 @@
                                 </div>
                                 <div class="small text-muted">
                                     {{ number_format($property->price, 2) }} {{ __('JOD') }}
+
+                                    <span class="mx-1">·</span>
+
+                                    <i class="bi bi-arrows-angle-expand"></i>
+
+                                    {{ rtrim(rtrim(number_format((float) $property->area_sqm, 2, '.', ''), '0'), '.') }}
+                                    {{ __('m²') }}
                                 </div>
                                 <p class="small text-muted mb-0">{{ __('Verification:') }}
                                     {{ __(\Illuminate\Support\Str::headline($property->verification_status)) }}</p>

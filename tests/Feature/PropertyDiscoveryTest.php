@@ -120,6 +120,7 @@ class PropertyDiscoveryTest extends TestCase
             'category' => $property->category,
             'city' => $property->city,
             'price' => $property->price,
+            'area_sqm' => $property->area_sqm,
             'address' => $property->address,
         ])->assertRedirect(route('owner.properties'));
 
@@ -135,7 +136,10 @@ class PropertyDiscoveryTest extends TestCase
     public function test_home_search_matches_title_and_area_and_discover_has_a_name_only_filter(): void
     {
         $agent = $this->account('agent');
-        $this->listing($agent, ['title' => 'Courtyard apartment', 'area_ar' => 'اللويبدة']);
+        $this->listing($agent, [
+    'title' => 'Courtyard apartment',
+    'address_ar' => 'اللويبدة',
+]);
         $this->listing($agent, ['title' => 'Garden apartment', 'description' => 'Courtyard apartment']);
 
         $this->get(route('home', ['q' => 'Courtyard اللويبدة']))->assertOk()
@@ -206,6 +210,7 @@ class PropertyDiscoveryTest extends TestCase
             'city' => 'Amman',
             'address' => 'Test address',
             'price' => 200,
+            'area_sqm' => 60,
             'ownership_deed_url' => 'test.pdf',
             'status' => 'available',
             'verification_status' => 'verified',

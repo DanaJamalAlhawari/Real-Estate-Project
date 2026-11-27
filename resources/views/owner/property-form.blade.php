@@ -94,6 +94,26 @@
                                 </ul>
                             </div>
                         @endif
+                        @php
+                            $bilingualValue = function (string $field, string $language) use (&$property) {
+                                $translation = $field . '_' . $language;
+
+                                $translatedValue = $property?->{$translation};
+
+                                $hasTranslation =
+                                    filled($property?->{$field . '_ar'}) || filled($property?->{$field . '_en'});
+
+                                if ($hasTranslation) {
+                                    return old($translation, $translatedValue ?? '');
+                                }
+
+                                $original = $property?->{$field} ?? '';
+
+                                $originalLanguage = preg_match('/\p{Arabic}/u', $original) ? 'ar' : 'en';
+
+                                return old($translation, $originalLanguage === $language ? $original : '');
+                            };
+                        @endphp
                         <!-- 1. Basic details -->
 
                         <section class="panel form-section" aria-labelledby="secBasics">
@@ -104,14 +124,35 @@
 
                             <div class="row g-3">
 
-                                <div class="col-12">
+                                <div class="col-md-6">
+                                    <label for="title_ar" class="form-label">
+                                        {{ __('Property title') }} ({{ __('Arabic') }})
+                                    </label>
 
-                                    <label for="fTitle" class="form-label">{{ __('Listing title') }}</label>
+                                    <input type="text" class="form-control" id="title_ar" name="title_ar"
+                                        maxlength="255" dir="rtl" value="{{ $bilingualValue('title', 'ar') }}">
 
-                                    <input type="text" class="form-control" id="fTitle" name="title"
-                                        value="{{ old('title', $property->title ?? '') }}" required />
-
+                                    @error('title_ar')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </div>
+
+                                <div class="col-md-6">
+                                    <label for="title_en" class="form-label">
+                                        {{ __('Property title') }} ({{ __('English') }})
+                                    </label>
+
+                                    <input type="text" class="form-control" id="title_en" name="title_en"
+                                        maxlength="255" dir="ltr" value="{{ $bilingualValue('title', 'en') }}">
+
+                                    @error('title_en')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                @error('title')
+                                    <div class="col-12 text-danger small">{{ $message }}</div>
+                                @enderror
 
                                 <div class="col-sm-6 col-xl-3">
 
@@ -137,7 +178,7 @@
 
                                     <!-- Bedrooms -->
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
 
                                         <label for="fBedrooms" class="form-label">
 
@@ -153,7 +194,7 @@
 
                                     <!-- Bathrooms -->
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
 
                                         <label for="fBathrooms" class="form-label">
 
@@ -166,193 +207,316 @@
                                             required>
 
                                     </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- Amenities srevices -->
-
-                            <fieldset class="mt-3">
-
-                                <legend class="visually-hidden">{{ __('Amenities') }}</legend>
-
-                                <div class="d-flex flex-wrap gap-2" id="amenities">
-
-                                    @foreach ($services ?? [] as $service)
-                                        <input type="checkbox" class="btn-check" id="service{{ $service->id }}"
-                                            name="services[]" value="{{ $service->id }}"
-                                            {{ in_array(
-                                                $service->id,
-
-                                                old(
-                                                    'services',
-
-                                                    isset($property) ? $property->services->pluck('id')->all() : [],
-                                                ),
-                                            )
-                                                ? 'checked'
-                                                : '' }} />
-
-                                        <label class="chip-select" for="service{{ $service->id }}">
-
-                                            @if (!empty($service->icon_name))
-                                                <i class="bi {{ $service->icon_name }}"></i>
-                                            @endif
-
-                                            {{ __($service->name) }}
-
+                                    <div class="col-md-4">
+                                        <label for="fAreaSqm" class="form-label">
+                                            {{ __('Property Area (m²)') }}
+                                            <span class="text-danger">*</span>
                                         </label>
-                                    @endforeach
+
+                                        <input type="number" class="form-control @error('area_sqm') is-invalid @enderror"
+                                            id="fAreaSqm" name="area_sqm"
+                                            value="{{ old('area_sqm', $property->area_sqm ?? '') }}" min="0.01"
+                                            max="99999999.99" step="0.01" placeholder="120" required>
+
+                                        @error('area_sqm')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
 
                                 </div>
 
-                            </fieldset>
-
-                        </section>
-
-                        <section class="panel form-section" aria-labelledby="secDesc">
-                            <h2 id="secDesc">{{ __('2. Description') }}</h2>
-                            <label for="fDescEn" class="form-label">{{ __('Property description') }}</label>
-                            <textarea class="form-control" id="fDescEn" name="description" rows="5" required>{{ old('description', $property->description ?? '') }}</textarea>
-                        </section>
-
-                        <details class="panel form-section" open>
-                            <summary class="h5">{{ __('Property translations') }}</summary>
-                            <div class="row g-3 mt-1">
-                                @foreach (['ar' => 'Arabic', 'en' => 'English'] as $language => $languageLabel)
-                                    <fieldset class="col-md-6">
-                                        <legend class="h6">{{ __($languageLabel) }}</legend>
-                                        @foreach (['title' => 'Property title', 'description' => 'Property description', 'city' => 'City', 'area' => 'Area', 'address' => 'Address'] as $field => $label)
-                                            @php
-                                                $translation = $field . '_' . $language;
-                                            @endphp
-                                            <div class="mb-3">
-                                                <label class="form-label"
-                                                    for="{{ $translation }}">{{ __($label) }}</label>
-                                                @if ($field === 'description')
-                                                    <textarea class="form-control" id="{{ $translation }}" name="{{ $translation }}" rows="3" dir="auto">{{ old($translation, $property?->{$translation} ?? '') }}</textarea>
-                                                @else
-                                                    <input type="text" class="form-control" id="{{ $translation }}"
-                                                        name="{{ $translation }}" maxlength="255" dir="auto"
-                                                        value="{{ old($translation, $property?->{$translation} ?? '') }}">
-                                                @endif
-                                                @error($translation)
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        @endforeach
-                                    </fieldset>
-                                @endforeach
                             </div>
-                        </details>
 
-                        <!-- 3. Photos -->
-                        <section class="panel form-section" aria-labelledby="secPhotos">
+                </div>
 
-                            <h2 id="secPhotos">{{ __('3. Photos') }}</h2>
+                <!-- Amenities srevices -->
 
-                            @php
-                                $existingCover = isset($property) ? $property->coverImage() : null;
-                            @endphp
+                <fieldset class="mt-3">
 
-                            <p>{{ __('Upload a default photo and optional additional photos.') }}</p>
+                    <legend class="visually-hidden">{{ __('Amenities') }}</legend>
 
-                            <!-- Default property photo -->
-                            <h3 class="h6 fw-semibold">
-                                {{ __('Default photo') }}
-                                <span class="text-danger">*</span>
-                            </h3>
+                    <div class="d-flex flex-wrap gap-2" id="amenities">
 
-                            <p class="small text-muted">
-                                {{ __('This photo will appear on the property card.') }}
+                        @foreach ($services ?? [] as $service)
+                            <input type="checkbox" class="btn-check" id="service{{ $service->id }}" name="services[]"
+                                value="{{ $service->id }}"
+                                {{ in_array(
+                                    $service->id,
+
+                                    old(
+                                        'services',
+
+                                        isset($property) ? $property->services->pluck('id')->all() : [],
+                                    ),
+                                )
+                                    ? 'checked'
+                                    : '' }} />
+
+                            <label class="chip-select" for="service{{ $service->id }}">
+
+                                @if (!empty($service->icon_name))
+                                    <i class="bi {{ $service->icon_name }}"></i>
+                                @endif
+
+                                {{ __($service->name) }}
+
+                            </label>
+                        @endforeach
+
+                    </div>
+
+                </fieldset>
+
+                </section>
+
+
+                <section class="panel form-section" aria-labelledby="secDesc">
+
+                    <h2 id="secDesc">{{ __('2. Description') }}</h2>
+
+                    <div class="mb-3">
+                        <label for="description_ar" class="form-label">
+                            {{ __('Property description') }} ({{ __('Arabic') }})
+                        </label>
+
+                        <textarea class="form-control" id="description_ar" name="description_ar" rows="4" dir="rtl">{{ $bilingualValue('description', 'ar') }}</textarea>
+
+                        @error('description_ar')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="description_en" class="form-label">
+                            {{ __('Property description') }} ({{ __('English') }})
+                        </label>
+
+                        <textarea class="form-control" id="description_en" name="description_en" rows="4" dir="ltr">{{ $bilingualValue('description', 'en') }}</textarea>
+
+                        @error('description_en')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                </section>
+
+
+                <section class="panel form-section" aria-labelledby="secLocation">
+
+                    <h2 id="secLocation">{{ __('3. Location') }}</h2>
+
+                    <p>{{ __('Search for the neighborhood, then place the marker at the exact building.') }}</p>
+
+                    <div class="row g-3 mb-3">
+
+
+
+
+
+                        <div class="col-12">
+
+                            <label for="locationSearch" class="form-label">{{ __('Search Property Location') }}</label>
+
+                            <div class="input-group">
+
+                                <input type="text" id="locationSearch" class="form-control"
+                                    placeholder="{{ __('e.g. Khalda, Amman') }}">
+
+                                <button type="button" id="searchLocationBtn" class="btn btn-primary"><i
+                                        class="bi bi-search"></i> {{ __('Search') }}</button>
+
+                            </div>
+
+                            <div id="locationResults" class="list-group mt-2" aria-live="polite"></div>
+
+                        </div>
+
+                        <div class="col-12">
+
+                            <div id="locationMap" style="height:400px;width:100%;border-radius:12px;overflow:hidden;">
+                            </div>
+
+                            <input type="hidden" id="fLat" name="latitude"
+                                value="{{ old('latitude', $property->latitude ?? '') }}">
+
+                            <input type="hidden" id="fLng" name="longitude"
+                                value="{{ old('longitude', $property->longitude ?? '') }}">
+                            <input type="hidden" id="fApproximate" name="location_is_approximate"
+                                value="{{ (int) old('location_is_approximate', $property->location_is_approximate ?? false) }}">
+
+                            <p class="small text-muted mt-2 mb-0">
+                                {{ __('Search for an address, select a result, then drag the marker to the exact property location.') }}
                             </p>
 
-                            <label class="dropzone d-block mb-3" for="fDefaultPhoto">
-                                <i class="bi bi-image"></i>
+                        </div>
+                        <!-- Bilingual property location -->
 
-                                <span class="d-block fw-semibold text-body">
-                                    {{ __('Choose default photo') }}
-                                </span>
-
-                                <span class="d-block small">
-                                    {{ __('JPG or PNG · 1 photo · Max 5 MB') }}
-                                </span>
+                        <div class="col-md-6">
+                            <label for="city_ar" class="form-label">
+                                {{ __('City') }} ({{ __('Arabic') }})
                             </label>
 
-                            <input type="file" class="visually-hidden" id="fDefaultPhoto" name="default_photo"
-                                accept="image/jpeg,image/png" @required(!$existingCover) />
+                            <input type="text" class="form-control" id="city_ar" name="city_ar" maxlength="255"
+                                dir="rtl" value="{{ $bilingualValue('city', 'ar') }}">
 
-                            @error('default_photo')
-                                <div class="text-danger small mb-2">
-                                    {{ $message }}
-                                </div>
+                            @error('city_ar')
+                                <div class="text-danger small">{{ $message }}</div>
                             @enderror
+                        </div>
 
-                            <div class="thumbs mb-4" id="defaultPhotoThumbs"></div>
-
-                            <!-- Additional property photos -->
-                            <h3 class="h6 fw-semibold">
-                                {{ __('Additional photos') }}
-                                <span class="small text-muted">
-                                    ({{ __('Optional') }})
-                                </span>
-                            </h3>
-
-                            <label class="dropzone d-block mb-3" for="fPhotos">
-                                <i class="bi bi-cloud-arrow-up"></i>
-
-                                <span class="d-block fw-semibold text-body">
-                                    {{ __('Choose additional photos') }}
-                                </span>
-
-                                <span class="d-block small">
-                                    {{ __('JPG or PNG · up to 9 additional photos') }}
-                                </span>
+                        <div class="col-md-6">
+                            <label for="city_en" class="form-label">
+                                {{ __('City') }} ({{ __('English') }})
                             </label>
 
-                            <input type="file" class="visually-hidden" id="fPhotos" name="photos[]"
-                                accept="image/jpeg,image/png" multiple />
+                            <input type="text" class="form-control" id="city_en" name="city_en" maxlength="255"
+                                dir="ltr" value="{{ $bilingualValue('city', 'en') }}">
 
-                            @error('photos')
-                                <div class="text-danger small mb-2">
-                                    {{ $message }}
-                                </div>
+                            @error('city_en')
+                                <div class="text-danger small">{{ $message }}</div>
                             @enderror
+                        </div>
 
-                            @foreach ($errors->get('photos.*') as $messages)
-                                @foreach ($messages as $message)
-                                    <div class="text-danger small mb-2">
-                                        {{ $message }}
-                                    </div>
-                                @endforeach
-                            @endforeach
+                        <div class="col-md-6">
+                            <label for="address_ar" class="form-label">
+                                {{ __('Street / Building Address') }} ({{ __('Arabic') }})
+                            </label>
 
-                            <div class="thumbs mb-3" id="photoThumbs"></div>
+                            <input type="text" class="form-control" id="address_ar" name="address_ar"
+                                maxlength="255" dir="rtl" value="{{ $bilingualValue('address', 'ar') }}">
 
-                            <!-- Existing property photos -->
-                            @if (isset($property) && $property->images->whereNull('room_id')->isNotEmpty())
+                            @error('address_ar')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                                <h3 class="h6 fw-semibold mt-3">
-                                    {{ __('Existing photos') }}
-                                </h3>
+                        <div class="col-md-6">
+                            <label for="address_en" class="form-label">
+                                {{ __('Street / Building Address') }} ({{ __('English') }})
+                            </label>
 
-                                <div class="thumbs" id="existingPhotoThumbs">
+                            <input type="text" class="form-control" id="address_en" name="address_en"
+                                maxlength="255" dir="ltr" value="{{ $bilingualValue('address', 'en') }}">
 
-                                    @foreach ($property->images->whereNull('room_id') as $image)
-                                        <div class="t" id="property-image-{{ $image->id }}"
-                                            data-existing-cover="{{ $existingCover?->id === $image->id ? '1' : '0' }}"
-                                            style="position: relative;">
+                            @error('address_en')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                                            <img src="{{ $image->public_url }}" alt="{{ __('Property image') }}"
-                                                style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
 
-                                            @if ($existingCover?->id === $image->id)
-                                                <span class="cover">{{ __('Cover') }}</span>
-                                            @endif
+                </section>
 
-                                            <label
-                                                style="position: absolute;
+
+
+                <!-- 3. Photos -->
+                <section class="panel form-section" aria-labelledby="secPhotos">
+
+                    <h2 id="secPhotos">{{ __('4. Photos') }}</h2>
+
+                    @php
+                        $existingCover = isset($property) ? $property->coverImage() : null;
+                    @endphp
+
+                    <p>{{ __('Upload a default photo and optional additional photos.') }}</p>
+
+                    <!-- Default property photo -->
+                    <h3 class="h6 fw-semibold">
+                        {{ __('Default photo') }}
+                        <span class="text-danger">*</span>
+                    </h3>
+
+                    <p class="small text-muted">
+                        {{ __('This photo will appear on the property card.') }}
+                    </p>
+
+                    <label class="dropzone d-block mb-3" for="fDefaultPhoto">
+                        <i class="bi bi-image"></i>
+
+                        <span class="d-block fw-semibold text-body">
+                            {{ __('Choose default photo') }}
+                        </span>
+
+                        <span class="d-block small">
+                            {{ __('JPG or PNG · 1 photo · Max 5 MB') }}
+                        </span>
+                    </label>
+
+                    <input type="file" class="visually-hidden" id="fDefaultPhoto" name="default_photo"
+                        accept="image/jpeg,image/png" @required(!$existingCover) />
+
+                    @error('default_photo')
+                        <div class="text-danger small mb-2">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <div class="thumbs mb-4" id="defaultPhotoThumbs"></div>
+
+                    <!-- Additional property photos -->
+                    <h3 class="h6 fw-semibold">
+                        {{ __('Additional photos') }}
+                        <span class="small text-muted">
+                            ({{ __('Optional') }})
+                        </span>
+                    </h3>
+
+                    <label class="dropzone d-block mb-3" for="fPhotos">
+                        <i class="bi bi-cloud-arrow-up"></i>
+
+                        <span class="d-block fw-semibold text-body">
+                            {{ __('Choose additional photos') }}
+                        </span>
+
+                        <span class="d-block small">
+                            {{ __('JPG or PNG · up to 9 additional photos') }}
+                        </span>
+                    </label>
+
+                    <input type="file" class="visually-hidden" id="fPhotos" name="photos[]"
+                        accept="image/jpeg,image/png" multiple />
+
+                    @error('photos')
+                        <div class="text-danger small mb-2">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    @foreach ($errors->get('photos.*') as $messages)
+                        @foreach ($messages as $message)
+                            <div class="text-danger small mb-2">
+                                {{ $message }}
+                            </div>
+                        @endforeach
+                    @endforeach
+
+                    <div class="thumbs mb-3" id="photoThumbs"></div>
+
+                    <!-- Existing property photos -->
+                    @if (isset($property) && $property->images->whereNull('room_id')->isNotEmpty())
+
+                        <h3 class="h6 fw-semibold mt-3">
+                            {{ __('Existing photos') }}
+                        </h3>
+
+                        <div class="thumbs" id="existingPhotoThumbs">
+
+                            @foreach ($property->images->whereNull('room_id') as $image)
+                                <div class="t" id="property-image-{{ $image->id }}"
+                                    data-existing-cover="{{ $existingCover?->id === $image->id ? '1' : '0' }}"
+                                    style="position: relative;">
+
+                                    <img src="{{ $image->public_url }}" alt="{{ __('Property image') }}"
+                                        style="width: 100%; height: 100%; object-fit: cover;">
+
+                                    @if ($existingCover?->id === $image->id)
+                                        <span class="cover">{{ __('Cover') }}</span>
+                                    @endif
+
+                                    <label
+                                        style="position: absolute;
                             top: 5px;
                             right: 5px;
                             background: #dc3545;
@@ -364,256 +528,173 @@
                             align-items: center;
                             justify-content: center;
                             cursor: pointer;"
-                                                title="{{ __('Delete image') }}">
+                                        title="{{ __('Delete image') }}">
 
-                                                <input type="checkbox" name="deleted_images[]"
-                                                    value="{{ $image->id }}" class="visually-hidden"
-                                                    onchange="this.closest('.t').style.opacity = this.checked ? '0.4' : '1';">
+                                        <input type="checkbox" name="deleted_images[]" value="{{ $image->id }}"
+                                            class="visually-hidden"
+                                            onchange="this.closest('.t').style.opacity = this.checked ? '0.4' : '1';">
 
-                                                <i class="bi bi-x-lg"></i>
-
-                                            </label>
-
-                                        </div>
-                                    @endforeach
-
-                                </div>
-
-                            @endif
-
-                            @error('deleted_images')
-                                <div class="text-danger small mt-2">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-
-                        </section>
-
-                        @unless (isset($property))
-                            <section class="panel form-section" aria-labelledby="secOwnership">
-                                <h2 id="secOwnership">{{ __('Ownership verification') }}</h2>
-                                <label for="createOwnershipDocument"
-                                    class="form-label">{{ __('Ownership document (PDF, JPG or PNG, up to 5 MB)') }}</label>
-                                <input id="createOwnershipDocument" class="form-control" type="file" name="document"
-                                    accept=".pdf,.jpg,.jpeg,.png" required>
-                            </section>
-                        @endunless
-
-                        <!-- 4. Location -->
-
-                        <section class="panel form-section" aria-labelledby="secLocation">
-
-                            <h2 id="secLocation">{{ __('4. Location') }}</h2>
-
-                            <p>{{ __('Search for the neighborhood, then place the marker at the exact building.') }}</p>
-
-                            <div class="row g-3 mb-3">
-
-                                <div class="col-md-6">
-
-                                    <label for="fCity" class="form-label">{{ __('City') }}</label>
-
-                                    <input type="text" class="form-control" id="fCity"
-                                        value="{{ old('city', $property->city ?? '') }}" disabled>
-                                    <input type="hidden" id="fCityValue" name="city"
-                                        value="{{ old('city', $property->city ?? '') }}">
-
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <label for="fArea" class="form-label">{{ __('Area / Neighborhood') }}</label>
-
-                                    <input type="text" class="form-control" id="fArea"
-                                        value="{{ old('area', $property->area ?? '') }}" disabled>
-                                    <input type="hidden" id="fAreaValue" name="area"
-                                        value="{{ old('area', $property->area ?? '') }}">
-
-                                </div>
-
-                                <div class="col-12">
-
-                                    <label for="fStreet"
-                                        class="form-label">{{ __('Street / Building Address') }}</label>
-
-                                    <input type="text" class="form-control" id="fStreet"
-                                        value="{{ old('address', $property->address ?? '') }}" disabled>
-                                    <input type="hidden" id="fStreetValue" name="address"
-                                        value="{{ old('address', $property->address ?? '') }}">
-
-                                </div>
-
-                                <div class="col-12">
-
-                                    <label for="locationSearch"
-                                        class="form-label">{{ __('Search Property Location') }}</label>
-
-                                    <div class="input-group">
-
-                                        <input type="text" id="locationSearch" class="form-control"
-                                            placeholder="{{ __('e.g. Khalda, Amman') }}">
-
-                                        <button type="button" id="searchLocationBtn" class="btn btn-primary"><i
-                                                class="bi bi-search"></i> {{ __('Search') }}</button>
-
-                                    </div>
-
-                                    <div id="locationResults" class="list-group mt-2" aria-live="polite"></div>
-
-                                </div>
-
-                                <div class="col-12">
-
-                                    <div id="locationMap"
-                                        style="height:400px;width:100%;border-radius:12px;overflow:hidden;"></div>
-
-                                    <input type="hidden" id="fLat" name="latitude"
-                                        value="{{ old('latitude', $property->latitude ?? '') }}">
-
-                                    <input type="hidden" id="fLng" name="longitude"
-                                        value="{{ old('longitude', $property->longitude ?? '') }}">
-                                    <input type="hidden" id="fApproximate" name="location_is_approximate"
-                                        value="{{ (int) old('location_is_approximate', $property->location_is_approximate ?? false) }}">
-
-                                    <p class="small text-muted mt-2 mb-0">
-                                        {{ __('Search for a Jordan address and select a result to fill the location fields.') }}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- 5. Property Price -->
-
-                        <section class="panel form-section" aria-labelledby="secPrice">
-
-                            <h2 id="secPrice">{{ __('5. Property Price') }}</h2>
-
-                            <p>{{ __('Set the monthly rental price for your property.') }}</p>
-
-                            <div class="row g-3">
-
-                                <div class="col-sm-6">
-
-                                    <label for="fRent" class="form-label">
-
-                                        {{ __('Monthly Rent (JOD)') }}
+                                        <i class="bi bi-x-lg"></i>
 
                                     </label>
 
-                                    <input type="number" class="form-control" id="fRent" name="price"
-                                        value="{{ old('price', $property->price ?? '') }}" min="0"
-                                        step="0.01" required />
-
                                 </div>
-
-                            </div>
-
-                        </section>
-
-                        <!-- Save buttons -->
-
-                        <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
-
-                            <button type="submit" class="btn btn-accent btn-lg" name="action" value="publish">
-
-                                {{ __('Publish listing') }}
-
-                            </button>
+                            @endforeach
 
                         </div>
 
-                    </form>
+                    @endif
+
+                    @error('deleted_images')
+                        <div class="text-danger small mt-2">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                </section>
+
+                @unless (isset($property))
+                    <section class="panel form-section" aria-labelledby="secOwnership">
+                        <h2 id="secOwnership">{{ __('Ownership verification') }}</h2>
+                        <label for="createOwnershipDocument"
+                            class="form-label">{{ __('Ownership document (PDF, JPG or PNG, up to 5 MB)') }}</label>
+                        <input id="createOwnershipDocument" class="form-control" type="file" name="document"
+                            accept=".pdf,.jpg,.jpeg,.png" required>
+                    </section>
+                @endunless
+
+
+
+
+
+                <!-- 5. Property Price -->
+
+                <section class="panel form-section" aria-labelledby="secPrice">
+
+                    <h2 id="secPrice">{{ __('5. Property Price') }}</h2>
+
+                    <p>{{ __('Set the monthly rental price for your property.') }}</p>
+
+                    <div class="row g-3">
+
+                        <div class="col-sm-6">
+
+                            <label for="fRent" class="form-label">
+
+                                {{ __('Monthly Rent (JOD)') }}
+
+                            </label>
+
+                            <input type="number" class="form-control" id="fRent" name="price"
+                                value="{{ old('price', $property->price ?? '') }}" min="0" step="0.01"
+                                required />
+
+                        </div>
+
+
+                </section>
+
+                <!-- Save buttons -->
+
+                <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+
+                    <button type="submit" class="btn btn-accent btn-lg" name="action" value="publish">
+
+                        {{ __('Publish listing') }}
+
+                    </button>
 
                 </div>
 
-                <!-- ===== Side summary ===== -->
-
-                <aside class="col-lg-4">
-
-                    <div class="sticky-box d-flex flex-column gap-3">
-
-                        <!-- Listing readiness -->
-
-                        <section class="panel" aria-labelledby="readyTitle">
-
-                            <h2 class="fs-6 mb-2" id="readyTitle">{{ __('Listing readiness') }}</h2>
-
-                            <div class="progress mb-3" role="progressbar" aria-label="{{ __('Listing readiness') }}"
-                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-
-                                <div class="progress-bar" id="readinessBar" style="width: 0%"></div>
-
-                            </div>
-
-                            <ul class="list-clean d-flex flex-column gap-2 small" id="readinessList">
-
-                                <li class="d-flex align-items-center gap-2" data-check="basic">
-
-                                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Basic details') }}
-
-                                </li>
-
-                                <li class="d-flex align-items-center gap-2" data-check="description">
-
-                                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Description') }}
-
-                                </li>
-
-                                <li class="d-flex align-items-center gap-2" data-check="photos">
-
-                                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Photos') }}
-
-                                </li>
-
-                                <li class="d-flex align-items-center gap-2" data-check="location">
-
-                                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Location') }}
-
-                                </li>
-
-                                <li class="d-flex align-items-center gap-2" data-check="price">
-
-                                    <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Price') }}
-
-                                </li>
-
-                            </ul>
-
-                        </section>
-
-                        <!-- After publishing -->
-
-                        <section class="panel" aria-labelledby="afterTitle">
-
-                            <h2 class="fs-6 mb-2" id="afterTitle">{{ __('After publishing') }}</h2>
-
-                            <div class="d-flex gap-2 small text-muted mb-2">
-
-                                <i class="bi bi-patch-check text-primary-bt"></i>
-
-                                <span>{{ __('Your property listing will be submitted for admin review.') }}</span>
-
-                            </div>
-
-                            <div class="d-flex gap-2 small text-muted">
-
-                                <i class="bi bi-arrow-repeat text-primary-bt"></i>
-
-                                <span>{{ __('You can edit your property details whenever needed.') }}</span>
-
-                            </div>
-
-                        </section>
-
-                    </div>
-
-                </aside>
+                </form>
 
             </div>
-        </main>
+
+            <!-- ===== Side summary ===== -->
+
+            <aside class="col-lg-4">
+
+                <div class="sticky-box d-flex flex-column gap-3">
+
+                    <!-- Listing readiness -->
+
+                    <section class="panel" aria-labelledby="readyTitle">
+
+                        <h2 class="fs-6 mb-2" id="readyTitle">{{ __('Listing readiness') }}</h2>
+
+                        <div class="progress mb-3" role="progressbar" aria-label="{{ __('Listing readiness') }}"
+                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+
+                            <div class="progress-bar" id="readinessBar" style="width: 0%"></div>
+
+                        </div>
+
+                        <ul class="list-clean d-flex flex-column gap-2 small" id="readinessList">
+
+                            <li class="d-flex align-items-center gap-2" data-check="basic">
+
+                                <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Basic details') }}
+
+                            </li>
+
+                            <li class="d-flex align-items-center gap-2" data-check="description">
+
+                                <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Description') }}
+
+                            </li>
+
+                            <li class="d-flex align-items-center gap-2" data-check="photos">
+
+                                <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Photos') }}
+
+                            </li>
+
+                            <li class="d-flex align-items-center gap-2" data-check="location">
+
+                                <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Location') }}
+
+                            </li>
+
+                            <li class="d-flex align-items-center gap-2" data-check="price">
+
+                                <i class="bi bi-exclamation-circle-fill ic-warn"></i>{{ __('Price') }}
+
+                            </li>
+
+                        </ul>
+
+                    </section>
+
+                    <!-- After publishing -->
+
+                    <section class="panel" aria-labelledby="afterTitle">
+
+                        <h2 class="fs-6 mb-2" id="afterTitle">{{ __('After publishing') }}</h2>
+
+                        <div class="d-flex gap-2 small text-muted mb-2">
+
+                            <i class="bi bi-patch-check text-primary-bt"></i>
+
+                            <span>{{ __('Your property listing will be submitted for admin review.') }}</span>
+
+                        </div>
+
+                        <div class="d-flex gap-2 small text-muted">
+
+                            <i class="bi bi-arrow-repeat text-primary-bt"></i>
+
+                            <span>{{ __('You can edit your property details whenever needed.') }}</span>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </aside>
+
+    </div>
+    </main>
     </div>
     @push('scripts')
         <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
@@ -651,11 +732,236 @@
                 }) || null;
 
                 let marker;
+                let reverseRequest = null;
+
+                const locationFields = [
+                    'city_ar',
+                    'city_en',
+                    'address_ar',
+                    'address_en'
+                ];
+
+                const cancelReverseLookup = () => {
+                    const previousRequest = reverseRequest;
+
+                    reverseRequest = null;
+
+                    previousRequest?.abort();
+                };
+
+                const reverseGeocode = async (lat, lng) => {
+                    cancelReverseLookup();
+
+                    const controller = new AbortController();
+                    reverseRequest = controller;
+
+                    locationFields.forEach(id => {
+                        element(id).value = '';
+
+                        element(id).dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                    });
+
+                    search.value = '';
+
+                    results.textContent = window.makanTranslate(
+                        'Updating property address...'
+                    );
+
+                    const timeout = setTimeout(() => {
+                        controller.abort();
+                    }, 10000);
+
+                    const fetchAddress = async (language) => {
+                        const url = new URL(
+                            'https://photon.komoot.io/reverse'
+                        );
+
+                        url.searchParams.set('lat', lat);
+                        url.searchParams.set('lon', lng);
+                        url.searchParams.set('lang', language);
+                        url.searchParams.set('limit', '5');
+                        url.searchParams.set('radius', '0.5');
+
+                        url.searchParams.append('layer', 'house');
+                        url.searchParams.append('layer', 'street');
+
+                        const response = await fetch(url, {
+                            signal: controller.signal
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Reverse geocoding failed');
+                        }
+
+                        const data = await response.json();
+
+                        return (data.features ?? [])
+                            .map(feature => feature.properties)
+                            .filter(place =>
+                                place?.countrycode?.toUpperCase() === 'JO'
+                            );
+                    };
+
+                    const fillLocationField = (field, value) => {
+                        if (typeof value !== 'string' || !value.trim()) {
+                            return;
+                        }
+
+                        const language = /\p{Script=Arabic}/u.test(value) ?
+                            'ar' :
+                            'en';
+
+                        const input = element(field + '_' + language);
+
+                        if (input.value.trim() !== '') {
+                            return;
+                        }
+
+                        input.value = value;
+
+                        input.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                    };
+
+                    try {
+                        const responses = await Promise.allSettled([
+                            fetchAddress('en'),
+                            fetchAddress('ar')
+                        ]);
+
+                        if (reverseRequest !== controller) {
+                            return;
+                        }
+
+                        const englishPlaces = responses[0].status === 'fulfilled' ?
+                            responses[0].value :
+                            [];
+
+                        const arabicPlaces = responses[1].status === 'fulfilled' ?
+                            responses[1].value :
+                            [];
+
+                        const samePlace = (first, second) => {
+                            return first?.osm_id != null &&
+                                second?.osm_id != null &&
+                                first.osm_id === second.osm_id &&
+                                first.osm_type === second.osm_type &&
+                                first.type === second.type &&
+                                (
+                                    !first.housenumber ||
+                                    !second.housenumber ||
+                                    first.housenumber === second.housenumber
+                                );
+                        };
+
+                        const primaryPlace = englishPlaces[0] ?? arabicPlaces[0];
+
+                        if (primaryPlace) {
+                            const matchingPlace = primaryPlace === englishPlaces[0] ?
+                                arabicPlaces.find(place => samePlace(primaryPlace, place)) :
+                                englishPlaces.find(place => samePlace(primaryPlace, place));
+
+                            const houseNumber = primaryPlace.type === 'house' ?
+                                primaryPlace.housenumber ||
+                                matchingPlace?.housenumber ||
+                                '' :
+                                '';
+
+                            [primaryPlace, matchingPlace]
+                            .filter(Boolean)
+                                .forEach(place => {
+                                    const city = place.city ||
+                                        place.town ||
+                                        place.village ||
+                                        place.municipality ||
+                                        '';
+
+                                    const street = place.street ||
+                                        (place.type === 'street' ? place.name : '') ||
+                                        '';
+
+                                    const address = street ?
+                                        [street, houseNumber]
+                                        .filter(Boolean)
+                                        .join(' ') :
+                                        '';
+
+                                    fillLocationField('city', city);
+                                    fillLocationField('address', address);
+                                });
+                        }
+
+                        const hasCity = element('city_ar').value.trim() ||
+                            element('city_en').value.trim();
+
+                        const hasAddress = element('address_ar').value.trim() ||
+                            element('address_en').value.trim();
+
+                        results.textContent = window.makanTranslate(
+                            hasCity && hasAddress ?
+                            'Property address updated. Please verify the details.' :
+                            'Could not find the complete address. Please enter the missing details manually.'
+                        );
+
+                    } finally {
+                        clearTimeout(timeout);
+
+                        if (reverseRequest === controller) {
+                            reverseRequest = null;
+                        }
+                    }
+                };
+
+                const createDraggableMarker = (lat, lng) => {
+                    const newMarker = window.MakanMap
+                        .createMarker(map, lat, lng)
+                        .setDraggable(true);
+
+                    newMarker.on('dragend', () => {
+                        const position = newMarker.getLngLat();
+
+                        if (
+                            position.lat < 29.18 ||
+                            position.lat > 33.4 ||
+                            position.lng < 34.9 ||
+                            position.lng > 39.32
+                        ) {
+                            newMarker.setLngLat([
+                                Number(longitude.value),
+                                Number(latitude.value)
+                            ]);
+
+                            results.textContent = window.makanTranslate(
+                                'Please select a location in Jordan.'
+                            );
+
+                            return;
+                        }
+
+                        latitude.value = position.lat.toFixed(7);
+                        longitude.value = position.lng.toFixed(7);
+                        approximate.value = '0';
+
+                        latitude.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+
+                        longitude.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+
+                        reverseGeocode(position.lat, position.lng);
+                    });
+
+                    return newMarker;
+                };
 
                 if (map) {
                     if (saved) {
-                        marker = window.MakanMap.createMarker(
-                            map,
+                        marker = createDraggableMarker(
                             +latitude.value,
                             +longitude.value
                         );
@@ -664,29 +970,32 @@
                     mapEl.hidden = true;
                 }
 
-                const fillField = (id, value) => {
-                    element(id).value = value;
-                    const hidden = element(id + 'Value');
-                    hidden.value = value;
-                    hidden.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                };
+
 
                 const selectPlace = place => {
+                    cancelReverseLookup();
                     const coordinates = [place.longitude, place.latitude];
                     const changed = +latitude.value !== place.latitude || +longitude.value !== place.longitude;
                     if (changed) {
-                        ['city_ar', 'area_ar', 'address_ar', 'city_en', 'area_en', 'address_en'].forEach(id => {
+                        ['city_ar', 'address_ar', 'city_en', 'address_en'].forEach(id => {
                             if (element(id)) element(id).value = '';
                         });
                     }
                     Object.entries(place.translations || {}).forEach(([id, value]) => {
                         if (element(id)) element(id).value = value;
                     });
-                    fillField('fCity', place.city);
-                    fillField('fArea', place.area);
-                    fillField('fStreet', place.address);
+                    if (!place.translations) {
+                        const cityLanguage = /\p{Script=Arabic}/u.test(place.city) ?
+                            'ar' :
+                            'en';
+
+                        const addressLanguage = /\p{Script=Arabic}/u.test(place.address) ?
+                            'ar' :
+                            'en';
+
+                        element('city_' + cityLanguage).value = place.city;
+                        element('address_' + addressLanguage).value = place.address;
+                    }
                     latitude.value = place.latitude.toFixed(7);
                     longitude.value = place.longitude.toFixed(7);
                     approximate.value = place.approximate ? '1' : '0';
@@ -702,8 +1011,7 @@
                         if (marker) {
                             marker.setLngLat(coordinates);
                         } else {
-                            marker = window.MakanMap.createMarker(
-                                map,
+                            marker = createDraggableMarker(
                                 place.latitude,
                                 place.longitude
                             );
@@ -730,10 +1038,10 @@
                         [address, area, city].join(', '),
                     translations: {
                         city_ar: cityAr,
-                        area_ar: areaAr,
+
                         address_ar: addressAr,
                         city_en: city,
-                        area_en: area,
+
                         address_en: address
                     },
                 }));
@@ -839,9 +1147,13 @@
 
                     const checks = {
 
-                        basic: filled('fTitle') && filled('fCategory'),
+                        basic: (filled('title_ar') || filled('title_en')) &&
+                            filled('fCategory') &&
+                            filled('fAreaSqm') &&
+                            field('fAreaSqm').checkValidity(),
 
-                        description: filled('fDescEn'),
+                        description: filled('description_ar') ||
+                            filled('description_en'),
 
                         photos: (
                             (field('fDefaultPhoto')?.files.length || 0) > 0 ||
@@ -850,9 +1162,13 @@
                             ))
                         ),
 
-                        location: filled('fCity') && filled('fStreet') &&
-
-                            filled('fLat') && filled('fLng'),
+                        location: (
+                                filled('city_ar') || filled('city_en')
+                            ) && (
+                                filled('address_ar') || filled('address_en')
+                            ) &&
+                            filled('fLat') &&
+                            filled('fLng'),
 
                         price: filled('fRent') && Number(field('fRent').value) > 0
 
@@ -1119,9 +1435,7 @@
 
                         syncPhotoInput(
                             defaultInput,
-                            selectedDefaultPhoto ?
-                            [selectedDefaultPhoto] :
-                            []
+                            selectedDefaultPhoto ? [selectedDefaultPhoto] : []
                         );
 
                     } else {

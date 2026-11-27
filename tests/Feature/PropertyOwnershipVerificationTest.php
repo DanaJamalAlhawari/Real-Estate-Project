@@ -28,7 +28,7 @@ class PropertyOwnershipVerificationTest extends TestCase
             ->assertSee($property->title)->assertDontSee($otherProperty->title);
         $this->get(route('owner.properties.edit', $otherProperty))->assertNotFound();
         $this->get(route('owner.properties.edit', $property))->assertOk()
-            ->assertSee('name="property_id" value="'.$property->id.'"', false);
+            ->assertSee('name="property_id" value="' . $property->id . '"', false);
         $this->post(route('properties.verification.store'), [
             'property_id' => $otherProperty->id,
             'document' => $document,
@@ -45,7 +45,10 @@ class PropertyOwnershipVerificationTest extends TestCase
             $this->assertSame('pending', $property->verification_status);
             $this->assertNull($property->reviewed_by);
             $this->assertNull($property->verified_at);
-            Storage::disk('local')->assertExists($property->ownership_deed_url);
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            $disk = Storage::disk('local');
+
+            $disk->assertExists($property->ownership_deed_url);
 
             $documentUrl = route('admin.verifications.document', $property);
             $this->get($documentUrl)->assertForbidden();
@@ -83,6 +86,7 @@ class PropertyOwnershipVerificationTest extends TestCase
             'title' => $title,
             'description' => 'Test property',
             'category' => 'apartment',
+            'area_sqm' => 120,
             'city' => 'Amman',
             'address' => 'Test address',
             'ownership_deed_url' => 'placeholder.pdf',

@@ -41,7 +41,7 @@ class PropertyPhotoTest extends TestCase
             'category' => 'apartment',
             'price' => 350,
             'city' => 'Amman',
-            'area' => 'Khalda',
+            'area_sqm' => 120,
             'address' => 'Test street',
             'latitude' => 31.98,
             'longitude' => 35.85,
@@ -75,6 +75,7 @@ class PropertyPhotoTest extends TestCase
             'description' => 'Existing property',
             'category' => 'apartment',
             'price' => 350,
+            'area_sqm' => 120,
             'city' => 'Amman',
             'address' => 'Test street',
             'status' => 'available',
@@ -107,6 +108,7 @@ class PropertyPhotoTest extends TestCase
             'price' => $property->price,
             'city' => $property->city,
             'address' => $property->address,
+            'area_sqm' => $property->area_sqm,
         ];
     }
 
@@ -438,6 +440,293 @@ class PropertyPhotoTest extends TestCase
 
         $this->assertSame(10, $property->images()->count());
     }
+    public function test_property_requires_area_sqm(): void
+    {
+        $payload = $this->payload();
+
+        unset($payload['area_sqm']);
+
+        $this->actingAs($this->agent())
+            ->post(route('properties.store'), $payload + [
+                'default_photo' => $this->photo(),
+            ])
+            ->assertSessionHasErrors('area_sqm');
+
+        $this->assertDatabaseCount('properties', 0);
+    }
+    public function test_property_rejects_invalid_area_sqm(): void
+    {
+        $agent = $this->agent();
+
+        $invalidAreas = [
+            null,
+            '',
+            0,
+            -50,
+            'abc',
+            '120.555',
+            '100000000',
+        ];
+
+        foreach ($invalidAreas as $area) {
+            $payload = $this->payload();
+
+            $payload['area_sqm'] = $area;
+            $payload['default_photo'] = $this->photo();
+
+            $this->actingAs($agent)
+                ->post(route('properties.store'), $payload)
+                ->assertSessionHasErrors('area_sqm');
+        }
+
+        $this->assertDatabaseCount('properties', 0);
+    }
+    public function test_property_can_save_decimal_area_sqm(): void
+    {
+        $agent = $this->agent();
+
+        $payload = $this->payload();
+
+        $payload['area_sqm'] = '125.75';
+        $payload['default_photo'] = $this->photo();
+
+        $response = $this->actingAs($agent)
+            ->post(route('properties.store'), $payload);
+
+        $response->assertSessionHasNoErrors();
+
+        $property = $agent->properties()->firstOrFail();
+
+        $response->assertRedirect(
+            route('owner.properties.edit', $property)
+        );
+
+        $this->assertSame('125.75', $property->area_sqm);
+    }
+    public function test_agent_can_update_property_area_sqm(): void
+    {
+        $agent = $this->agent();
+
+        $property = $this->listing($agent);
+
+        $this->existingPhoto($property, 'cover.jpg', true);
+
+        $payload = $this->updatePayload($property);
+
+        $payload['area_sqm'] = '150.50';
+
+        $this->actingAs($agent)
+            ->put(route('properties.update', $property), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('owner.properties'));
+
+        $this->assertSame(
+            '150.50',
+            $property->fresh()->area_sqm
+        );
+    }
+    public function test_property_can_be_created_with_bilingual_fields(): void
+    {
+        $agent = $this->agent();
+
+        $payload = $this->payload();
+
+        unset(
+            $payload['title'],
+            $payload['description'],
+            $payload['city'],
+            $payload['address']
+        );
+        $payload['title_ar'] = 'شقة مفروشة حديثة';
+        $payload['title_en'] = 'Modern furnished apartment';
+
+        $payload['description_ar'] = 'شقة مفروشة حديثة';
+        $payload['description_en'] = 'Modern furnished apartment';
+
+        $payload['city_ar'] = 'عمّان';
+        $payload['city_en'] = 'Amman';
+
+        $payload['address_ar'] = 'شارع وصفي التل';
+        $payload['address_en'] = 'Wasfi Al Tal Street';
+
+        $payload['default_photo'] = $this->photo();
+
+        $response = $this->actingAs($agent)
+            ->post(route('properties.store'), $payload);
+
+        $response->assertSessionHasNoErrors();
+
+        $property = $agent->properties()->firstOrFail();
+
+
+
+
+        $this->assertDatabaseHas('properties', [
+            'id' => $property->id,
+
+            'description' => 'Modern furnished apartment',
+            'description_ar' => 'شقة مفروشة حديثة',
+            'description_en' => 'Modern furnished apartment',
+
+            'city' => 'Amman',
+            'city_ar' => 'عمّان',
+            'city_en' => 'Amman',
+
+            'address' => 'Wasfi Al Tal Street',
+            'address_ar' => 'شارع وصفي التل',
+            'address_en' => 'Wasfi Al Tal Street',
+            'title' => 'Modern furnished apartment',
+            'title_ar' => 'شقة مفروشة حديثة',
+            'title_en' => 'Modern furnished apartment',
+        ]);
+    }
+    public function test_property_can_be_created_with_arabic_fields_only(): void
+    {
+        $agent = $this->agent();
+
+        $payload = $this->payload();
+
+        unset(
+            $payload['title'],
+            $payload['description'],
+            $payload['city'],
+            $payload['address']
+        );
+
+        $payload['title_ar'] = 'شقة مفروشة للإيجار';
+
+        $payload['description_ar'] = 'شقة مفروشة';
+        $payload['city_ar'] = 'عمّان';
+        $payload['address_ar'] = 'شارع الجامعة';
+
+        $payload['default_photo'] = $this->photo();
+
+        $this->actingAs($agent)
+            ->post(route('properties.store'), $payload)
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('properties', [
+            'agent_id' => $agent->id,
+            'description' => 'شقة مفروشة',
+            'city' => 'عمّان',
+            'address' => 'شارع الجامعة',
+            'title' => 'شقة مفروشة للإيجار',
+            'title_ar' => 'شقة مفروشة للإيجار',
+            'title_en' => null,
+        ]);
+    }
+
+    public function test_edit_form_preserves_legacy_property_fields(): void
+    {
+        $this->withoutVite();
+
+        $agent = $this->agent();
+
+        $property = $this->listing($agent);
+
+        $property->forceFill([
+            'description' => 'Legacy apartment description',
+            'description_ar' => null,
+            'description_en' => null,
+            'title' => 'Legacy apartment title',
+            'title_ar' => null,
+            'title_en' => null,
+
+            'city' => 'Amman',
+            'city_ar' => null,
+            'city_en' => null,
+
+            'address' => 'Legacy University Street',
+            'address_ar' => null,
+            'address_en' => null,
+        ])->save();
+
+        $this->actingAs($agent)
+            ->get(route('owner.properties.edit', $property))
+            ->assertOk()
+            ->assertSee('value="Legacy apartment title"', false)
+            ->assertSee('Legacy apartment description')
+            ->assertSee('value="Amman"', false)
+            ->assertSee('value="Legacy University Street"', false);
+    }
+
+    public function test_agent_can_update_bilingual_property_fields(): void
+    {
+        $agent = $this->agent();
+
+        $property = $this->listing($agent);
+
+        $this->existingPhoto($property, 'cover.jpg', true);
+
+        $payload = $this->updatePayload($property);
+
+        unset(
+            $payload['title'],
+            $payload['description'],
+            $payload['city'],
+            $payload['address']
+        );
+
+        $payload['title_ar'] = 'شقة فاخرة بعد التعديل';
+        $payload['title_en'] = 'Updated luxury apartment';
+        $payload['description_ar'] = 'شقة حديثة بعد التعديل';
+        $payload['description_en'] = 'Updated modern apartment';
+
+        $payload['city_ar'] = 'إربد';
+        $payload['city_en'] = 'Irbid';
+
+        $payload['address_ar'] = 'شارع الجامعة';
+        $payload['address_en'] = 'University Street';
+
+        $this->actingAs($agent)
+            ->put(route('properties.update', $property), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('owner.properties'));
+
+        $this->assertDatabaseHas('properties', [
+            'id' => $property->id,
+
+            'description' => 'Updated modern apartment',
+            'description_ar' => 'شقة حديثة بعد التعديل',
+            'description_en' => 'Updated modern apartment',
+
+            'city' => 'Irbid',
+            'city_ar' => 'إربد',
+            'city_en' => 'Irbid',
+
+            'address' => 'University Street',
+            'address_ar' => 'شارع الجامعة',
+            'address_en' => 'University Street',
+            'title' => 'Updated luxury apartment',
+            'title_ar' => 'شقة فاخرة بعد التعديل',
+            'title_en' => 'Updated luxury apartment',
+        ]);
+    }
+    public function test_property_can_be_created_with_english_title_only(): void
+    {
+        $agent = $this->agent();
+
+        $payload = $this->payload();
+
+        unset($payload['title'], $payload['title_ar']);
+
+        $payload['title_en'] = 'Modern apartment for rent';
+        $payload['default_photo'] = $this->photo();
+
+        $this->actingAs($agent)
+            ->post(route('properties.store'), $payload)
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('properties', [
+            'agent_id' => $agent->id,
+            'title' => 'Modern apartment for rent',
+            'title_en' => 'Modern apartment for rent',
+            'title_ar' => null,
+        ]);
+    }
+
+
+
     private function disk(string $name): FilesystemAdapter
     {
         /** @var FilesystemAdapter $disk */

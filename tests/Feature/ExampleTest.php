@@ -46,7 +46,7 @@ class ExampleTest extends TestCase
         $listing = [
             'agent_id' => $agent->id, 'description' => 'Test listing', 'category' => 'studio',
             'city' => 'Amman', 'address' => 'Test address', 'ownership_deed_url' => 'test.pdf',
-            'status' => 'available', 'verification_status' => 'verified',
+            'status' => 'available', 'verification_status' => 'verified','area_sqm' => 45,
         ];
         $saved = Property::forceCreate(['title' => 'Saved studio'] + $listing);
         $unsaved = Property::forceCreate(['title' => 'Unsaved studio'] + $listing);
@@ -75,6 +75,7 @@ class ExampleTest extends TestCase
             'title' => 'Example verified studio',
             'description' => 'Test listing',
             'category' => 'studio',
+            'area_sqm' => 45,
             'city' => 'Amman',
             'address' => 'Test address',
             'ownership_deed_url' => 'test.pdf',

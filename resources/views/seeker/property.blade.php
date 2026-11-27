@@ -68,13 +68,18 @@
                 <div class="prop-head">
                     <h1>{{ $property->localized('title') }}</h1>
                     <p class="text-muted">
-                        {{ implode(app()->isLocale('ar') ? '، ' : ', ', array_filter([$property->localized('area'), $property->localized('city')])) }}
+                        {{ $property->localized('city') }}
                     </p>
                     <div class="facts">
                         <span
                             class="fact">{{ __(\App\Models\Property::CATEGORIES[$property->category] ?? $property->category) }}</span>
                         <span class="fact">{{ $property->bedrooms }} {{ __('bedrooms') }}</span>
                         <span class="fact">{{ $property->bathrooms }} {{ __('bathrooms') }}</span>
+                        <span class="fact">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                            {{ rtrim(rtrim(number_format((float) $property->area_sqm, 2, '.', ''), '0'), '.') }}
+                            {{ __('m²') }}
+                        </span>
                         <span class="status status--info"><i class="bi bi-patch-check-fill"></i>
                             {{ __('Verified') }}</span>
                     </div>
@@ -94,7 +99,16 @@
                 </section>
                 <section class="panel">
                     <h2 class="h5">{{ __('Location') }}</h2>
-                    <p>{{ $property->localized('address') }}</p>
+                    <p class="d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt"></i>
+
+                        <span>
+                            {{ implode(
+                                app()->isLocale('ar') ? '، ' : ', ',
+                                array_filter([$property->localized('city'), $property->localized('address')]),
+                            ) }}
+                        </span>
+                    </p>
 
                     @if ($property->latitude !== null && $property->longitude !== null)
                         @php

@@ -73,7 +73,10 @@ if (chatForm) {
         replyButton.type = "button";
         replyButton.className = "chat-reply-button";
         replyButton.setAttribute("data-reply-button", "");
-        replyButton.setAttribute("aria-label", window.makanTranslate("Reply to message"));
+        replyButton.setAttribute(
+            "aria-label",
+            window.makanTranslate("Reply to message"),
+        );
         replyButton.title = "Reply";
 
         const replyIcon = document.createElement("i");
@@ -89,7 +92,10 @@ if (chatForm) {
         reactionButton.type = "button";
         reactionButton.className = "chat-reply-button";
         reactionButton.setAttribute("data-reaction-button", "");
-        reactionButton.setAttribute("aria-label", window.makanTranslate("React to message"));
+        reactionButton.setAttribute(
+            "aria-label",
+            window.makanTranslate("React to message"),
+        );
         reactionButton.title = "React";
 
         const reactionIcon = document.createElement("i");
@@ -104,7 +110,10 @@ if (chatForm) {
     }
     const reactionPicker = document.createElement("dialog");
     reactionPicker.className = "chat-reaction-picker";
-    reactionPicker.setAttribute("aria-label", window.makanTranslate("Choose a reaction"));
+    reactionPicker.setAttribute(
+        "aria-label",
+        window.makanTranslate("Choose a reaction"),
+    );
 
     reactionPicker.innerHTML = `
     <form method="dialog" class="d-flex flex-wrap gap-1">
@@ -291,6 +300,25 @@ if (chatForm) {
             if (!response.ok) {
                 const error = await response.json().catch(() => ({}));
 
+                // Handle chat moderation responses.
+                if (
+                    error.code === "MESSAGE_MODERATION_BLOCKED" ||
+                    error.code === "MESSAGE_MODERATION_UNAVAILABLE"
+                ) {
+                    const message =
+                        error.message ??
+                        window.makanTranslate("Could not send the message.");
+
+                    if (window.MakanPopup?.error) {
+                        window.MakanPopup.error(message);
+                    } else {
+                        status.textContent = message;
+                    }
+
+                    return;
+                }
+
+                // Preserve the original error handling.
                 throw new Error(
                     error.errors?.body?.[0] ??
                         error.errors?.reply_to_id?.[0] ??

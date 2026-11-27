@@ -77,6 +77,7 @@ class BookingCheckoutTest extends TestCase
             'description' => $property->description,
             'category' => 'apartment',
             'price' => 620,
+            'area_sqm' => $property->area_sqm,
             'city' => $property->city,
             'address' => $property->address,
         ])->assertRedirect(route('owner.properties'));
@@ -390,6 +391,7 @@ class BookingCheckoutTest extends TestCase
             'description' => 'Test property',
             'category' => 'apartment',
             'price' => 310,
+            'area_sqm' => 120,
             'city' => 'Amman',
             'address' => 'Test address',
             'status' => 'available',

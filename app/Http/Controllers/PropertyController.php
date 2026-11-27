@@ -60,14 +60,21 @@ class PropertyController extends Controller
     {
         $translationRules = $this->translationRules();
         $this->ensureCanSubmitProperty($request);
+        $this->mergeBilingualFields($request);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             ...$translationRules,
             'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
             'price' => 'required|numeric|min:0',
+            'area_sqm' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                'max:99999999.99',
+                'decimal:0,2',
+            ],
             'city' => 'required|string|max:255',
-            'area' => 'nullable|string|max:255',
             'address' => 'required|string|max:255',
             'latitude' => 'required|numeric|between:29.18,33.4',
             'longitude' => 'required|numeric|between:34.9,39.32',
@@ -135,8 +142,8 @@ class PropertyController extends Controller
                     'description' => $validated['description'],
                     'category' => $validated['category'],
                     'price' => $validated['price'],
+                    'area_sqm' => $validated['area_sqm'],
                     'city' => $validated['city'],
-                    'area' => $validated['area'] ?? null,
                     'address' => $validated['address'],
                     'latitude' => $validated['latitude'],
                     'longitude' => $validated['longitude'],
@@ -219,6 +226,7 @@ class PropertyController extends Controller
         $property = Property::where('agent_id', $request->user()->id)->findOrFail($id);
 
         // 2. Validate property details and selected services.
+        $this->mergeBilingualFields($request);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -226,7 +234,13 @@ class PropertyController extends Controller
             'category' => ['required', Rule::in(array_keys(Property::CATEGORIES))],
             'price' => 'required|numeric|min:0',
             'city' => 'required|string|max:255',
-            'area' => 'nullable|string|max:255',
+            'area_sqm' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                'max:99999999.99',
+                'decimal:0,2',
+            ],
             'address' => 'required|string|max:255',
             'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
             'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
@@ -252,10 +266,10 @@ class PropertyController extends Controller
         $property->description = $validated['description'];
         $property->category = $validated['category'];
         $property->price = $validated['price'];
+        $property->area_sqm = $validated['area_sqm'];
 
         // 4. Update property location.
         $property->city = $validated['city'];
-        $property->area = $validated['area'] ?? null;
         $property->address = $validated['address'];
         $property->latitude = $validated['latitude'] ?? $property->latitude;
         $property->longitude = $validated['longitude'] ?? $property->longitude;
@@ -447,6 +461,27 @@ class PropertyController extends Controller
         return redirect()
             ->route('owner.properties')
             ->with('success', __('Property deleted successfully.'));
+    }
+
+    private function mergeBilingualFields(Request $request): void
+    {
+        foreach (['title', 'description', 'city', 'address'] as $field) {
+            if ($request->has($field)) {
+                continue;
+            }
+
+            foreach (['en', 'ar'] as $language) {
+                $value = $request->input($field . '_' . $language);
+
+                if (is_string($value) && trim($value) !== '') {
+                    $request->merge([
+                        $field => $value,
+                    ]);
+
+                    break;
+                }
+            }
+        }
     }
 
     /** @return array<string, string> */

@@ -9,7 +9,7 @@ class PropertyLocationSeeder extends Seeder
 {
     public function run(): void
     {
-        Property::query()->where(fn ($query) => $query->whereNull('latitude')->orWhereNull('longitude'))
+        Property::query()->where(fn($query) => $query->whereNull('latitude')->orWhereNull('longitude'))
             ->eachById(function (Property $property): void {
                 $coordinates = $this->coordinates($property);
                 if ($coordinates === null) {
@@ -30,33 +30,35 @@ class PropertyLocationSeeder extends Seeder
     {
         $cities = $this->normalizedValues($property, 'city');
         $addresses = $this->normalizedValues($property, 'address');
-        $areas = $this->normalizedValues($property, 'area');
-        $areaCoordinates = null;
+
         foreach (config('jordan_locations.sites') as $site) {
-            [$city, $cityAr, $area, $areaAr, $street, $streetAr, $latitude, $longitude] = $site;
-            if (! array_intersect($cities, [$this->normalize($city), $this->normalize($cityAr)])) {
+            [$city, $cityAr,,, $street, $streetAr, $latitude, $longitude] = $site;
+
+            if (! array_intersect($cities, [
+                $this->normalize($city),
+                $this->normalize($cityAr)
+            ])) {
                 continue;
             }
 
             foreach ([$street, $streetAr, ...($site[8] ?? [])] as $alias) {
+                $normalizedAlias = $this->normalize($alias);
+
+                if ($normalizedAlias === '') {
+                    continue;
+                }
+
                 foreach ($addresses as $address) {
-                    if (str_contains($address, $this->normalize($alias))) {
+                    if (str_contains($address, $normalizedAlias)) {
                         return [$latitude, $longitude];
                     }
                 }
             }
-
-            if (array_intersect($areas, [$this->normalize($area), $this->normalize($areaAr)])) {
-                $areaCoordinates = [$latitude, $longitude];
-            }
-        }
-
-        if ($areaCoordinates !== null) {
-            return $areaCoordinates;
         }
 
         foreach (config('jordan_locations.cities') as $city) {
             $coordinates = array_splice($city, -2);
+
             if (array_intersect($cities, array_map($this->normalize(...), $city))) {
                 return $coordinates;
             }
@@ -68,7 +70,7 @@ class PropertyLocationSeeder extends Seeder
     /** @return list<string> */
     private function normalizedValues(Property $property, string $field): array
     {
-        return array_values(array_unique(array_filter(array_map($this->normalize(...), [$property->{$field}, $property->{$field.'_ar'}, $property->{$field.'_en'}]))));
+        return array_values(array_unique(array_filter(array_map($this->normalize(...), [$property->{$field}, $property->{$field . '_ar'}, $property->{$field . '_en'}]))));
     }
 
     private function normalize(?string $value): string

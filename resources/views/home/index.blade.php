@@ -123,7 +123,7 @@
             </div>
           </div>
 
-          <x-property-search :action="route('home')" :category="request('category')" fragment="#homes" placeholder="Search by property name or area" />
+          <x-property-search :action="route('home')" :category="request('category')" fragment="#homes" placeholder="Search by property name or location" />
           <div class="home-filters mb-4" role="group" aria-label="{{ __('Property type') }}">
             <a class="btn btn-outline-primary" href="{{ route('home', request()->only('q')) }}#homes">{{ __('All') }}</a>
             @foreach (\App\Models\Property::CATEGORIES as $value => $label)
@@ -145,7 +145,7 @@
         <div class="container"><h2>{{ __('Why Makan') }}</h2><p>{{ __('Browse available, verified listings and contact the property owner in one place.') }}</p></div>
       </section>
       <section class="section section-alt" id="how">
-        <div class="container"><h2>{{ __('How it works') }}</h2><p>{{ __('Filter listings by category, area, and budget. Open a listing to view photos, save it, or send a booking request.') }}</p></div>
+        <div class="container"><h2>{{ __('How it works') }}</h2><p>{{ __('Filter listings by category, city, and budget. Open a listing to view photos, save it, or send a booking request.') }}</p></div>
       </section>
       <section class="section" id="features">
         <div class="container"><h2>{{ __('Features') }}</h2><p>{{ __('Save your favorites, message property owners, and follow the status of your bookings.') }}</p></div>

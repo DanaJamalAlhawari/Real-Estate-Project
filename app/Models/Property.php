@@ -22,8 +22,8 @@ class Property extends Model
         'description',
         'category',
         'price',
+        'area_sqm',
         'city',
-        'area',
         'address',
         'latitude',
         'longitude',
@@ -34,12 +34,10 @@ class Property extends Model
         'title_ar',
         'description_ar',
         'city_ar',
-        'area_ar',
         'address_ar',
         'title_en',
         'description_en',
         'city_en',
-        'area_en',
         'address_en',
     ];
 
@@ -47,6 +45,7 @@ class Property extends Model
     {
         return [
             'price' => 'decimal:2',
+            'area_sqm' => 'decimal:2',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
             'location_is_approximate' => 'boolean',
@@ -63,7 +62,12 @@ class Property extends Model
         'vacation' => 'Vacation',
     ];
 
-    public const TRANSLATABLE_FIELDS = ['title', 'description', 'city', 'area', 'address'];
+    public const TRANSLATABLE_FIELDS = [
+        'title',
+        'description',
+        'city',
+        'address'
+    ];
 
     private const CITY_NAMES = [
         'Amman' => ['عمّان', 'عمان'],
@@ -111,9 +115,13 @@ class Property extends Model
         return $this->matchSearchTerms($query, $search, ['title']);
     }
 
-    public function scopeMatchingTitleOrArea(Builder $query, string $search): Builder
+   public function scopeMatchingTitleOrLocation(Builder $query, string $search): Builder
     {
-        return $this->matchSearchTerms($query, $search, ['title', 'area']);
+        return $this->matchSearchTerms(
+            $query,
+            $search,
+            ['title', 'city', 'address']
+        );
     }
 
     /** @param list<string> $fields */

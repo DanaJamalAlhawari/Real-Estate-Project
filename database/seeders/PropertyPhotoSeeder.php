@@ -112,6 +112,13 @@ class PropertyPhotoSeeder extends Seeder
                         'description_ar' => 'إعلان عقار تجريبي.',
                         'category' => $category,
                         'price' => 250,
+                        'area_sqm' => match ($category) {
+                            'apartment' => 120,
+                            'student_apartment' => 80,
+                            'studio' => 45,
+                            'vacation' => 150,
+                            default => 100,
+                        },
                         'ownership_deed_url' => 'NULL',
                     ]);
                     $property->verification_status = 'verified';
@@ -209,7 +216,7 @@ class PropertyPhotoSeeder extends Seeder
 
     private function setListingLocation(Property $property, string $site, string $title, string $titleAr): void
     {
-        [$city, $cityAr, $area, $areaAr, $address, $addressAr, $latitude, $longitude] = config('jordan_locations.sites.' . $site);
+        [$city, $cityAr, , , $address, $addressAr, $latitude, $longitude] = config('jordan_locations.sites.' . $site);
         $property->fill([
             'title' => $title,
             'title_en' => $title,
@@ -217,9 +224,6 @@ class PropertyPhotoSeeder extends Seeder
             'city' => $city,
             'city_en' => $city,
             'city_ar' => $cityAr,
-            'area' => $area,
-            'area_en' => $area,
-            'area_ar' => $areaAr,
             'address' => $address,
             'address_en' => $address,
             'address_ar' => $addressAr,

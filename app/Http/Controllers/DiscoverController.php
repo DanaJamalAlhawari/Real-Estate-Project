@@ -34,7 +34,7 @@ class DiscoverController extends Controller
         }
 
         if (($filters['search_scope'] ?? null) === 'title_area') {
-            $query->matchingTitleOrArea($filters['q'] ?? '');
+            $query->matchingTitleOrLocation($filters['q'] ?? '');
         } else {
             $query->matchingSearch($filters['q'] ?? '');
         }

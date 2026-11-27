@@ -52,7 +52,7 @@
             <div class="prop-meta">
                 <span>
                     <i class="bi bi-geo-alt"></i>
-                    {{ implode(app()->isLocale('ar') ? '، ' : ', ', array_filter([$property->localized('area'), $property->localized('city')])) }}
+                    {{ $property->localized('city') }}
                 </span>
                 <span>
                     <i class="bi bi-house-door"></i>
@@ -61,6 +61,11 @@
                 <span>
                     <i class="bi bi-droplet"></i>
                     {{ $property->bathrooms }} {{ __('bathrooms') }}
+                    <span>
+                        <i class="bi bi-arrows-angle-expand"></i>
+                        {{ rtrim(rtrim(number_format((float) $property->area_sqm, 2, '.', ''), '0'), '.') }}
+                        {{ __('m²') }}
+                    </span>
                 </span>
             </div>
 

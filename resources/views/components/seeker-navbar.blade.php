@@ -105,8 +105,8 @@
                             class="form-control"
                             name="q"
                             value="{{ request('q') }}"
-                            placeholder="{{ __('Search by property name or area') }}"
-                            aria-label="{{ __('Search by property name or area') }}"
+                            placeholder="{{ __('Search by property name or location') }}"
+                            aria-label="{{ __('Search by property name or location') }}"
                         />
                     </form>
                 </div>
